@@ -4,8 +4,8 @@
 
 | Phase | Domain Area | Status | Deliverable |
 | :--- | :--- | :--- | :--- |
-| **Phase H1** | Organization Hierarchy | **NOT_STARTED** | Multi-tenant organization and business unit schemas and REST APIs |
-| **Phase H2** | Enterprise Asset Inventory | **NOT_STARTED** | Asset data model, CSV & JSON import parsers, validation, unit mapping |
+| **Phase H1** | Organization Hierarchy | **COMPLETED** | Multi-tenant organization and business unit schemas and REST APIs |
+| **Phase H2** | Enterprise Asset Inventory | **COMPLETED** | Asset data model, CSV & JSON import parsers, validation, unit mapping |
 | **Phase H3** | Software Inventory | **NOT_STARTED** | Installed software model, version tracking, asset-software relationships |
 | **Phase H4** | CPE Matching Engine | **NOT_STARTED** | CPE criteria evaluator with version-bound logic and confidence rating |
 | **Phase H5** | Security Controls Posture | **NOT_STARTED** | Control catalog, asset-control mapping (MFA, EDR, Backups, PAM, Seg) |
@@ -15,32 +15,32 @@
 ## Detailed Phase Breakdown
 
 ### Phase H1 — Organization & Business Unit Model
-- [ ] Design organization entity schema (`id`, `name`, `industry`, `employee_count`, `annual_revenue`, `currency`, `created_at`, `updated_at`).
-- [ ] Design business unit schema (`id`, `organization_id`, `name`, `criticality_tier`, `budget`).
-- [ ] Create database migration `003_organizations.sql` (or next sequential number) with header:
+- [x] Design organization entity schema (`id`, `name`, `industry`, `employee_count`, `annual_revenue`, `currency`, `created_at`, `updated_at`).
+- [x] Design business unit schema (`id`, `organization_id`, `name`, `criticality_tier`, `budget`).
+- [x] Create database migration `003_organizations.sql` (or next sequential number) with header:
   ```sql
   -- Owner: HARSH
   -- Purpose: Organizations and business units hierarchy
   ```
-- [ ] Implement REST endpoints:
+- [x] Implement REST endpoints:
   - `POST /api/organizations`: Create enterprise profile.
   - `GET /api/organizations/:id`: Retrieve profile.
   - `POST /api/business-units`: Create business unit.
   - `GET /api/business-units?organizationId=`: List units.
-- [ ] Define import contract for organization onboarding.
+- [x] Define import contract for organization onboarding.
 
 ---
 
 ### Phase H2 — Enterprise Asset Inventory
-- [ ] Design asset schema (`id`, `organization_id`, `business_unit_id`, `name`, `hostname`, `ip_address`, `mac_address`, `asset_type`, `operating_system`, `business_criticality`, `internet_facing`, `data_classification`).
-- [ ] Create database migration for assets and network interfaces.
-- [ ] Implement CSV Asset Import Pipeline:
+- [x] Design asset schema (`id`, `organization_id`, `business_unit_id`, `name`, `hostname`, `ip_address`, `mac_address`, `asset_type`, `operating_system`, `business_criticality`, `internet_facing`, `data_classification`).
+- [x] Create database migration for assets and network interfaces.
+- [x] Implement CSV Asset Import Pipeline:
   - Streaming CSV parser with column mapping.
   - Header validation and strict row-level error reporting.
   - Deduping on hostname / MAC address / IP address.
-- [ ] Implement JSON Asset Import Pipeline:
+- [x] Implement JSON Asset Import Pipeline:
   - Batch JSON schema validation via Zod.
-- [ ] Implement REST endpoints:
+- [x] Implement REST endpoints:
   - `GET /api/assets`: Paginated asset list with filtering (criticality, internet-facing, type).
   - `GET /api/assets/:id`: Detailed asset view with software and control posture.
   - `POST /api/assets/import/csv`: Upload CSV file.
