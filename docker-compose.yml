@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: cyberriskos-postgres
+    environment:
+      POSTGRES_USER: cyberadmin
+      POSTGRES_PASSWORD: cyberpassword
+      POSTGRES_DB: cyberriskos
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cyberadmin -d cyberriskos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  risk-engine:
+    build:
+      context: ./risk-engine
+    container_name: cyberriskos-risk-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    depends_on:
+      - database
+
+  backend:
+    build:
+      context: ./backend
+    container_name: cyberriskos-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DATABASE_URL=postgresql://cyberadmin:cyberpassword@database:5432/cyberriskos
+      - RISK_ENGINE_URL=http://risk-engine:8000
+    depends_on:
+      - database
+      - risk-engine
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: cyberriskos-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

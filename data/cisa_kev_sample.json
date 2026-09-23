@@ -1,0 +1,22 @@
+[
+  {
+    "cveID": "CVE-2021-44228",
+    "vendorProject": "Apache",
+    "product": "Log4j",
+    "vulnerabilityName": "Apache Log4j Remote Code Execution Vulnerability",
+    "dateAdded": "2021-12-10",
+    "shortDescription": "Apache Log4j2 contains an unauthenticated remote code execution vulnerability via JNDI lookup.",
+    "requiredAction": "Apply updates per vendor instructions.",
+    "knownRansomwareCampaignUse": "Known"
+  },
+  {
+    "cveID": "CVE-2023-38606",
+    "vendorProject": "Apple",
+    "product": "iOS and macOS",
+    "vulnerabilityName": "Apple Multiple Products Kernel Memory Modification Vulnerability",
+    "dateAdded": "2023-07-25",
+    "shortDescription": "An app may be able to modify sensitive kernel state.",
+    "requiredAction": "Apply mitigations per vendor instructions.",
+    "knownRansomwareCampaignUse": "Unknown"
+  }
+]

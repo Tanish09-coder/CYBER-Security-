@@ -1,0 +1,4 @@
+timestamp,asset_identifier,event_type,source_feed,severity,user_or_ip,message
+2026-09-23T10:14:02Z,AST-00101,IAM_FAILED_LOGIN,IAM,MEDIUM,192.168.1.104,Multiple failed logins from internal subnet
+2026-09-23T10:15:30Z,AST-00102,EDR_SUSPICIOUS_EXEC,EDR,HIGH,svc_payment,Unexpected PowerShell execution detected
+2026-09-23T10:22:11Z,AST-00105,SIEM_PORT_SCAN,SIEM,HIGH,10.0.4.12,Inbound TCP port scan targeting port 443 and 8443
