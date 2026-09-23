@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { NvdService } from './nvd.service';
 import { VulnerabilityService } from '../vulnerabilities/vulnerability.service';
 import { cveIdSchema, dateRangeSchema } from './nvd.validation';
+import { vulnerabilityListQuerySchema } from '../vulnerabilities/vulnerability.validation';
 import { logger } from '../../config/logger';
 
 export class NvdController {
@@ -98,6 +99,30 @@ export class NvdController {
       res.status(500).json({
         error: 'StatusError',
         message: err.message,
+      });
+    }
+  };
+
+  listVulnerabilities = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const validation = vulnerabilityListQuerySchema.safeParse(req.query);
+      if (!validation.success) {
+        res.status(400).json({
+          error: 'Validation Error',
+          details: validation.error.errors.map((e) => e.message),
+        });
+        return;
+      }
+
+      const queryParams = validation.data;
+      const result = await this.vulnService.listVulnerabilities(queryParams);
+
+      res.status(200).json(result);
+    } catch (err: any) {
+      logger.error('Failed to list vulnerabilities', { error: err.message });
+      res.status(500).json({
+        error: 'QueryError',
+        message: 'Failed to retrieve vulnerabilities',
       });
     }
   };

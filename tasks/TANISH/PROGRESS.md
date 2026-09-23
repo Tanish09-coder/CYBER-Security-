@@ -1,12 +1,32 @@
 # TANISH — Live Progress Tracker
 
 # Current Task
-Phase 4 Implementation: Production-Ready VCDB / VERIS Public Cyber Incident Ingestion Module & 4A Graph Model.
+Backend Dependency Implementation: `GET /api/vulnerabilities` for N3 Vulnerability Explorer.
 
 # Status
 COMPLETED
 
 # Work Completed
+1. Implemented `GET /api/vulnerabilities` (and alias `/api/v1/vulnerabilities`) serving authoritative normalized PostgreSQL records populated from NIST NVD and CISA KEV ingestion.
+2. Followed strict architecture: `Route` → `Controller` → `Service` → `Repository` → `PostgreSQL` with zero ad-hoc SQL in controllers/routes.
+3. Implemented full query parameter parsing and validation using Zod (`vulnerability.validation.ts`):
+   - `page`: integer >= 1 (default: 1)
+   - `limit`: integer >= 1, max 100 (default: 25)
+   - `search`: case-insensitive partial match on `cve_id`, `description`, `source_identifier`
+   - `severity`: enum `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
+   - `kevOnly`: boolean (`true`/`false`)
+   - `ransomwareOnly`: boolean (`true`/`false`)
+   - Invalid parameters return HTTP 400 with safe structured error format `{ error: 'Validation Error', details: [...] }`.
+4. Enforced strict CISA KEV filter semantics:
+   - `kevOnly=true`: returns only vulnerabilities with active, authoritative CISA KEV membership (`is_current = TRUE`).
+   - `ransomwareOnly=true`: returns only vulnerabilities where active CISA KEV data explicitly indicates known ransomware campaign use (`known_ransomware_campaign_use = 'Known'`).
+   - `kevOnly=false` / `ransomwareOnly=false`: no restrictive filter applied.
+5. Guaranteed strictly 1 result per CVE with deterministic sorting (`modified_at DESC NULLS LAST, cve_id ASC`) and accurate pagination counts with zero row multiplication.
+6. Maintained zero mock/synthetic CVEs and zero synthetic data: if database has 0 rows, returns `data: []` with valid pagination metadata.
+7. Preserved backward compatibility of `GET /api/vulnerabilities/:cveId` completely intact.
+8. Documented complete API contract in `docs/API_CONTRACTS.md` (Section 1.2).
+9. Built automated integration test suite with 21 tests covering all required scenarios (`vulnerability.integration.test.ts`). Full backend suite: 16 test suites, 98 tests passing (100%).
+10. Executed real data verification against live NIST NVD and CISA KEV ingestion (`verify-vulnerability-api.ts`).
 1. Created safe ZIP archive extractor with `adm-zip` supporting PK header validation (`0x04034b50`), path-traversal rejection (`..`, leading `/`, leading `\`), entry verification (`.json`), and 200MB decompression safety limit (`vcdb.client.ts`).
 2. Implemented dynamic VERIS schema detection (extracting `schema_version` per incident and remote `verisc.json`) and forward compatibility for unknown fields (`vcdb.client.ts`, `vcdb.mapper.ts`).
 3. Implemented VERIS 4A Dimension mapper (Actors, Actions, Assets, Attributes), Timeline, Victim Metadata, and explicit structured CVE evidence links (`vcdb.mapper.ts`).

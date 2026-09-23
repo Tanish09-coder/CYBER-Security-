@@ -107,7 +107,88 @@ Every endpoint entry must declare:
 
 ---
 
-### 1.2 NVD Integration Status
+### 1.2 Vulnerability List & Explorer Query
+- **Method**: `GET`
+- **Path**: `/api/vulnerabilities` (also accessible at `/api/v1/vulnerabilities`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N3: Vulnerability Explorer, Screen N4: Prioritization)
+- **Purpose**: Paginated, filtered, and searchable listing of authoritative normalized CVE vulnerability records populated from official NVD and CISA KEV ingestion.
+- **Request Parameters**:
+  - `page` (optional integer >= 1, default `1`)
+  - `limit` (optional integer >= 1, max `100`, default `25`)
+  - `search` (optional string, max 200 chars): Case-insensitive partial matching against `cveId`, `description`, and `source.identifier`.
+  - `severity` (optional enum: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`): Filter using preferred CVSS base severity. *Note: CVSS represents vulnerability severity only, not enterprise risk.*
+  - `kevOnly` (optional boolean, accepts `'true'`, `'false'`, `'1'`, `'0'`):
+    - `kevOnly=true`: Restricts results strictly to vulnerabilities with current, authoritative CISA KEV membership (`is_current = TRUE`). Does not infer exploitation from CVSS.
+    - `kevOnly=false`: No KEV-only restriction.
+  - `ransomwareOnly` (optional boolean, accepts `'true'`, `'false'`, `'1'`, `'0'`):
+    - `ransomwareOnly=true`: Restricts results strictly to vulnerabilities where official CISA KEV data explicitly indicates known ransomware campaign use (`known_ransomware_campaign_use = 'Known'`). A CVE with no KEV record is never treated as ransomware-related.
+    - `ransomwareOnly=false`: No ransomware-only restriction.
+- **Sorting**: Deterministic ordering by `lastModifiedAt DESC NULLS LAST, cveId ASC`.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "data": [
+      {
+        "cveId": "CVE-2021-44228",
+        "description": "Apache Log4j2 JNDI Remote Code Execution Vulnerability",
+        "publishedAt": "2021-12-10T10:00:00.000Z",
+        "lastModifiedAt": "2021-12-14T10:00:00.000Z",
+        "cvss": {
+          "baseScore": 10.0,
+          "severity": "CRITICAL",
+          "version": "3.1",
+          "attackVector": "NETWORK"
+        },
+        "knownExploited": true,
+        "ransomwareCampaignUse": "Known",
+        "source": {
+          "identifier": "cve@mitre.org",
+          "provider": "NIST"
+        },
+        "kev": {
+          "dateAdded": "2021-12-10",
+          "dueDate": "2021-12-24",
+          "requiredAction": "Apply updates per vendor instructions."
+        }
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 25,
+      "total": 1,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrevious": false
+    }
+  }
+  ```
+- **Null & Missing Data Semantics**:
+  - `cvss`: `null` if CVSS score is not assigned by NVD.
+  - `knownExploited`: `false` if not in active CISA KEV catalog.
+  - `ransomwareCampaignUse`: `null` if not in active KEV or ransomware status is not explicitly known.
+  - `kev`: `null` if no active CISA KEV record exists.
+  - Missing data is never fabricated or synthesized. If the database has 0 matches, returns `"data": []` with valid pagination metadata.
+- **Errors**:
+  - `400 Bad Request`: Returned when any query parameter fails validation (e.g. `limit > 100`, `page < 1`, invalid severity enum, non-boolean string). Format:
+    ```json
+    {
+      "error": "Validation Error",
+      "details": ["limit cannot exceed 100"]
+    }
+    ```
+  - `500 Internal Server Error`: Internal query error without leaking database connection details:
+    ```json
+    {
+      "error": "QueryError",
+      "message": "Failed to retrieve vulnerabilities"
+    }
+    ```
+- **Status**: **LIVE**
+
+---
+
+### 1.3 NVD Integration Status
 - **Method**: `GET`
 - **Path**: `/api/integrations/nvd/status`
 - **Owner**: Tanish

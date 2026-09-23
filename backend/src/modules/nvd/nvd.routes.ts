@@ -17,6 +17,7 @@ export function createVulnerabilityRouter(controller?: NvdController): Router {
   const router = Router();
   const ctrl = controller || new NvdController();
 
+  router.get('/', ctrl.listVulnerabilities);
   router.get('/:cveId', ctrl.getVulnerability);
 
   return router;
