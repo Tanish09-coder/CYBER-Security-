@@ -251,4 +251,12 @@ export class CisaKevService {
   async getKevByCveId(cveId: string): Promise<StoredCisaKevEntry | null> {
     return await this.kevRepo.findByCveId(cveId);
   }
+
+  async getKevSummary(): Promise<{ activeCount: number; knownRansomwareCount: number; overdueCount: number }> {
+    return await this.kevRepo.getKevSummary();
+  }
+
+  async getKevCatalog(filters: import('./cisa-kev.types').CisaKevFilter): Promise<import('./cisa-kev.types').PaginatedCisaKevResponse> {
+    return await this.kevRepo.getKevCatalog(filters);
+  }
 }

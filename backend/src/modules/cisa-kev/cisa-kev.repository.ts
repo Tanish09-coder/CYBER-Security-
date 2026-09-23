@@ -295,4 +295,161 @@ export class CisaKevRepository {
     const res = await query(`SELECT COUNT(*) as count FROM cisa_kev_entries WHERE is_current = TRUE`);
     return parseInt(res.rows[0]?.count || '0', 10);
   }
+
+  async getKevSummary(): Promise<{ activeCount: number; knownRansomwareCount: number; overdueCount: number }> {
+    const sql = `
+      SELECT
+        COUNT(CASE WHEN is_current = TRUE THEN 1 END) as active_count,
+        COUNT(CASE WHEN is_current = TRUE AND known_ransomware_campaign_use = 'Known' THEN 1 END) as ransomware_count,
+        COUNT(CASE WHEN is_current = TRUE AND due_date < CURRENT_DATE THEN 1 END) as overdue_count
+      FROM cisa_kev_entries
+    `;
+    const res = await query(sql);
+    const row = res.rows[0];
+    return {
+      activeCount: parseInt(row?.active_count || '0', 10),
+      knownRansomwareCount: parseInt(row?.ransomware_count || '0', 10),
+      overdueCount: parseInt(row?.overdue_count || '0', 10),
+    };
+  }
+
+  async getKevCatalog(filters: import('./cisa-kev.types').CisaKevFilter): Promise<import('./cisa-kev.types').PaginatedCisaKevResponse> {
+    const {
+      page = 1,
+      limit = 25,
+      search,
+      ransomware,
+      dateAddedFrom,
+      dateAddedTo,
+      dueDateFrom,
+      dueDateTo,
+    } = filters;
+
+    const boundedLimit = Math.min(Math.max(1, limit), 100);
+    const boundedPage = Math.max(1, page);
+    const offset = (boundedPage - 1) * boundedLimit;
+
+    let whereClauses = ['k.is_current = TRUE'];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    if (search) {
+      whereClauses.push(`(
+        k.cve_id ILIKE $${paramIndex} OR 
+        k.vulnerability_name ILIKE $${paramIndex} OR 
+        k.short_description ILIKE $${paramIndex} OR
+        k.vendor_project ILIKE $${paramIndex} OR
+        k.product ILIKE $${paramIndex}
+      )`);
+      values.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    if (ransomware === true) {
+      whereClauses.push(`k.known_ransomware_campaign_use = 'Known'`);
+    } else if (ransomware === false) {
+      whereClauses.push(`(k.known_ransomware_campaign_use IS NULL OR k.known_ransomware_campaign_use != 'Known')`);
+    }
+
+    if (dateAddedFrom) {
+      whereClauses.push(`k.date_added >= $${paramIndex}`);
+      values.push(dateAddedFrom);
+      paramIndex++;
+    }
+    if (dateAddedTo) {
+      whereClauses.push(`k.date_added <= $${paramIndex}`);
+      values.push(dateAddedTo);
+      paramIndex++;
+    }
+    if (dueDateFrom) {
+      whereClauses.push(`k.due_date >= $${paramIndex}`);
+      values.push(dueDateFrom);
+      paramIndex++;
+    }
+    if (dueDateTo) {
+      whereClauses.push(`k.due_date <= $${paramIndex}`);
+      values.push(dueDateTo);
+      paramIndex++;
+    }
+
+    const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    const countSql = `SELECT COUNT(*) as total FROM cisa_kev_entries k ${whereString}`;
+    const countRes = await query(countSql, values);
+    const total = parseInt(countRes.rows[0]?.total || '0', 10);
+
+    const dataSql = `
+      SELECT 
+        k.*,
+        r.payload_hash as raw_payload_hash,
+        r.ingested_at as raw_ingested_at,
+        ds.name as data_source_name,
+        ds.provider as data_source_provider,
+        v.cvss_base_score,
+        v.cvss_base_severity,
+        v.cvss_version,
+        v.description as nvd_description
+      FROM cisa_kev_entries k
+      LEFT JOIN raw_source_records r ON k.raw_record_id = r.id
+      LEFT JOIN data_sources ds ON r.source_id = ds.id
+      LEFT JOIN vulnerabilities v ON k.vulnerability_id = v.id
+      ${whereString}
+      ORDER BY k.date_added DESC NULLS LAST, k.cve_id ASC
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
+    const dataValues = [...values, boundedLimit, offset];
+    const dataRes = await query(dataSql, dataValues);
+
+    const data = dataRes.rows.map((row) => ({
+      id: row.id,
+      cveId: row.cve_id,
+      vulnerabilityId: row.vulnerability_id,
+      vendorProject: row.vendor_project,
+      product: row.product,
+      vulnerabilityName: row.vulnerability_name,
+      dateAdded: row.date_added ? new Date(row.date_added).toISOString().split('T')[0] : null,
+      shortDescription: row.short_description,
+      requiredAction: row.required_action,
+      dueDate: row.due_date ? new Date(row.due_date).toISOString().split('T')[0] : null,
+      knownRansomwareCampaignUse: row.known_ransomware_campaign_use,
+      notes: row.notes,
+      sourceRecordId: row.source_record_id,
+      rawRecordId: row.raw_record_id,
+      isCurrent: row.is_current,
+      firstSeenAt: row.first_seen_at,
+      lastSeenAt: row.last_seen_at,
+      removedFromCatalogAt: row.removed_from_catalog_at,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      linkedNvdVulnerability: row.vulnerability_id
+        ? {
+            id: row.vulnerability_id,
+            cvssBaseScore: row.cvss_base_score !== null ? parseFloat(row.cvss_base_score) : null,
+            cvssBaseSeverity: row.cvss_base_severity,
+            cvssVersion: row.cvss_version,
+            description: row.nvd_description,
+          }
+        : null,
+      provenance: {
+        sourceName: row.data_source_name || 'CISA Known Exploited Vulnerabilities Catalog',
+        sourceProvider: row.data_source_provider || 'CISA',
+        rawPayloadHash: row.raw_payload_hash,
+        ingestedAt: row.raw_ingested_at,
+      },
+    }));
+
+    const totalPages = Math.ceil(total / boundedLimit);
+
+    return {
+      data,
+      pagination: {
+        page: boundedPage,
+        limit: boundedLimit,
+        total,
+        totalPages,
+        hasNext: boundedPage < totalPages,
+        hasPrevious: boundedPage > 1,
+      },
+    };
+  }
 }
