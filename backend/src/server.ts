@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 
 import { createNvdRouter, createVulnerabilityRouter } from './modules/nvd/nvd.routes';
 import { createCisaKevRouter } from './modules/cisa-kev/cisa-kev.routes';
+import { createOrganizationRouter, createBusinessUnitRouter } from './modules/organizations/organizations.routes';
 
 dotenv.config();
 
@@ -34,6 +35,10 @@ app.use('/api/integrations/cisa-kev', createCisaKevRouter());
 // Normalized Vulnerabilities Query API
 app.use('/api/vulnerabilities', createVulnerabilityRouter());
 app.use('/api/v1/vulnerabilities', createVulnerabilityRouter());
+
+// Enterprise Context APIs (Owner: HARSH)
+app.use('/api/organizations', createOrganizationRouter());
+app.use('/api/business-units', createBusinessUnitRouter());
 
 // -----------------------------------------------------------------------------
 // Structural Route Registrations (Phase 1-7 Implementations)
