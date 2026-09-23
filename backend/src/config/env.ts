@@ -19,6 +19,17 @@ const envSchema = z.object({
   CISA_KEV_TIMEOUT_MS: z.string().default('15000').transform((val) => parseInt(val, 10)),
   CISA_KEV_MAX_RETRIES: z.string().default('4').transform((val) => parseInt(val, 10)),
   CISA_KEV_STALE_AFTER_HOURS: z.string().default('24').transform((val) => parseInt(val, 10)),
+  MITRE_ATTACK_INDEX_URL: z
+    .string()
+    .url()
+    .default('https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/index.json'),
+  MITRE_ATTACK_ENTERPRISE_URL: z
+    .string()
+    .url()
+    .default('https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json'),
+  MITRE_ATTACK_TIMEOUT_MS: z.string().default('30000').transform((val) => parseInt(val, 10)),
+  MITRE_ATTACK_MAX_RETRIES: z.string().default('4').transform((val) => parseInt(val, 10)),
+  MITRE_ATTACK_STALE_AFTER_HOURS: z.string().default('168').transform((val) => parseInt(val, 10)),
   JWT_SECRET: z.string().default('dev-secret-cyberriskos'),
 });
 

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 
 import { createNvdRouter, createVulnerabilityRouter } from './modules/nvd/nvd.routes';
 import { createCisaKevRouter } from './modules/cisa-kev/cisa-kev.routes';
+import { createMitreAttackRouter } from './modules/mitre-attack/mitre-attack.routes';
 
 dotenv.config();
 
@@ -31,6 +32,9 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/integrations/nvd', createNvdRouter());
 // CISA KEV Ingestion & Integration API
 app.use('/api/integrations/cisa-kev', createCisaKevRouter());
+// MITRE ATT&CK Ingestion & Integration API
+app.use('/api/integrations/mitre-attack', createMitreAttackRouter());
+app.use('/api/v1/threats', createMitreAttackRouter());
 // Normalized Vulnerabilities Query API
 app.use('/api/vulnerabilities', createVulnerabilityRouter());
 app.use('/api/v1/vulnerabilities', createVulnerabilityRouter());
@@ -50,8 +54,6 @@ const routeNotice = (moduleName: string) => (req: Request, res: Response) => {
 app.use('/api/v1/auth', routeNotice('Authentication & RBAC'));
 app.use('/api/v1/organizations', routeNotice('Enterprise & Financial Calibration'));
 app.use('/api/v1/assets', routeNotice('Enterprise Asset Registry'));
-app.use('/api/v1/vulnerabilities', routeNotice('Vulnerability & CISA KEV Intelligence'));
-app.use('/api/v1/threats', routeNotice('Threat Intelligence & MITRE ATT&CK'));
 app.use('/api/v1/telemetry', routeNotice('Security Telemetry Ingestion (CSV/JSON/REST)'));
 app.use('/api/v1/controls', routeNotice('Control Effectiveness Engine'));
 app.use('/api/v1/risk', routeNotice('Risk Quantification & Snapshot Engine'));
