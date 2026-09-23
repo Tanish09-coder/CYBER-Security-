@@ -50,8 +50,8 @@ export class ThreatIntelController {
 
       res.json(response);
     } catch (err: any) {
-      logger.error('Failed to get threat intel summary', { error: err.message, stack: err.stack, full: err });
-      res.status(500).json({ error: 'Internal Server Error', message: err.message, stack: err.stack });
+      logger.error('Failed to get threat intel summary', { error: err.message, stack: err.stack });
+      res.status(500).json({ error: 'Internal Server Error', message: err.message });
     }
   }
 

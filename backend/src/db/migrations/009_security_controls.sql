@@ -1,5 +1,5 @@
 -- =============================================================================
--- Migration 007: Security Controls Catalog & Asset Posture Mapping
+-- Migration 009: Security Controls Catalog & Asset Posture Mapping
 -- Owner: HARSH
 -- Purpose: Defensive controls catalog and per-asset implementation posture
 -- =============================================================================

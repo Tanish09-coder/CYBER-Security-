@@ -1,5 +1,5 @@
 -- =============================================================================
--- Migration 004: Enterprise Asset Inventory
+-- Migration 006: Enterprise Asset Inventory
 -- Owner: HARSH
 -- Purpose: Assets table with network interfaces, dedup indexes, and filtering
 -- =============================================================================

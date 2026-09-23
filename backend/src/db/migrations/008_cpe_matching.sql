@@ -1,5 +1,5 @@
 -- =============================================================================
--- Migration 006: CPE Matching & Asset Vulnerability Correlation
+-- Migration 008: CPE Matching & Asset Vulnerability Correlation
 -- Owner: HARSH
 -- Purpose: Correlating installed software with NVD vulnerability CPE criteria
 -- =============================================================================

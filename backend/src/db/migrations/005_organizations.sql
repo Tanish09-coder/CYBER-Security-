@@ -1,7 +1,10 @@
+-- =============================================================================
+-- Migration 005: Organizations and Business Units Hierarchy
 -- Owner: HARSH
 -- Purpose: Organizations and business units hierarchy
 -- Tables: organizations, business_units
 -- Indexes: business_units(organization_id), organizations(industry)
+-- =============================================================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 

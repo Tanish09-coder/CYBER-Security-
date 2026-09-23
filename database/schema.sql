@@ -1,6 +1,13 @@
 -- =============================================================================
--- CyberRiskOS - Core Relational Database DDL
--- Covering 22 Core Domains (PRD Section 22)
+-- LEGACY / DEPRECATED REFERENCE ONLY — DO NOT USE FOR RUNTIME INITIALIZATION
+-- =============================================================================
+-- Notice: This monolithic schema represents an early prototype design.
+-- The authoritative evolving database schema for CyberRiskOS is maintained
+-- exclusively via the numbered migration system in:
+--   backend/src/db/migrations/
+-- Runtime database setup and migrations are managed exclusively by the backend
+-- migration runner (runMigrations() in backend/src/db/index.ts).
+-- DO NOT mount or execute this file during container initialization or deployment.
 -- =============================================================================
 
 -- Enable UUID extension

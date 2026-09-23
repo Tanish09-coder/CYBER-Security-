@@ -1,5 +1,5 @@
 -- =============================================================================
--- Migration 005: Installed Software Inventory & Versioning
+-- Migration 007: Installed Software Inventory & Versioning
 -- Owner: HARSH
 -- Purpose: Installed software packages, version tracking, and asset-software relations
 -- =============================================================================

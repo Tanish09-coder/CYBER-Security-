@@ -75,6 +75,13 @@ async function verifyMigrations() {
     'vcdb_incident_attributes',
     'vcdb_incident_timeline',
     'vcdb_incident_cves',
+    'organizations',
+    'business_units',
+    'assets',
+    'installed_software',
+    'asset_vulnerabilities',
+    'security_controls',
+    'asset_controls',
   ];
 
   console.log('\nVerifying table existence in fresh schema...');

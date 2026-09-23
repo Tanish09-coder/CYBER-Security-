@@ -37,6 +37,10 @@ export async function getDbPool(): Promise<Pool | any> {
 export async function initMemoryDb(): Promise<any> {
   if (memoryAdapter) return memoryAdapter;
 
+  if (env.NODE_ENV === 'production') {
+    throw new Error('Fatal: In-memory database fallback is strictly prohibited in production mode. CyberRiskOS requires a live PostgreSQL instance.');
+  }
+
   logger.info('Initializing in-memory PostgreSQL engine for test/development mode');
   try {
     const { newDb, DataType } = await import('pg-mem');
@@ -163,11 +167,13 @@ export async function query<T extends QueryResultRow = any>(
     const activePool = await getDbPool();
     return await activePool.query(text, params);
   } catch (err: any) {
-    // If real Postgres connection failed with ECONNREFUSED and not explicitly forced, fallback to memory
     if (
       (err.code === 'ECONNREFUSED' || err.message?.includes('connect ECONNREFUSED')) &&
       !memoryAdapter
     ) {
+      if (env.NODE_ENV === 'production') {
+        throw new Error(`Fatal: PostgreSQL server is not accessible in production mode: ${err.message}`);
+      }
       logger.warn('PostgreSQL server not accessible on localhost:5432. Falling back to in-memory PostgreSQL engine.');
       const mem = await initMemoryDb();
       // If the query was a migration script, it has already been applied by initMemoryDb()
@@ -189,6 +195,9 @@ export async function withTransaction<T>(
     client = await activePool.connect();
   } catch (err: any) {
     if ((err.code === 'ECONNREFUSED' || err.message?.includes('connect ECONNREFUSED')) && !memoryAdapter) {
+      if (env.NODE_ENV === 'production') {
+        throw new Error(`Fatal: PostgreSQL connection failed during transaction in production mode: ${err.message}`);
+      }
       const mem = await initMemoryDb();
       client = await mem.connect();
     } else {
@@ -236,6 +245,9 @@ export async function runMigrations(): Promise<void> {
       logger.info(`Migration ${file} applied successfully to PostgreSQL server`);
     } catch (err: any) {
       if (err.code === 'ECONNREFUSED' || err.message?.includes('connect ECONNREFUSED')) {
+        if (env.NODE_ENV === 'production') {
+          throw new Error(`Fatal: PostgreSQL connection failed during migration ${file} in production mode: ${err.message}`);
+        }
         logger.warn('PostgreSQL connection failed during migration. Initializing in-memory fallback.');
         await initMemoryDb();
         return;

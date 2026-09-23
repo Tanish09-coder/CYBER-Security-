@@ -620,96 +620,161 @@ Every endpoint entry must declare:
 
 ### 2.1 Paginated Asset Inventory
 - **Method**: `GET`
-- **Path**: `/api/assets`
+- **Canonical Path**: `/api/assets`
+- **Compatibility Alias**: `/api/v1/assets`
 - **Owner**: Harsh
 - **Consumer**: Nishit (Screen N5: Asset Explorer)
-- **Purpose**: Return paginated enterprise assets with criticality, network exposure, and count of potential vulnerability matches.
+- **Purpose**: Return paginated enterprise assets with criticality, network exposure, and operational context. Zero synthetic assets are ever returned.
 - **Request**:
-  - Query Parameters: `page` (number, default 1), `limit` (number, default 20), `search` (string), `criticality` (CRITICAL, HIGH, MEDIUM, LOW), `businessUnitId` (string).
+  - Query Parameters: `page` (number, default 1), `limit` (number, default 50), `search` (string), `assetType` (string), `criticality` (1-5), `isInternetFacing` (boolean), `businessUnitId` (string).
 - **Response (HTTP 200)**:
   ```json
   {
-    "assets": [
+    "data": [
       {
         "id": "uuid",
+        "organizationId": "uuid",
+        "businessUnitId": "uuid",
+        "assetIdentifier": "AST-001",
         "name": "Production Payment Gateway 01",
         "hostname": "paygate-prod-01.internal",
         "ipAddress": "10.0.12.50",
-        "assetType": "SERVER",
-        "businessCriticality": "CRITICAL",
-        "internetFacing": true,
-        "businessUnitName": "Digital Banking",
-        "matchedVulnerabilitiesCount": 3,
-        "highestCvssScore": 9.8
+        "macAddress": "00:1A:2B:3C:4D:5E",
+        "assetType": "server",
+        "operatingSystem": "Ubuntu 22.04 LTS",
+        "environment": "Production",
+        "owner": "SecOps Team",
+        "isInternetFacing": true,
+        "businessCriticality": 5,
+        "dataClassification": "Restricted",
+        "revenueDependencyPct": 45.5,
+        "operationalImportance": 5.0,
+        "metadata": {},
+        "createdAt": "2026-09-24T00:00:00.000Z",
+        "updatedAt": "2026-09-24T00:00:00.000Z"
       }
     ],
     "total": 1,
     "page": 1,
-    "totalPages": 1
+    "limit": 50
   }
   ```
-- **Status**: **PLANNED (Phase H2)**
+- **Empty State**: When no assets exist, returns `{"data": [], "total": 0, "page": 1, "limit": 50}`.
+- **Status**: **LIVE**
 
 ---
 
 ### 2.2 Asset Detail & Correlated Vulnerabilities
 - **Method**: `GET`
-- **Path**: `/api/assets/:assetId/vulnerabilities`
+- **Canonical Path**: `/api/assets/:assetId/vulnerabilities`
+- **Compatibility Alias**: `/api/cpe-matching/correlations/:assetId`
 - **Owner**: Harsh
 - **Consumer**: Nishit (Screen N5 Drawer)
-- **Purpose**: Retrieve correlated vulnerabilities for a specific asset with plain-English match reasoning.
+- **Purpose**: Retrieve correlated vulnerabilities for a specific asset with transparent match reasoning and confidence score. Strictly labelled as "Potential vulnerability match" (never infers compromise).
 - **Response (HTTP 200)**:
   ```json
   {
     "assetId": "uuid",
     "assetName": "Production Payment Gateway 01",
-    "matches": [
+    "count": 1,
+    "data": [
       {
+        "id": "uuid",
+        "assetId": "uuid",
+        "softwareId": "uuid",
+        "vulnerabilityId": "uuid",
         "cveId": "CVE-2021-44228",
         "softwareName": "log4j-core",
         "installedVersion": "2.14.1",
-        "matchedCpeCriteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
-        "confidence": "HIGH",
-        "reasoning": "Installed version 2.14.1 satisfies range <= 2.15.0",
-        "label": "Potential vulnerability match",
-        "knownExploited": true,
-        "cvssBaseScore": 10.0,
-        "cvssBaseSeverity": "CRITICAL"
+        "cpeCriteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+        "matchConfidence": 0.95,
+        "matchType": "CPE_VERSION_BOUND",
+        "matchReason": "Installed version 2.14.1 satisfies range <= 2.15.0",
+        "status": "POTENTIAL_VULNERABILITY_MATCH",
+        "matchedAt": "2026-09-24T00:00:00.000Z"
       }
     ]
   }
   ```
-- **Status**: **PLANNED (Phase H4)**
+- **Status**: **LIVE**
 
 ---
 
-### 2.3 Security Controls Inventory
+### 2.3 Security Controls Inventory & Defensive Coverage
 - **Method**: `GET`
-- **Path**: `/api/controls`
+- **Canonical Path**: `/api/controls` (with `?summary=true` for coverage aggregation)
+- **Compatibility Alias**: `/api/v1/controls`
 - **Owner**: Harsh
-- **Consumer**: Nishit (Screen N6: Controls UI)
-- **Purpose**: Return defensive security control coverage across enterprise assets.
-- **Response (HTTP 200)**:
+- **Consumer**: Nishit (Screen N6: Controls Posture)
+- **Purpose**: Return authoritative defensive security control catalog and enterprise asset coverage percentage. Never invents ROI or hallucinated effectiveness percentages.
+- **Request Parameters**:
+  - `summary` (boolean, default false): If true, aggregates coverage metrics across assets.
+  - `organizationId` (optional UUID): Filter summary to a specific organization.
+- **Response (HTTP 200, ?summary=true)**:
   ```json
   {
+    "totalCatalogControls": 7,
     "controls": [
       {
-        "id": "ctrl-edr",
-        "name": "Endpoint Detection & Response (EDR)",
-        "category": "PROTECTION",
-        "totalAssets": 250,
-        "implementedCount": 235,
-        "coveragePercentage": 94.0
-      },
-      {
-        "id": "ctrl-mfa",
-        "name": "Multi-Factor Authentication (MFA)",
-        "category": "ACCESS_CONTROL",
-        "totalAssets": 250,
-        "implementedCount": 250,
-        "coveragePercentage": 100.0
+        "code": "MFA",
+        "name": "Multi-Factor Authentication",
+        "category": "Identity & Access",
+        "defaultMitigationWeight": 0.85,
+        "totalAssetsAssigned": 0,
+        "implementedCount": 0,
+        "partialCount": 0,
+        "notImplementedCount": 0,
+        "unknownCount": 0,
+        "coveragePercentage": 0
       }
     ]
   }
   ```
-- **Status**: **PLANNED (Phase H5)**
+- **Status**: **LIVE**
+
+---
+
+## 3. Top-Level Unified Threat Intelligence (Owner: TANISH)
+
+### 3.1 Unified Threat Intel Summary
+- **Method**: `GET`
+- **Canonical Path**: `/api/threat-intel/summary`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N7: Threat Intelligence Feed)
+- **Purpose**: High-level aggregated threat intelligence metrics across CISA KEV active catalog and MITRE ATT&CK Enterprise Matrix.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "data": {
+      "cisaKev": {
+        "activeCount": 1721,
+        "knownRansomwareCount": 240,
+        "overdueCount": 15,
+        "lastSyncAt": "2026-09-24T00:00:00.000Z",
+        "lastSuccessfulRun": {}
+      },
+      "mitreAttack": {
+        "domain": "enterprise-attack",
+        "releaseVersion": "19.2",
+        "releaseId": null,
+        "tacticsCount": 14,
+        "techniquesCount": 660,
+        "groupsCount": 158,
+        "softwareCount": 696,
+        "mitigationsCount": 44,
+        "lastSyncAt": "2026-09-24T00:00:00.000Z"
+      },
+      "generatedAt": "2026-09-24T00:00:00.000Z"
+    }
+  }
+  ```
+- **Status**: **LIVE**
+
+### 3.2 Threat Intel KEV Catalog
+- **Method**: `GET`
+- **Canonical Path**: `/api/threat-intel/kev`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N7: KEV Feed Explorer)
+- **Purpose**: Paginated listing of active CISA KEV entries with date range, search, and ransomware campaign filters.
+- **Status**: **LIVE**
+
