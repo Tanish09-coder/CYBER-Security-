@@ -97,6 +97,29 @@ export interface CisaKevStatusResponse {
   staleThresholdHours: number;
 }
 
+export interface CisaKevFilter {
+  page?: number;
+  limit?: number;
+  search?: string;
+  ransomware?: boolean;
+  dateAddedFrom?: string;
+  dateAddedTo?: string;
+  dueDateFrom?: string;
+  dueDateTo?: string;
+}
+
+export interface PaginatedCisaKevResponse {
+  data: StoredCisaKevEntry[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+  };
+}
+
 // =============================================================================
 // Safe Domain Error Classes
 // =============================================================================
