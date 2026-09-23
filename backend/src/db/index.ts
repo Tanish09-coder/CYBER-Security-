@@ -78,13 +78,40 @@ export async function initMemoryDb(): Promise<any> {
     const pgAdapter = memoryDb.adapters.createPg();
     const memPool = new pgAdapter.Pool();
 
+    const sanitizeParam = (p: any) => {
+      if (typeof p === 'string' && p.length > 500000) {
+        try {
+          const parsed = JSON.parse(p);
+          return JSON.stringify({
+            type: parsed.type,
+            id: parsed.id,
+            spec_version: parsed.spec_version,
+            objects_count: Array.isArray(parsed.objects) ? parsed.objects.length : undefined,
+            _in_memory_note: 'Full payload preserved in production PostgreSQL; trimmed in pg-mem to avoid V8 call stack overflow.',
+          });
+        } catch {
+          return p.substring(0, 10000) + '...[truncated for pg-mem]';
+        }
+      }
+      return p;
+    };
+
     memoryAdapter = {
       isMemory: true,
       query: async (text: string, params?: any[]) => {
-        return memPool.query(text, params);
+        const safeParams = params ? params.map(sanitizeParam) : params;
+        return memPool.query(text, safeParams);
       },
       connect: async () => {
-        return memPool.connect();
+        const client = await memPool.connect();
+        const origQuery = client.query.bind(client);
+        client.query = (text: any, params?: any) => {
+          if (Array.isArray(params)) {
+            return origQuery(text, params.map(sanitizeParam));
+          }
+          return origQuery(text, params);
+        };
+        return client;
       },
       end: async () => {
         return memPool.end();

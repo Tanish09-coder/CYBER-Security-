@@ -212,6 +212,134 @@ Every endpoint entry must declare:
 
 ---
 
+### 1.6 MITRE ATT&CK Enterprise Status & Health
+- **Method**: `GET`
+- **Path**: `/api/integrations/mitre-attack/status`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N2: Integration Center)
+- **Purpose**: Return live health, current release version, bundle hash, counts across tactics/techniques/subtechniques/groups/software/relationships, and staleness status.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "enabled": true,
+    "domain": "enterprise-attack",
+    "currentVersion": "19.2",
+    "releaseDate": "2026-08-05T21:33:58.496Z",
+    "bundleHash": "sha256-hash-string",
+    "dataAgeHours": 1.2,
+    "isStale": false,
+    "staleThresholdHours": 168,
+    "counts": {
+      "tactics": 14,
+      "techniques": 216,
+      "subtechniques": 444,
+      "mitigations": 44,
+      "groups": 158,
+      "software": 696,
+      "relationships": 18500,
+      "retired": 320,
+      "deprecated": 180
+    }
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 1.7 Trigger MITRE ATT&CK Full Enterprise Sync
+- **Method**: `POST`
+- **Path**: `/api/integrations/mitre-attack/sync`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N2: Integration Center Sync Trigger)
+- **Purpose**: Dynamically discover latest official Enterprise ATT&CK release, fetch STIX 2.1 bundle, compute SHA-256 hash, upsert entities, and update release state with idempotency.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "runId": "uuid",
+    "status": "COMPLETED",
+    "version": "19.2",
+    "releaseDate": "2026-08-05T21:33:58.496Z",
+    "bundleHash": "sha256...",
+    "recordsReceived": 21450,
+    "recordsInserted": 0,
+    "recordsUpdated": 0,
+    "recordsSkipped": 21450,
+    "durationMs": 5200,
+    "counts": {
+      "tactics": 14,
+      "techniques": 216,
+      "subtechniques": 444,
+      "mitigations": 44,
+      "groups": 158,
+      "software": 696,
+      "relationships": 18500
+    }
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 1.8 Query ATT&CK Techniques & Graph Explorer
+- **Method**: `GET`
+- **Path**: `/api/integrations/mitre-attack/techniques`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N4: Threat & Technique Matrix Explorer)
+- **Purpose**: Filter techniques by tactic (e.g. `initial-access` or `TA0001`), platform, subtechnique status, or search string.
+- **Request**:
+  - Query Parameters: `tactic` (string), `platform` (string), `isSubtechnique` (boolean), `search` (string), `includeRetired` (boolean), `page` (number), `limit` (number).
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "techniques": [
+      {
+        "id": "uuid",
+        "stixId": "attack-pattern--970a4a58-6933-4f9e-876e-aa5e4939b70b",
+        "attackId": "T1059.001",
+        "name": "PowerShell",
+        "description": "Adversaries may abuse PowerShell commands...",
+        "isSubtechnique": true,
+        "parentAttackId": "T1059",
+        "platforms": ["Windows"],
+        "killChainPhases": [{ "kill_chain_name": "mitre-attack", "phase_name": "execution" }]
+      }
+    ],
+    "total": 660
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 1.9 Single Technique Deep Graph Lookup
+- **Method**: `GET`
+- **Path**: `/api/integrations/mitre-attack/techniques/:attackId`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N4: Technique Detail Modal)
+- **Purpose**: Retrieve full technique details with parent, sub-techniques, mapped tactics, mitigations, threat groups using it, software using it, and relationship edges.
+- **Request**:
+  - URL Parameter: `attackId` (e.g. `T1059` or `T1059.001`).
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "technique": {
+      "attackId": "T1059.001",
+      "name": "PowerShell",
+      "isSubtechnique": true
+    },
+    "parentTechnique": { "attackId": "T1059", "name": "Command and Scripting Interpreter" },
+    "subtechniques": [],
+    "tactics": [{ "attackId": "TA0002", "name": "Execution", "shortName": "execution" }],
+    "mitigations": [{ "attackId": "M1049", "name": "Antivirus/Antimalware" }],
+    "groups": [{ "attackId": "G0016", "name": "APT29" }],
+    "software": [{ "attackId": "S0029", "name": "PsExec" }],
+    "relationships": []
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
 ## 2. Enterprise Asset & Context (Owner: HARSH)
 
 ### 2.1 Paginated Asset Inventory

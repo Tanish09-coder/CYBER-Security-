@@ -6,8 +6,8 @@
 | :--- | :--- | :--- | :--- |
 | **M1: NVD Ingestion** | External Threat Intel | **COMPLETED** | NVD API v2.0 client, CVSS preservation, CPE parser, live verification |
 | **M2: CISA KEV Ingestion** | External Threat Intel | **COMPLETED** | Official KEV feed, non-destructive reconciliation, NVD join, dual provenance |
-| **M3: MITRE ATT&CK Ingestion** | External Threat Intel | **NEXT** | STIX 2.1 parser, tactics, techniques, mitigations, attack-pattern graph |
-| **M4: VCDB / VERIS Ingestion** | Historical Incident Intel | **PLANNED** | Public incident parser, breach frequency distributions, loss telemetry |
+| **M3: MITRE ATT&CK Ingestion** | External Threat Intel | **COMPLETED** | STIX 2.1 parser, tactics, techniques, mitigations, attack-pattern graph |
+| **M4: VCDB / VERIS Ingestion** | Historical Incident Intel | **NEXT** | Public incident parser, breach frequency distributions, loss telemetry |
 | **M5: Unified Threat Intel API** | Cross-Source Lookup | **PLANNED** | Multi-source lookup API (`CVE -> NVD + KEV + ATT&CK + VCDB`) |
 
 ---
@@ -38,18 +38,19 @@
 
 ---
 
-### Phase 3: MITRE ATT&CK Enterprise Matrix [NEXT]
-- [ ] Connect to official MITRE ATT&CK GitHub STIX 2.1 JSON repository:
-  `https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json`
-- [ ] Implement streaming / memory-efficient STIX object parser.
-- [ ] Normalize ATT&CK Tactics (matrix columns, external ID, name, short name).
-- [ ] Normalize ATT&CK Techniques & Sub-techniques (T-codes, name, kill chain phases, data sources).
-- [ ] Normalize ATT&CK Mitigations (M-codes, description, addressable techniques).
-- [ ] Normalize Threat Groups & Software (G-codes, S-codes, aliases).
-- [ ] Preserve STIX Relationship Graph (`technique -> mitigation`, `group -> technique`).
-- [ ] Store raw STIX payload hash in `raw_source_records` with SHA-256 provenance.
-- [ ] Create Migration `003_mitre_attack.sql` with owner header `-- Owner: TANISH`.
-- [ ] Implement `verify-live-mitre.ts` end-to-end verification script.
+### Phase 3: MITRE ATT&CK Enterprise Matrix [COMPLETED]
+- [x] Connect to official MITRE ATT&CK GitHub STIX 2.1 repository and dynamic release index (`index.json`).
+- [x] Implement memory-efficient STIX object parser with Zod schema validation.
+- [x] Normalize ATT&CK Tactics (matrix columns, external ID, name, short name).
+- [x] Normalize ATT&CK Techniques & Sub-techniques (T-codes, name, kill chain phases, data sources, platforms).
+- [x] Normalize ATT&CK Mitigations (M-codes, description, addressable techniques).
+- [x] Normalize Threat Groups & Software (G-codes, S-codes, aliases, software classification).
+- [x] Preserve STIX Relationship Graph (`technique -> mitigation`, `group -> technique`, `subtechnique-of`).
+- [x] Resolve sub-technique parents authoritatively from official `subtechnique-of` STIX relationships.
+- [x] Store complete raw STIX bundle in `raw_source_records` with cryptographic SHA-256 provenance.
+- [x] Create Migration `003_mitre_attack_ingestion.sql` with owner header `-- Owner: TANISH`.
+- [x] Build 27 automated unit/integration tests across 4 test suites (100% pass rate).
+- [x] Implement and execute `verify-live-mitre-attack.ts` end-to-end data-driven verification script (v19.2, 26,086 objects, 100% idempotent).
 
 ---
 
