@@ -7,6 +7,7 @@ import { Router, text } from 'express';
 import { AssetController } from './assets.controller';
 
 import { createAssetSoftwareRouter } from '../software/software.routes';
+import { createAssetVulnerabilityRouter } from '../cpe-matching/cpe-matching.routes';
 
 export function createAssetRouter(controller?: AssetController): Router {
   const router = Router();
@@ -17,6 +18,9 @@ export function createAssetRouter(controller?: AssetController): Router {
 
   // Software Sub-resource Routes
   router.use('/:assetId/software', createAssetSoftwareRouter());
+
+  // Vulnerability Correlation Sub-resource Routes
+  router.use('/:assetId/vulnerabilities', createAssetVulnerabilityRouter());
 
   // Import Endpoints
   router.post('/import/json', ctrl.importJson);

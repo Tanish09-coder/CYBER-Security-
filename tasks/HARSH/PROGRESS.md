@@ -1,7 +1,7 @@
 # HARSH — Live Progress Tracker
 
 # Current Task
-Phase H3: Software Inventory & Versioning — COMPLETED
+Phase H4: CPE Matching Engine — COMPLETED
 
 # Status
 COMPLETED
@@ -18,18 +18,22 @@ COMPLETED
   - Streaming CSV and JSON batch import pipelines.
   - 18 passing tests.
 - **Phase H3: Software Inventory & Versioning**
-  - Designed installed software schema (`id`, `asset_id`, `vendor`, `product`, `version`, `release`, `cpe23`, `install_path`, `last_observed_at`, `metadata`).
-  - Created database migration `005_software.sql` with unique constraint on `(asset_id, vendor, product, version)` and cascade on asset delete.
-  - Created domain types, mappers, and Zod validation with lowercase normalization for vendors and products (ready for CPE matching).
-  - Implemented repository with transactional batch upsert semantics.
+  - Installed software schema with unique constraint on `(asset_id, vendor, product, version)`.
+  - Migration `005_software.sql`.
+  - Batch upserting, filtering, and cascade deletion.
+  - 14 passing tests.
+- **Phase H4: CPE Matching Engine**
+  - Integration with Tanish's `vulnerability_cpes` and `vulnerabilities` tables.
+  - Implemented semantic & numerical version comparator (`compareVersions`) and CPE 2.3 criteria evaluator (`evaluateCpeMatch`).
+  - Implemented version bounds evaluation (`versionStartIncluding`, `versionStartExcluding`, `versionEndIncluding`, `versionEndExcluding`).
+  - Confidence scoring matrix (1.00 for exact version, 0.95 for bounded range, 0.85 for wildcard).
+  - Strict terminology enforcement (`POTENTIAL_VULNERABILITY_MATCH` — zero claims of compromise).
+  - Created migration `006_cpe_matching.sql` for `asset_vulnerabilities` table.
   - Implemented REST APIs:
-    - `POST /api/assets/:assetId/software`: Single or batch software registration with upsert.
-    - `GET /api/assets/:assetId/software`: Paginated & filtered package query (`?vendor=...`, `?product=...`, `?search=...`).
-    - `GET /api/software/:id`: Package detail.
-    - `PATCH /api/software/:id`: Update package release or metadata.
-    - `DELETE /api/software/:id`: Delete package.
-  - Mounted `/api/assets/:assetId/software` sub-router and `/api/software` in `backend/src/server.ts`.
-  - Comprehensive test suite: 14 integration tests covering single/batch registration, upserting, filtering, search, and cascading deletion.
+    - `POST /api/cpe-matching/evaluate`: Trigger matching evaluation for an asset or across inventory.
+    - `GET /api/assets/:assetId/vulnerabilities`: List correlated CVEs with match reasoning, CVSS score/severity, CISA KEV status, and confidence score.
+  - Created documentation specification `docs/CPE_MATCHING.md`.
+  - Comprehensive test suite: 10 integration and unit tests covering exact matching, bounds checking, out-of-bounds rejection, wildcard matching, and REST queries.
 
 # Files Created
 - `backend/src/db/migrations/003_organizations.sql`
@@ -49,24 +53,34 @@ COMPLETED
 - `backend/src/modules/assets/assets.controller.ts`
 - `backend/src/modules/assets/assets.routes.ts`
 - `backend/src/modules/assets/__tests__/assets.test.ts`
-- `backend/src/db/migrations/005_software.sql` [NEW]
-- `backend/src/modules/software/software.types.ts` [NEW]
-- `backend/src/modules/software/software.validation.ts` [NEW]
-- `backend/src/modules/software/software.repository.ts` [NEW]
-- `backend/src/modules/software/software.service.ts` [NEW]
-- `backend/src/modules/software/software.controller.ts` [NEW]
-- `backend/src/modules/software/software.routes.ts` [NEW]
-- `backend/src/modules/software/__tests__/software.test.ts` [NEW]
+- `backend/src/db/migrations/005_software.sql`
+- `backend/src/modules/software/software.types.ts`
+- `backend/src/modules/software/software.validation.ts`
+- `backend/src/modules/software/software.repository.ts`
+- `backend/src/modules/software/software.service.ts`
+- `backend/src/modules/software/software.controller.ts`
+- `backend/src/modules/software/software.routes.ts`
+- `backend/src/modules/software/__tests__/software.test.ts`
+- `backend/src/db/migrations/006_cpe_matching.sql` [NEW]
+- `backend/src/modules/cpe-matching/cpe-matching.types.ts` [NEW]
+- `backend/src/modules/cpe-matching/cpe-matching.evaluator.ts` [NEW]
+- `backend/src/modules/cpe-matching/cpe-matching.repository.ts` [NEW]
+- `backend/src/modules/cpe-matching/cpe-matching.service.ts` [NEW]
+- `backend/src/modules/cpe-matching/cpe-matching.controller.ts` [NEW]
+- `backend/src/modules/cpe-matching/cpe-matching.routes.ts` [NEW]
+- `backend/src/modules/cpe-matching/__tests__/cpe-matching.test.ts` [NEW]
+- `docs/CPE_MATCHING.md` [NEW]
 
 # Files Modified
 - `backend/src/server.ts` [MODIFIED — added import + route registration lines only]
+- `backend/src/modules/assets/assets.routes.ts` [MODIFIED — mounted /:assetId/vulnerabilities]
 
 # Tests
-- 90 total tests run across 10 test suites, 90 passed, 0 failures.
+- 100 total tests run across 11 test suites, 100 passed, 0 failures.
 - Zero regressions.
 
 # Dependencies
-- Dependent on Tanish's `vulnerability_cpes` table for Phase H4 (already delivered).
+- Tanish's `vulnerability_cpes` table (consumed).
 
 # Next Step
-Phase H4: CPE Matching Engine — Integrate installed software with Tanish's `vulnerability_cpes` table, implement version-bound semantic evaluator, match confidence scoring, transparent reasoning, and `/api/cpe-matching/evaluate` endpoint.
+Phase H5: Security Controls Posture — Defensive control catalog (MFA, EDR, BACKUP, SEGMENTATION, PAM, ENCRYPTION, MONITORING), asset-control posture mapping, and `/api/controls` APIs.

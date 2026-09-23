@@ -7,7 +7,7 @@
 | **Phase H1** | Organization Hierarchy | **COMPLETED** | Multi-tenant organization and business unit schemas and REST APIs |
 | **Phase H2** | Enterprise Asset Inventory | **COMPLETED** | Asset data model, CSV & JSON import parsers, validation, unit mapping |
 | **Phase H3** | Software Inventory | **COMPLETED** | Installed software model, version tracking, asset-software relationships |
-| **Phase H4** | CPE Matching Engine | **NOT_STARTED** | CPE criteria evaluator with version-bound logic and confidence rating |
+| **Phase H4** | CPE Matching Engine | **COMPLETED** | CPE criteria evaluator with version-bound logic and confidence rating |
 | **Phase H5** | Security Controls Posture | **NOT_STARTED** | Control catalog, asset-control mapping (MFA, EDR, Backups, PAM, Seg) |
 
 ---
@@ -59,17 +59,17 @@
 ---
 
 ### Phase H4 — CPE Matching Engine
-- [ ] Integrate with Tanish's NVD CPE criteria (`vulnerability_cpes` table created in `001_nvd_ingestion.sql`).
-- [ ] Implement CPE comparison logic:
+- [x] Integrate with Tanish's NVD CPE criteria (`vulnerability_cpes` table created in `001_nvd_ingestion.sql`).
+- [x] Implement CPE comparison logic:
   - Exact vendor and product matching (normalized lowercase).
   - Version-bound comparison evaluating `versionStartIncluding`, `versionStartExcluding`, `versionEndIncluding`, `versionEndExcluding` against semantic versions.
-- [ ] Transparent match reasoning:
+- [x] Transparent match reasoning:
   - Generate confidence score and plain-English explanation (e.g., *"Matched Apache Log4j v2.14.1 because version is <= 2.15.0"*).
-- [ ] **Strict Terminology Rule**:
+- [x] **Strict Terminology Rule**:
   - The system must declare: **"Potential vulnerability match"**
   - The system must NEVER declare: **"Asset compromised"**
   - Vulnerability presence indicates exposure, NOT confirmed active intrusion.
-- [ ] Implement REST endpoints:
+- [x] Implement REST endpoints:
   - `POST /api/cpe-matching/evaluate`: Trigger matching for an asset or across inventory.
   - `GET /api/assets/:assetId/vulnerabilities`: List correlated CVEs with match reasoning.
 

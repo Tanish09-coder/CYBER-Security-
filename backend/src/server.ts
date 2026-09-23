@@ -7,6 +7,7 @@ import { createCisaKevRouter } from './modules/cisa-kev/cisa-kev.routes';
 import { createOrganizationRouter, createBusinessUnitRouter } from './modules/organizations/organizations.routes';
 import { createAssetRouter } from './modules/assets/assets.routes';
 import { createSoftwareRouter } from './modules/software/software.routes';
+import { createCpeMatchingRouter } from './modules/cpe-matching/cpe-matching.routes';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use('/api/organizations', createOrganizationRouter());
 app.use('/api/business-units', createBusinessUnitRouter());
 app.use('/api/assets', createAssetRouter());
 app.use('/api/software', createSoftwareRouter());
+app.use('/api/cpe-matching', createCpeMatchingRouter());
 
 // -----------------------------------------------------------------------------
 // Structural Route Registrations (Phase 1-7 Implementations)
