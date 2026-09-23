@@ -8,7 +8,7 @@
 | **Phase H2** | Enterprise Asset Inventory | **COMPLETED** | Asset data model, CSV & JSON import parsers, validation, unit mapping |
 | **Phase H3** | Software Inventory | **COMPLETED** | Installed software model, version tracking, asset-software relationships |
 | **Phase H4** | CPE Matching Engine | **COMPLETED** | CPE criteria evaluator with version-bound logic and confidence rating |
-| **Phase H5** | Security Controls Posture | **NOT_STARTED** | Control catalog, asset-control mapping (MFA, EDR, Backups, PAM, Seg) |
+| **Phase H5** | Security Controls Posture | **COMPLETED** | Control catalog, asset-control mapping (MFA, EDR, Backups, PAM, Seg) |
 
 ---
 
@@ -76,7 +76,7 @@
 ---
 
 ### Phase H5 — Security Controls Posture
-- [ ] Define defensive control catalog:
+- [x] Define defensive control catalog:
   - `MFA`: Multi-Factor Authentication enforcement.
   - `EDR`: Endpoint Detection & Response active sensor status.
   - `BACKUP`: Immutable / offline backup coverage and testing frequency.
@@ -84,8 +84,8 @@
   - `PAM`: Privileged Access Management enforcement.
   - `ENCRYPTION`: Data-at-rest and data-in-transit encryption status.
   - `MONITORING`: 24/7 SIEM / SOC telemetry coverage.
-- [ ] Model asset-control assignment with implementation state (`IMPLEMENTED`, `PARTIAL`, `NOT_IMPLEMENTED`, `UNKNOWN`).
-- [ ] Control values must originate **strictly from user configuration or automated scanner imports**—zero synthetic default claims.
-- [ ] Implement REST endpoints:
+- [x] Model asset-control assignment with implementation state (`IMPLEMENTED`, `PARTIAL`, `NOT_IMPLEMENTED`, `UNKNOWN`).
+- [x] Control values must originate **strictly from user configuration or automated scanner imports**—zero synthetic default claims.
+- [x] Implement REST endpoints:
   - `GET /api/controls`: Summary of controls and coverage.
   - `POST /api/assets/:assetId/controls`: Update control status on an asset.

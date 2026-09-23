@@ -8,6 +8,7 @@ import { createOrganizationRouter, createBusinessUnitRouter } from './modules/or
 import { createAssetRouter } from './modules/assets/assets.routes';
 import { createSoftwareRouter } from './modules/software/software.routes';
 import { createCpeMatchingRouter } from './modules/cpe-matching/cpe-matching.routes';
+import { createControlsRouter } from './modules/controls/controls.routes';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/api/business-units', createBusinessUnitRouter());
 app.use('/api/assets', createAssetRouter());
 app.use('/api/software', createSoftwareRouter());
 app.use('/api/cpe-matching', createCpeMatchingRouter());
+app.use('/api/controls', createControlsRouter());
 
 // -----------------------------------------------------------------------------
 // Structural Route Registrations (Phase 1-7 Implementations)
