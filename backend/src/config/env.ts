@@ -30,6 +30,13 @@ const envSchema = z.object({
   MITRE_ATTACK_TIMEOUT_MS: z.string().default('30000').transform((val) => parseInt(val, 10)),
   MITRE_ATTACK_MAX_RETRIES: z.string().default('4').transform((val) => parseInt(val, 10)),
   MITRE_ATTACK_STALE_AFTER_HOURS: z.string().default('168').transform((val) => parseInt(val, 10)),
+  VCDB_ZIP_URL: z
+    .string()
+    .url()
+    .default('https://raw.githubusercontent.com/vz-risk/VCDB/master/data/joined/vcdb.json.zip'),
+  VCDB_TIMEOUT_MS: z.string().default('60000').transform((val) => parseInt(val, 10)),
+  VCDB_MAX_RETRIES: z.string().default('4').transform((val) => parseInt(val, 10)),
+  VCDB_STALE_AFTER_HOURS: z.string().default('168').transform((val) => parseInt(val, 10)),
   JWT_SECRET: z.string().default('dev-secret-cyberriskos'),
 });
 

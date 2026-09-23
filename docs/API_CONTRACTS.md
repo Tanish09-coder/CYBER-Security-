@@ -340,6 +340,201 @@ Every endpoint entry must declare:
 
 ---
 
+### 1.10 VCDB / VERIS Integration Status & Health
+- **Method**: `GET`
+- **Path**: `/api/integrations/vcdb/status`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N2: Integration Center)
+- **Purpose**: Return live connector health, repository URL, current commit SHA, VERIS schema version, staleness, and VERIS 4A entity counts.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "enabled": true,
+    "provider": "vz-risk / VERIS Community",
+    "repositoryUrl": "https://raw.githubusercontent.com/vz-risk/VCDB/master/data/joined/vcdb.json.zip",
+    "currentCommitSha": "230cf22b56a481dd1a994b21e4d94c59e2bccea9",
+    "currentVerisVersion": "1.3.6",
+    "lastSuccessfulSync": "2026-09-23T19:34:00.000Z",
+    "dataAgeHours": 0.1,
+    "isStale": false,
+    "staleThresholdHours": 168,
+    "counts": {
+      "incidents": 10047,
+      "activeIncidents": 10047,
+      "actors": 11200,
+      "actions": 12400,
+      "assets": 15000,
+      "attributes": 13800,
+      "explicitCveLinks": 485
+    }
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 1.11 Trigger VCDB / VERIS Full Incident Sync
+- **Method**: `POST`
+- **Path**: `/api/integrations/vcdb/sync`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N2: Integration Center Sync Trigger)
+- **Purpose**: Download canonical joined ZIP archive, parse with security checks, compute SHA-256 payload hash, normalize 4A dimensions, and upsert with idempotency.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "status": "COMPLETED",
+    "runId": "uuid",
+    "repositoryUrl": "https://raw.githubusercontent.com/vz-risk/VCDB/master/data/joined/vcdb.json.zip",
+    "commitSha": "230cf22b56a481dd1a994b21e4d94c59e2bccea9",
+    "verisVersion": "1.3.6",
+    "bundleHash": "5599777efa65a197ddfeb52c7a64fbe7d38c290b0416e2cdaba3ef031127ccdb",
+    "totalDiscovered": 10047,
+    "recordsInserted": 10047,
+    "recordsUpdated": 0,
+    "recordsSkipped": 0,
+    "recordsRemovedFromSource": 0,
+    "durationMs": 2800,
+    "counts": {
+      "incidents": 10047,
+      "actors": 11200,
+      "actions": 12400,
+      "assets": 15000,
+      "attributes": 13800,
+      "explicitCveLinks": 485,
+      "unknownFields": 0
+    },
+    "errorCount": 0
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 1.12 Query Normalized VCDB Incidents
+- **Method**: `GET`
+- **Path**: `/api/integrations/vcdb/incidents` (or `/api/v1/incidents`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N4 / Historical Incident Matrix Explorer)
+- **Purpose**: Query historical cyber incidents by year, industry, country, 4A dimensions, search string, or structured CVE ID with pagination.
+- **Request**:
+  - Query Parameters: `search` (string), `cve` (string), `year` (number), `actorVariety` (string), `actionCategory` (string), `assetCategory` (string), `attributeCategory` (string), `victimIndustry` (string), `victimCountry` (string), `page` (number), `limit` (number).
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "incidents": [
+      {
+        "id": "uuid",
+        "vcdbId": "C20AD4D7-6FE9-7759-AA27-A0C99BFF6710",
+        "incidentYear": 2025,
+        "securityIncident": "Confirmed",
+        "confidence": "High",
+        "summary": "Security incident targeting sales workflow integrations...",
+        "victimCountry": "FR",
+        "victimIndustry": "541511",
+        "employeeCount": "1001 to 10000",
+        "dataDisclosure": "Yes",
+        "schemaVersion": "1.4.1",
+        "isCurrent": true
+      }
+    ],
+    "total": 10047,
+    "page": 1,
+    "limit": 50,
+    "hasNext": true
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 1.13 Single Incident Deep Lookup
+- **Method**: `GET`
+- **Path**: `/api/integrations/vcdb/incidents/:vcdbId`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Incident Detail Modal)
+- **Purpose**: Retrieve full VERIS incident details including 4A dimensions (Actors, Actions, Assets, Attributes), Timeline, and Authoritative Explicit Structured CVE Evidence.
+- **Request**:
+  - URL Parameter: `vcdbId` (string, e.g. `C20AD4D7-6FE9-7759-AA27-A0C99BFF6710`).
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "incident": {
+      "id": "uuid",
+      "vcdbId": "C20AD4D7-6FE9-7759-AA27-A0C99BFF6710",
+      "summary": "Security incident targeting sales workflow integrations...",
+      "victimCountry": "FR",
+      "victimIndustry": "541511",
+      "schemaVersion": "1.4.1",
+      "isCurrent": true
+    },
+    "actors": [
+      { "actorCategory": "External", "actorSubtype": "Organized crime", "motive": "Financial" }
+    ],
+    "actions": [
+      { "actionCategory": "Hacking", "variety": "Use of stolen creds", "vector": "Web application" }
+    ],
+    "assets": [
+      { "assetCategory": "Server", "assetVariety": "S - Web application" }
+    ],
+    "attributes": [
+      { "attributeCategory": "Confidentiality", "variety": "Unknown" }
+    ],
+    "timeline": {
+      "incidentYear": 2025,
+      "incidentMonth": 8,
+      "incidentDay": 25
+    },
+    "explicitCves": [
+      { "cveId": "CVE-2023-4444", "evidenceSource": "action.hacking.cve" }
+    ]
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 1.14 VCDB / VERIS Aggregate Statistics
+- **Method**: `GET`
+- **Path**: `/api/integrations/vcdb/statistics`
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N4: Incident Insights & Breach Visualizations)
+- **Purpose**: Return aggregate historical incident distributions across incident years, VERIS 4A dimensions (Actors, Actions, Assets, Attributes), top victim industries, and top victim countries.
+- **Request**: None.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "byYear": [
+      { "year": 2024, "count": 1250 },
+      { "year": 2023, "count": 1420 }
+    ],
+    "byActorCategory": [
+      { "category": "External", "count": 8200 },
+      { "category": "Internal", "count": 1850 }
+    ],
+    "byActionCategory": [
+      { "category": "Hacking", "count": 5100 },
+      { "category": "Malware", "count": 3400 }
+    ],
+    "byAssetCategory": [
+      { "category": "Server", "count": 6400 },
+      { "category": "User Device", "count": 2900 }
+    ],
+    "byAttributeCategory": [
+      { "category": "Confidentiality", "count": 9100 },
+      { "category": "Availability", "count": 3200 }
+    ],
+    "byIndustry": [
+      { "industry": "541511", "count": 420 }
+    ],
+    "byCountry": [
+      { "country": "US", "count": 4500 }
+    ]
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
 ## 2. Enterprise Asset & Context (Owner: HARSH)
 
 ### 2.1 Paginated Asset Inventory

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { createNvdRouter, createVulnerabilityRouter } from './modules/nvd/nvd.routes';
 import { createCisaKevRouter } from './modules/cisa-kev/cisa-kev.routes';
 import { createMitreAttackRouter } from './modules/mitre-attack/mitre-attack.routes';
+import { createVcdbRouter } from './modules/vcdb/vcdb.routes';
 
 dotenv.config();
 
@@ -35,6 +36,9 @@ app.use('/api/integrations/cisa-kev', createCisaKevRouter());
 // MITRE ATT&CK Ingestion & Integration API
 app.use('/api/integrations/mitre-attack', createMitreAttackRouter());
 app.use('/api/v1/threats', createMitreAttackRouter());
+// VCDB / VERIS Public Cyber Incident Ingestion API
+app.use('/api/integrations/vcdb', createVcdbRouter());
+app.use('/api/v1/incidents', createVcdbRouter());
 // Normalized Vulnerabilities Query API
 app.use('/api/vulnerabilities', createVulnerabilityRouter());
 app.use('/api/v1/vulnerabilities', createVulnerabilityRouter());
