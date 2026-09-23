@@ -88,4 +88,12 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`CyberRiskOS API Gateway listening on port ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+    console.log(`Vulnerabilities: http://localhost:${PORT}/api/vulnerabilities`);
+  });
+}
+
 export default app;
