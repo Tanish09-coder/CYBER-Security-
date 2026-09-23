@@ -6,7 +6,7 @@
 | :--- | :--- | :--- | :--- |
 | **Phase H1** | Organization Hierarchy | **COMPLETED** | Multi-tenant organization and business unit schemas and REST APIs |
 | **Phase H2** | Enterprise Asset Inventory | **COMPLETED** | Asset data model, CSV & JSON import parsers, validation, unit mapping |
-| **Phase H3** | Software Inventory | **NOT_STARTED** | Installed software model, version tracking, asset-software relationships |
+| **Phase H3** | Software Inventory | **COMPLETED** | Installed software model, version tracking, asset-software relationships |
 | **Phase H4** | CPE Matching Engine | **NOT_STARTED** | CPE criteria evaluator with version-bound logic and confidence rating |
 | **Phase H5** | Security Controls Posture | **NOT_STARTED** | Control catalog, asset-control mapping (MFA, EDR, Backups, PAM, Seg) |
 
@@ -49,10 +49,10 @@
 ---
 
 ### Phase H3 — Software Inventory & Versioning
-- [ ] Design installed software schema (`id`, `asset_id`, `vendor`, `product`, `version`, `release`, `install_path`, `last_observed_at`).
-- [ ] Model asset ↔ software one-to-many relationship.
-- [ ] Support software import via asset JSON payloads and dedicated software inventory lists.
-- [ ] Implement REST endpoints:
+- [x] Design installed software schema (`id`, `asset_id`, `vendor`, `product`, `version`, `release`, `install_path`, `last_observed_at`).
+- [x] Model asset ↔ software one-to-many relationship.
+- [x] Support software import via asset JSON payloads and dedicated software inventory lists.
+- [x] Implement REST endpoints:
   - `GET /api/assets/:assetId/software`: List all packages on an asset.
   - `POST /api/assets/:assetId/software`: Register or update installed packages.
 
