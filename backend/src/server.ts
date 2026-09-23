@@ -6,6 +6,12 @@ import { createNvdRouter, createVulnerabilityRouter } from './modules/nvd/nvd.ro
 import { createCisaKevRouter } from './modules/cisa-kev/cisa-kev.routes';
 import { createMitreAttackRouter } from './modules/mitre-attack/mitre-attack.routes';
 import { createVcdbRouter } from './modules/vcdb/vcdb.routes';
+import { createOrganizationRouter, createBusinessUnitRouter } from './modules/organizations/organizations.routes';
+import { createAssetRouter } from './modules/assets/assets.routes';
+import { createSoftwareRouter } from './modules/software/software.routes';
+import { createCpeMatchingRouter } from './modules/cpe-matching/cpe-matching.routes';
+import { createControlsRouter } from './modules/controls/controls.routes';
+
 
 dotenv.config();
 
@@ -42,6 +48,14 @@ app.use('/api/v1/incidents', createVcdbRouter());
 // Normalized Vulnerabilities Query API
 app.use('/api/vulnerabilities', createVulnerabilityRouter());
 app.use('/api/v1/vulnerabilities', createVulnerabilityRouter());
+
+// Enterprise Context APIs (Owner: HARSH)
+app.use('/api/organizations', createOrganizationRouter());
+app.use('/api/business-units', createBusinessUnitRouter());
+app.use('/api/assets', createAssetRouter());
+app.use('/api/software', createSoftwareRouter());
+app.use('/api/cpe-matching', createCpeMatchingRouter());
+app.use('/api/controls', createControlsRouter());
 
 // -----------------------------------------------------------------------------
 // Structural Route Registrations (Phase 1-7 Implementations)
