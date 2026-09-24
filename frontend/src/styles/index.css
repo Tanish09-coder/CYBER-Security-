@@ -10,7 +10,7 @@
   }
 
   body {
-    @apply bg-gov-offWhite text-gov-text antialiased;
+    @apply bg-gov-offwhite text-gov-text antialiased;
     font-family: 'Source Sans 3', 'Noto Sans', Arial, sans-serif;
     font-size: 13px;
     margin: 0;
@@ -22,9 +22,9 @@
     @apply font-bold text-gov-text;
     margin: 0;
   }
-  
+
   a { @apply text-gov-navy no-underline; }
-  a:hover { @apply underline; }
+  a:hover { text-decoration: underline; }
 
   table {
     border-collapse: collapse;
@@ -32,7 +32,11 @@
   }
 
   th {
-    @apply text-gov-xs font-bold text-gov-text uppercase tracking-wider;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1A1A2E;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     background-color: #D8DEE9;
     border: 1px solid #B0BAC9;
     padding: 8px 12px;
@@ -40,7 +44,8 @@
   }
 
   td {
-    @apply text-gov-sm text-gov-text;
+    font-size: 12px;
+    color: #1A1A2E;
     border: 1px solid #D0D7E3;
     padding: 7px 12px;
     vertical-align: top;
@@ -55,7 +60,10 @@
   }
 
   input, select, textarea {
-    @apply text-gov-sm text-gov-text border border-gov-border bg-white;
+    font-size: 12px;
+    color: #1A1A2E;
+    border: 1px solid #D0D7E3;
+    background: #FFFFFF;
     padding: 5px 8px;
     border-radius: 2px;
     outline: none;
@@ -76,136 +84,179 @@
 @layer components {
   /* ── Government Panel Box ── */
   .gov-panel {
-    @apply bg-white border border-gov-border;
+    background: #FFFFFF;
+    border: 1px solid #D0D7E3;
     border-radius: 2px;
   }
 
   .gov-panel-header {
-    @apply bg-gov-navyLight border-b border-gov-border px-4 py-2.5 flex items-center justify-between;
+    background: #E8EDF7;
+    border-bottom: 1px solid #D0D7E3;
     border-left: 4px solid #003087;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .gov-panel-title {
-    @apply font-bold text-gov-text;
     font-size: 13px;
+    font-weight: 700;
+    color: #1A1A2E;
     letter-spacing: 0.01em;
   }
 
-  /* ── Government Badge / Status Chips ── */
+  /* ── Status Badges ── */
   .gov-badge-green {
-    @apply text-[10px] font-bold uppercase tracking-wider border;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     background: #E6F3E6;
     color: #138808;
-    border-color: #138808;
+    border: 1px solid #138808;
     padding: 2px 7px;
     border-radius: 2px;
   }
 
   .gov-badge-red {
-    @apply text-[10px] font-bold uppercase tracking-wider border;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     background: #FCEAEA;
     color: #C0020A;
-    border-color: #C0020A;
+    border: 1px solid #C0020A;
     padding: 2px 7px;
     border-radius: 2px;
   }
 
   .gov-badge-orange {
-    @apply text-[10px] font-bold uppercase tracking-wider border;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     background: #FFF0E6;
     color: #FF6200;
-    border-color: #FF6200;
+    border: 1px solid #FF6200;
     padding: 2px 7px;
     border-radius: 2px;
   }
 
   .gov-badge-blue {
-    @apply text-[10px] font-bold uppercase tracking-wider border;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     background: #E8EDF7;
     color: #003087;
-    border-color: #003087;
+    border: 1px solid #003087;
     padding: 2px 7px;
     border-radius: 2px;
   }
 
-  /* ── Government Button ── */
+  /* ── Buttons ── */
   .gov-btn-primary {
-    @apply font-semibold uppercase tracking-wider border border-gov-navy bg-gov-navy text-white;
     font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: 1px solid #003087;
+    background: #003087;
+    color: #FFFFFF;
     padding: 6px 16px;
     border-radius: 2px;
-    letter-spacing: 0.06em;
     transition: background 0.15s, border-color 0.15s;
   }
-  .gov-btn-primary:hover {
+  .gov-btn-primary:hover:not(:disabled) {
     background: #001F5B;
     border-color: #001F5B;
   }
+  .gov-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   .gov-btn-secondary {
-    @apply font-semibold uppercase tracking-wider border border-gov-border bg-white text-gov-text;
     font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: 1px solid #D0D7E3;
+    background: #FFFFFF;
+    color: #1A1A2E;
     padding: 6px 16px;
     border-radius: 2px;
-    letter-spacing: 0.06em;
     transition: background 0.15s;
   }
   .gov-btn-secondary:hover {
-    @apply bg-gov-navyLight;
+    background: #E8EDF7;
   }
 
-  /* ── Stat metric box ── */
+  /* ── Stat Box ── */
   .gov-stat-box {
-    @apply bg-white border border-gov-border p-4;
-    border-radius: 2px;
+    background: #FFFFFF;
+    border: 1px solid #D0D7E3;
     border-top: 3px solid #003087;
+    padding: 16px;
+    border-radius: 2px;
   }
 
   .gov-stat-label {
-    @apply text-[10px] font-bold uppercase tracking-widest text-gov-textMuted;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #5A6478;
     margin-bottom: 4px;
   }
 
   .gov-stat-value {
-    @apply font-bold text-gov-text;
     font-size: 28px;
+    font-weight: 700;
+    color: #1A1A2E;
     line-height: 1;
   }
 
-  /* ── Divider rule ── */
-  .gov-rule {
-    @apply border-t border-gov-border my-0;
-  }
-
-  /* ── Section heading ── */
+  /* ── Section Heading ── */
   .gov-section-heading {
-    @apply font-bold text-gov-text border-b-2 border-gov-navy pb-1.5 mb-4;
     font-size: 14px;
+    font-weight: 700;
+    color: #1A1A2E;
+    border-bottom: 2px solid #003087;
+    padding-bottom: 6px;
+    margin-bottom: 16px;
     letter-spacing: 0.01em;
   }
 
-  /* ── Notice box ── */
+  /* ── Notice Boxes ── */
   .gov-notice-info {
-    @apply border border-gov-navy bg-gov-navyLight text-gov-navy;
+    border: 1px solid #003087;
+    border-left: 4px solid #003087;
+    background: #E8EDF7;
+    color: #003087;
     padding: 10px 14px;
     border-radius: 2px;
-    border-left: 4px solid #003087;
     font-size: 12px;
   }
 
   .gov-notice-warning {
-    @apply border border-gov-saffron bg-gov-saffronLight text-gov-text;
+    border: 1px solid #FF6200;
+    border-left: 4px solid #FF6200;
+    background: #FFF0E6;
+    color: #1A1A2E;
     padding: 10px 14px;
     border-radius: 2px;
-    border-left: 4px solid #FF6200;
     font-size: 12px;
   }
 
   .gov-notice-error {
-    @apply border border-red-600 bg-red-50 text-red-900;
+    border: 1px solid #C0020A;
+    border-left: 4px solid #C0020A;
+    background: #FCEAEA;
+    color: #7A0000;
     padding: 10px 14px;
     border-radius: 2px;
-    border-left: 4px solid #C0020A;
     font-size: 12px;
   }
 }
@@ -218,11 +269,4 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
-  .gov-text-muted { color: #5A6478; }
-  .gov-border-top-navy { border-top: 3px solid #003087; }
-  .gov-border-top-saffron { border-top: 3px solid #FF6200; }
-  .gov-border-top-green { border-top: 3px solid #138808; }
-  .gov-border-left-navy { border-left: 4px solid #003087; }
-  .gov-border-left-saffron { border-left: 4px solid #FF6200; }
 }
