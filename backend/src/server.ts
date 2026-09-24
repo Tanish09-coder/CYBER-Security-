@@ -12,6 +12,7 @@ import { createSoftwareRouter } from './modules/software/software.routes';
 import { createCpeMatchingRouter } from './modules/cpe-matching/cpe-matching.routes';
 import { createControlsRouter } from './modules/controls/controls.routes';
 import { createThreatIntelRouter } from './modules/threat-intel/threat-intel.routes';
+import { financialContextRouter } from './modules/financial-context/financial-context.routes';
 import { runMigrations } from './db';
 import { logger } from './config/logger';
 
@@ -92,6 +93,8 @@ app.use('/api/v1/cpe-matching', cpeRouter);
 const controlsRouter = createControlsRouter();
 app.use('/api/controls', controlsRouter);
 app.use('/api/v1/controls', controlsRouter);
+
+app.use('/api', financialContextRouter);
 
 // -----------------------------------------------------------------------------
 // Structural Route Registrations (Phase 3+ Implementations)
