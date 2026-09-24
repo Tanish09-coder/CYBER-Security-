@@ -10,267 +10,108 @@ import {
   Building2,
   DollarSign,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  GitMerge,
+  Sparkles,
+  Activity,
 } from 'lucide-react';
+
+interface NavItemProps {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ to, icon, label }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `flex items-center px-3 py-2 text-[12px] font-medium transition-colors border-l-2 ${
+        isActive
+          ? 'bg-gov-navyLight text-gov-navy border-gov-saffron font-bold'
+          : 'text-[#BFD0EE] border-transparent hover:bg-white/10 hover:text-white'
+      }`
+    }
+  >
+    <span className="w-4 h-4 mr-2.5 flex-shrink-0 opacity-80">{icon}</span>
+    <span>{label}</span>
+  </NavLink>
+);
+
+const SectionLabel: React.FC<{ label: string }> = ({ label }) => (
+  <div className="px-3 pt-4 pb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#7FA3CF]">
+    {label}
+  </div>
+);
 
 export const Sidebar: React.FC = () => {
   return (
-    <aside className="w-64 bg-app-surface border-r border-app-border flex flex-col justify-between select-none z-10 relative">
-      <div>
-        {/* Brand Header */}
-        <div className="h-16 flex items-center px-6 border-b border-app-border space-x-3 bg-app-surface">
-          <div className="w-8 h-8 rounded bg-brand-primary flex items-center justify-center text-white font-bold text-sm shadow-sm">
-            <Lock className="w-4 h-4" />
+    <aside className="w-60 flex flex-col select-none z-10 relative flex-shrink-0" style={{ background: '#001F5B' }}>
+      
+      {/* Brand Header */}
+      <div className="flex flex-col items-start px-4 py-3 border-b" style={{ borderColor: '#0A3070', background: '#001040' }}>
+        {/* Ashoka Chakra-style emblem area */}
+        <div className="flex items-center space-x-2 mb-1">
+          <div className="w-8 h-8 rounded-sm flex items-center justify-center bg-white/10 border border-white/20">
+            <Lock className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-sm tracking-tight text-text-primary">CyberRiskOS</h1>
-            <p className="text-[10px] text-text-muted font-medium tracking-wide uppercase">Cyber Risk Intelligence</p>
+            <h1 className="font-bold text-sm text-white leading-tight tracking-tight">CyberRiskOS</h1>
+            <p className="text-[9px] font-medium tracking-widest uppercase" style={{ color: '#FF6200' }}>
+              Cyber Risk Intelligence
+            </p>
           </div>
         </div>
-
-        {/* Navigation Links */}
-        <nav className="p-3 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)] scrollbar-hide mt-2">
-          
-          {/* OVERVIEW */}
-          <div>
-            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
-              Overview
-            </div>
-            <NavLink
-              to="/integrations"
-              className={({ isActive }) =>
-                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <Radio className="w-4 h-4 mr-3" />
-              <span>Integrations</span>
-            </NavLink>
-          </div>
-
-          {/* INTELLIGENCE */}
-          <div>
-            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
-              Intelligence
-            </div>
-            <NavLink
-              to="/vulnerabilities"
-              className={({ isActive }) =>
-                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <Bug className="w-4 h-4 mr-3" />
-              <span>Vulnerabilities</span>
-            </NavLink>
-            <NavLink
-              to="/threat-intel"
-              className={({ isActive }) =>
-                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <Flame className="w-4 h-4 mr-3" />
-              <span>Threat Intelligence</span>
-            </NavLink>
-          </div>
-
-          {/* ENVIRONMENT */}
-          <div>
-            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
-              Environment
-            </div>
-            <NavLink
-              to="/assets"
-              className={({ isActive }) =>
-                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <Server className="w-4 h-4 mr-3" />
-              <span>Assets</span>
-            </NavLink>
-            <NavLink
-              to="/controls"
-              className={({ isActive }) =>
-                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <ShieldAlert className="w-4 h-4 mr-3" />
-              <span>Security Controls</span>
-            </NavLink>
-          </div>
-
-          {/* FINANCIAL RISK */}
-          <div>
-            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
-              Financial Risk
-            </div>
-            <NavLink
-              to="/risk-overview"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <DollarSign className="w-4 h-4 mr-3" />
-                <span>Risk Overview</span>
-              </div>
-            </NavLink>
-            <NavLink
-              to="/financial-exposure"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <DollarSign className="w-4 h-4 mr-3" />
-                <span>Financial Exposure</span>
-              </div>
-            </NavLink>
-            <NavLink
-              to="/investment-optimizer"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <TrendingUp className="w-4 h-4 mr-3" />
-                <span>Investment Analysis</span>
-              </div>
-            </NavLink>
-            <NavLink
-              to="/what-if-simulator"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <Bug className="w-4 h-4 mr-3" />
-                <span>What-If Simulator</span>
-              </div>
-            </NavLink>
-          </div>
-
-          {/* BOARDROOM & REPORTING */}
-          <div>
-            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1 mt-3">
-              Reporting
-            </div>
-            <NavLink
-              to="/executive-dashboard"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <CheckCircle2 className="w-4 h-4 mr-3" />
-                <span>Executive Dashboard</span>
-              </div>
-            </NavLink>
-            <NavLink
-              to="/compliance"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <ShieldAlert className="w-4 h-4 mr-3" />
-                <span>Compliance</span>
-              </div>
-            </NavLink>
-            <NavLink
-              to="/attack-path"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <Flame className="w-4 h-4 mr-3" />
-                <span>Attack Path</span>
-              </div>
-            </NavLink>
-            <NavLink
-              to="/ai-assistant"
-              className={({ isActive }) =>
-                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
-                  isActive
-                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
-                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
-                }`
-              }
-            >
-              <div className="flex items-center">
-                <Radio className="w-4 h-4 mr-3" />
-                <span>AI Assistant</span>
-              </div>
-            </NavLink>
-          </div>
-        </nav>
+        {/* Gov tagline bar */}
+        <div className="w-full mt-1 pt-1.5 border-t border-white/10">
+          <p className="text-[9px] text-[#7FA3CF] tracking-wide">
+            भारत सरकार — Government of India
+          </p>
+        </div>
       </div>
 
-      {/* User / Org Bottom Status */}
-      <div className="border-t border-app-border bg-app-surface">
-        <div className="p-3 border-b border-app-border">
-          <div className="flex items-center text-[10px] font-medium text-text-secondary">
-            <CheckCircle2 className="w-3 h-3 text-risk-success mr-1.5" />
-            SYSTEM OPERATIONAL
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto scrollbar-hide py-2">
+        <SectionLabel label="Overview" />
+        <NavItem to="/integrations"       icon={<Radio size={14} />}         label="Data Integrations" />
+
+        <SectionLabel label="Intelligence" />
+        <NavItem to="/vulnerabilities"    icon={<Bug size={14} />}           label="Vulnerabilities" />
+        <NavItem to="/threat-intel"       icon={<Flame size={14} />}         label="Threat Intelligence" />
+
+        <SectionLabel label="Environment" />
+        <NavItem to="/assets"             icon={<Server size={14} />}        label="Assets" />
+        <NavItem to="/controls"           icon={<ShieldAlert size={14} />}   label="Security Controls" />
+
+        <SectionLabel label="Financial Risk" />
+        <NavItem to="/risk-overview"      icon={<DollarSign size={14} />}    label="Risk Overview" />
+        <NavItem to="/financial-exposure" icon={<DollarSign size={14} />}    label="Financial Exposure" />
+        <NavItem to="/investment-optimizer" icon={<TrendingUp size={14} />}  label="Investment Analysis" />
+        <NavItem to="/what-if-simulator"  icon={<Activity size={14} />}      label="What-If Simulator" />
+
+        <SectionLabel label="Reporting" />
+        <NavItem to="/executive-dashboard" icon={<CheckCircle2 size={14} />} label="Executive Dashboard" />
+        <NavItem to="/compliance"          icon={<ShieldAlert size={14} />}  label="Compliance" />
+        <NavItem to="/attack-path"         icon={<GitMerge size={14} />}     label="Attack Path" />
+        <NavItem to="/ai-assistant"        icon={<Sparkles size={14} />}     label="AI Assistant" />
+      </nav>
+
+      {/* Bottom org info */}
+      <div className="border-t" style={{ borderColor: '#0A3070' }}>
+        <div className="px-3 py-2 flex items-center space-x-2">
+          <div className="w-6 h-6 rounded-sm flex items-center justify-center bg-white/10 flex-shrink-0">
+            <Building2 className="w-3.5 h-3.5 text-[#7FA3CF]" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-[11px] font-bold text-white truncate">BharatFin Demo Corp</p>
+            <p className="text-[9px] text-[#7FA3CF]">Role: CISO / Risk Officer</p>
           </div>
         </div>
-        <div className="p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-1.5 rounded-md bg-app-surfaceSecondary border border-app-border">
-               <Building2 className="w-4 h-4 text-text-secondary" />
-            </div>
-            <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-text-primary truncate">BharatFin Demo Corp</p>
-              <p className="text-[10px] text-text-secondary font-medium">Role: CISO / Risk Officer</p>
-            </div>
-          </div>
+        <div className="px-3 py-1.5 flex items-center border-t" style={{ borderColor: '#0A3070' }}>
+          <CheckCircle2 className="w-3 h-3 mr-1.5" style={{ color: '#138808' }} />
+          <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#5DAF5D' }}>
+            System Operational
+          </span>
         </div>
       </div>
     </aside>

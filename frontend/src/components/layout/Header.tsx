@@ -1,57 +1,76 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { HelpCircle, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
-const getTitleFromPath = (pathname: string): string => {
-  const path = pathname.split('/')[1];
-  if (!path) return 'Overview';
-  
-  const titles: Record<string, string> = {
-    'integrations': 'Integrations',
-    'vulnerabilities': 'Vulnerability Intelligence',
-    'assets': 'Enterprise Assets',
-    'controls': 'Security Control Posture',
-    'threat-intel': 'Threat Intelligence',
-  };
-  
-  return titles[path] || path.replace('-', ' ');
+const routeTitles: Record<string, string> = {
+  'integrations':        'Data Integrations',
+  'vulnerabilities':     'Vulnerability Intelligence',
+  'assets':              'Enterprise Assets',
+  'controls':            'Security Control Posture',
+  'threat-intel':        'Threat Intelligence',
+  'risk-overview':       'Risk Overview',
+  'financial-exposure':  'Financial Exposure',
+  'what-if-simulator':   'What-If Simulator',
+  'investment-optimizer':'Investment Analysis',
+  'executive-dashboard': 'Executive Dashboard',
+  'compliance':          'Compliance',
+  'attack-path':         'Attack Path Analysis',
+  'ai-assistant':        'AI Assistant',
 };
 
 export const Header: React.FC = () => {
   const location = useLocation();
-  const pageTitle = getTitleFromPath(location.pathname);
+  const segment = location.pathname.split('/')[1];
+  const pageTitle = routeTitles[segment] || 'Overview';
 
   return (
-    <header className="h-16 bg-app-surface border-b border-app-border px-8 flex items-center justify-between flex-shrink-0 z-20 relative">
-      <div className="flex items-center space-x-4">
-        <h2 className="text-lg font-bold text-text-primary capitalize tracking-tight">
-          {pageTitle}
-        </h2>
+    <header
+      className="flex-shrink-0 z-20 relative"
+      style={{
+        background: '#003087',
+        borderBottom: '3px solid #FF6200',
+      }}
+    >
+      {/* Top tricolor strip */}
+      <div className="flex h-1 w-full">
+        <div className="flex-1" style={{ background: '#FF6200' }} />
+        <div className="flex-1" style={{ background: '#FFFFFF' }} />
+        <div className="flex-1" style={{ background: '#138808' }} />
       </div>
 
-      <div className="flex items-center space-x-6">
-        {/* System Status */}
-        <div className="flex items-center text-xs font-medium text-text-secondary">
-          <span className="flex h-2 w-2 relative mr-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-risk-success opacity-20"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-risk-success"></span>
+      <div className="h-12 px-6 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <span
+            className="text-[9px] font-bold uppercase tracking-[0.15em] px-2 py-0.5 border border-white/30 text-white/60"
+            style={{ letterSpacing: '0.12em' }}
+          >
+            NIC-CERT
           </span>
-          SYSTEM OPERATIONAL
+          <div className="h-3.5 w-px bg-white/20" />
+          <h2 className="text-sm font-bold text-white tracking-wide">
+            {pageTitle}
+          </h2>
         </div>
 
-        <div className="h-4 w-px bg-app-border" />
+        <div className="flex items-center space-x-5">
+          {/* Live status indicator */}
+          <div className="flex items-center space-x-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-40" style={{ background: '#5DFF5D' }} />
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: '#138808' }} />
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">
+              OPERATIONAL
+            </span>
+          </div>
 
-        {/* Sync Status */}
-        <div className="flex items-center text-xs text-text-muted">
-          <RefreshCw className="w-3 h-3 mr-1.5 opacity-70" />
-          Last sync: 2 min ago
+          <div className="h-3 w-px bg-white/20" />
+
+          <div className="flex items-center text-[10px] text-white/50">
+            <RefreshCw className="w-3 h-3 mr-1.5 opacity-60" />
+            Last sync: 2 min ago
+          </div>
         </div>
-        
-        <div className="h-4 w-px bg-app-border" />
-        
-        <button className="p-2 text-text-muted hover:text-brand-primary rounded-md hover:bg-app-surfaceSecondary transition-colors">
-          <HelpCircle className="w-4 h-4" />
-        </button>
       </div>
     </header>
   );
