@@ -130,7 +130,7 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/assets/assets.types.ts`
 - **EXPECTED OUTPUT**: Comprehensive documentation and DTO schema for enterprise asset context and control posture states with transparent provenance.
 - **TEST REQUIREMENTS**: Schema type verification tests; completeness calculation tests; null/unknown state tests.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 #### TASK ID: HARSH-P2-02
 - **PHASE**: Phase 2 — Risk Quantification
@@ -143,7 +143,7 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/assets/__tests__/assets.risk-inputs.test.ts`
 - **EXPECTED OUTPUT**: Production REST APIs delivering authentic enterprise risk attributes for any asset without fabricated weights.
 - **TEST REQUIREMENTS**: Integration tests; zero synthetic fallback verification; HTTP status checks.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 
 ---
