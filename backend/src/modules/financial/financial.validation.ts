@@ -22,7 +22,7 @@ export const financialAssetInputSchema = z.object({
   recoveryCost: z.number().min(0.0).optional().nullable(),
   estimatedOutageHours: z.number().min(0.0).optional().nullable(),
   annualizedLossEventFrequency: z.number().min(0.0).optional().nullable(),
-  currency: z.string().max(10).default('USD'),
+  currency: z.string().max(10).optional().nullable(), // Authoritative from org context — no default
 });
 
 export const financialVulnerabilityInputSchema = z.object({

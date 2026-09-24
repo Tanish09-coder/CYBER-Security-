@@ -83,7 +83,7 @@ export class FinancialRepository {
       result.alef !== undefined ? result.alef : null,
       result.eal !== undefined ? result.eal : null,
       result.ealStatus || (result.eal !== null && result.eal !== undefined ? 'CALCULATED' : 'NOT_AVAILABLE'),
-      result.currency || 'USD',
+      result.currency ?? null, // null if org currency was unavailable at evaluation time
       result.primaryLoss,
       result.secondaryLoss,
       result.estimatedOutageHours,
@@ -300,7 +300,7 @@ export class FinancialRepository {
       avgAlef: Math.round(parseFloat(stats.avg_alef) * 10000) / 10000,
       totalPrimaryLoss: Math.round(parseFloat(stats.total_primary_loss) * 100) / 100,
       totalSecondaryLoss: Math.round(parseFloat(stats.total_secondary_loss) * 100) / 100,
-      currency: rowsRes.rows[0]?.currency || 'USD',
+      currency: rowsRes.rows[0]?.currency ?? null, // null = currency unavailable
       isEstimated: true,
       topLossVulnerabilities: rowsRes.rows.map((r: any) => ({
         cveId: r.cve_id,
@@ -352,7 +352,7 @@ export class FinancialRepository {
 
     return {
       totalModeledEal: Math.round(parseFloat(stats.total_eal) * 100) / 100,
-      currency: topDrivers.items[0]?.currency || 'USD',
+      currency: topDrivers.items[0]?.currency ?? null, // null = no financial results yet
       totalEvaluatedAssets: stats.total_assets,
       totalEvaluatedVulnerabilities: stats.total_vulns,
       highestEalAsset: topAsset

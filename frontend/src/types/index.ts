@@ -19,7 +19,7 @@ export type NavItemKey =
   | 'settings';
 
 export interface ExecutiveSummaryKPIs {
-  modeledFinancialExposure: number; // In INR (e.g. 47,200,000)
+  modeledFinancialExposure: number; // Authoritative currency from org context
   exposurePeriodDeltaPct: number;    // e.g. +8.4%
   criticalAssetCount: number;
   openKevVulnerabilityCount: number;
@@ -36,7 +36,7 @@ export interface AssetItem {
   businessUnit: string;
   criticalityTier: 1 | 2 | 3 | 4 | 5;
   isInternetFacing: boolean;
-  modeledExposure: number; // In INR
+  modeledExposure: number; // Authoritative currency from org context
   riskTier: 'Low' | 'Moderate' | 'High' | 'Critical';
   kevPresent: boolean;
   topControlGap: string;

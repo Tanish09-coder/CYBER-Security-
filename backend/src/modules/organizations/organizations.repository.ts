@@ -29,7 +29,7 @@ export class OrganizationRepository {
         data.industry || null,
         data.employee_count ?? null,
         data.annual_revenue ?? null,
-        data.currency || 'USD',
+        data.currency, // Required — ISO-4217 validated by createOrganizationSchema
         JSON.stringify(data.metadata || {}),
       ]
     );

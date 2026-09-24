@@ -150,7 +150,7 @@ export class ExecutiveRepository {
         v.known_exploited,
         v.kev_known_ransomware_campaign_use,
         f.eal,
-        COALESCE(f.currency, 'USD') AS currency
+        f.currency AS currency
       FROM risk_results r
       JOIN assets a ON a.id = r.asset_id
       LEFT JOIN vulnerabilities v ON v.cve_id = r.cve_id
@@ -183,7 +183,7 @@ export class ExecutiveRepository {
         isKnownExploited: Boolean(row.known_exploited),
         ransomwareCampaignUse: row.kev_known_ransomware_campaign_use || null,
         eal: row.eal !== null && row.eal !== undefined ? parseFloat(row.eal) : null,
-        currency: row.currency || 'USD',
+        currency: row.currency ?? null, // null = org currency was unavailable at evaluation time
       };
     });
   }
@@ -203,7 +203,7 @@ export class ExecutiveRepository {
         COALESCE(SUM(primary_loss), 0.0) AS total_primary,
         COALESCE(SUM(secondary_loss), 0.0) AS total_secondary,
         COALESCE(AVG(estimated_outage_hours), 0.0) AS avg_outage,
-        COALESCE(MAX(currency), 'USD') AS currency
+        MAX(currency) AS currency -- null if no financial results have currency recorded
       FROM financial_results
       ${orgFilter};
     `;
@@ -261,7 +261,7 @@ export class ExecutiveRepository {
       totalEvaluatedCount: totalCount,
       isPartialCoverage: isPartial,
       coverageNote,
-      currency: row.currency || 'USD',
+      currency: row.currency ?? null, // null = CURRENCY_UNAVAILABLE
       totalPrimaryLoss: Math.round(parseFloat(row.total_primary || '0') * 100) / 100,
       totalSecondaryLoss: Math.round(parseFloat(row.total_secondary || '0') * 100) / 100,
       averageOutageHours: Math.round(parseFloat(row.avg_outage || '0') * 10) / 10,

@@ -69,7 +69,10 @@ export const RiskOverview: React.FC = () => {
   }
 
   const items = data.items;
-  const criticalItems = items.filter(item => item.severity === 'CRITICAL').length;
+  const criticalItems = items.filter(item => (item.level || item.severity) === 'CRITICAL').length;
+  const avgCompleteness = items.length > 0
+    ? ((items.reduce((acc, curr) => acc + (curr.dataCompleteness ?? curr.dataCompletenessScore ?? 0), 0) / items.length) * 100).toFixed(1)
+    : '0.0';
   
   // 4. INCOMPLETE DATA STATE / POPULATED
   return (
@@ -98,7 +101,7 @@ export const RiskOverview: React.FC = () => {
         <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-sm">
           <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Data Completeness (Avg)</h3>
           <p className="text-xl font-bold text-text-primary truncate">
-            {((items.reduce((acc, curr) => acc + curr.dataCompletenessScore, 0) / items.length) * 100).toFixed(1)}%
+            {avgCompleteness}%
           </p>
         </div>
       </div>
@@ -114,43 +117,58 @@ export const RiskOverview: React.FC = () => {
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Asset</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">CVE ID</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Severity</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Level / Severity</th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Risk Score</th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Base CVSS</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Completeness</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Provenance</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-app-border">
-              {items.map((item, idx) => (
-                <tr key={`${item.assetId}-${item.cveId}-${idx}`} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
-                    {item.assetName || item.assetId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                    {item.cveId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      item.severity === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                      item.severity === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-                      item.severity === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                      item.severity === 'LOW' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {item.severity}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
-                    {item.riskScore?.toFixed(2) || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
-                    {item.baseCvss?.toFixed(1) || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
-                    {item.evaluationStatus || 'CALCULATED'}
-                  </td>
-                </tr>
-              ))}
+              {items.map((item, idx) => {
+                const scoreVal = item.score !== undefined ? item.score : item.riskScore;
+                const levelVal = item.level || item.severity || 'UNKNOWN';
+                const completenessVal = (item.dataCompleteness ?? item.dataCompletenessScore ?? 0) * 100;
+                const provHash = item.inputProvenanceHash || item.provenanceHash || '';
+
+                return (
+                  <tr key={`${item.assetId}-${item.cveId}-${idx}`} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
+                      {item.assetName || item.assetId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                      {item.cveId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        levelVal === 'CRITICAL' ? 'bg-red-100 text-red-800' :
+                        levelVal === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                        levelVal === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                        levelVal === 'LOW' ? 'bg-green-100 text-green-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {levelVal}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                      {scoreVal !== null && scoreVal !== undefined ? (
+                        <span className="font-semibold text-text-primary">{scoreVal.toFixed(2)}</span>
+                      ) : (
+                        <span className="text-amber-600 font-medium text-xs">NOT_AVAILABLE</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
+                      {item.baseCvss !== null && item.baseCvss !== undefined ? item.baseCvss.toFixed(1) : 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
+                      {completenessVal.toFixed(0)}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-text-muted text-right font-mono" title={provHash}>
+                      {provHash ? `${provHash.substring(0, 8)}...` : 'N/A'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

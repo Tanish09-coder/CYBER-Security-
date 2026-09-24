@@ -453,7 +453,7 @@ export class FinancialContextRepository {
   async getAggregatedRiskInputsBundle(organizationId: string): Promise<EnterpriseRiskInputsBundle> {
     // 1. Fetch organization profile for currency
     const orgRes = await query<any>(`SELECT currency FROM organizations WHERE id = $1`, [organizationId]);
-    const currency = orgRes.rows[0]?.currency || 'USD';
+    const currency: string | null = orgRes.rows[0]?.currency ?? null; // null = org currency unavailable
 
     // 2. Fetch financial parameters
     const finParams = await this.getFinancialParameters(organizationId);

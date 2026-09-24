@@ -35,7 +35,7 @@ export interface RemediationCandidateActionDTO {
 
 export interface OptimizationRequestDTO {
   budgetLimit: number;
-  currency?: string;
+  currency?: string | null;
   objective?: OptimizationObjective;
   candidateActions?: RemediationCandidateActionDTO[];
   baselinePortfolioRisk?: number | null;
@@ -63,7 +63,7 @@ export interface StrategyResultDTO {
 export interface OptimizationResultDTO {
   optimizationResultId?: string;
   budgetLimit: number;
-  currency: string;
+  currency: string | null;
   strategies: StrategyResultDTO[];
   totalCandidates: number;
   evaluatedAt: string;

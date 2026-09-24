@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Radio,
@@ -10,10 +10,34 @@ import {
   Building2,
   DollarSign,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
+import { fetchApi } from '../../api/client';
 
 export const Sidebar: React.FC = () => {
+  const [orgName, setOrgName] = useState<string>('CyberRiskOS Enterprise');
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchOrgAndHealth = async () => {
+      try {
+        const [orgRes, healthRes] = await Promise.all([
+          fetchApi<{ data: Array<{ name: string }> }>('/v1/organizations').catch(() => null),
+          fetchApi<{ status: string }>('/health').catch(() => null),
+        ]);
+
+        if (orgRes && orgRes.data && orgRes.data.length > 0) {
+          setOrgName(orgRes.data[0].name);
+        }
+        setIsOnline(healthRes?.status === 'ok');
+      } catch {
+        setIsOnline(false);
+      }
+    };
+
+    fetchOrgAndHealth();
+  }, []);
   return (
     <aside className="w-64 bg-app-surface border-r border-app-border flex flex-col justify-between select-none z-10 relative">
       <div>
@@ -257,17 +281,28 @@ export const Sidebar: React.FC = () => {
       <div className="border-t border-app-border bg-app-surface">
         <div className="p-3 border-b border-app-border">
           <div className="flex items-center text-[10px] font-medium text-text-secondary">
-            <CheckCircle2 className="w-3 h-3 text-risk-success mr-1.5" />
-            SYSTEM OPERATIONAL
+            {isOnline ? (
+              <>
+                <CheckCircle2 className="w-3 h-3 text-risk-success mr-1.5" />
+                GATEWAY ONLINE
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-3 h-3 text-red-500 mr-1.5" />
+                GATEWAY OFFLINE
+              </>
+            )}
           </div>
         </div>
         <div className="p-4">
           <div className="flex items-center space-x-3">
             <div className="p-1.5 rounded-md bg-app-surfaceSecondary border border-app-border">
-               <Building2 className="w-4 h-4 text-text-secondary" />
+              <Building2 className="w-4 h-4 text-text-secondary" />
             </div>
             <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-text-primary truncate">BharatFin Demo Corp</p>
+              <p className="text-[11px] font-bold text-text-primary truncate" title={orgName}>
+                {orgName}
+              </p>
               <p className="text-[10px] text-text-secondary font-medium">Role: CISO / Risk Officer</p>
             </div>
           </div>

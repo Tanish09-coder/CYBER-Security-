@@ -17,9 +17,9 @@ export const uuidSchema = z
 export const currencySchema = z
   .string()
   .trim()
-  .length(3, { message: 'Currency must be a 3-letter ISO 4217 code' })
-  .toUpperCase()
-  .default('USD');
+  .length(3, { message: 'Currency must be a valid 3-letter ISO 4217 code (e.g. INR, USD, GBP, EUR)' })
+  .regex(/^[A-Z]{3}$/, { message: 'Currency code must be 3 uppercase ASCII letters (ISO 4217)' })
+  .toUpperCase();
 
 export const criticalityTierSchema = z
   .number()
@@ -52,7 +52,7 @@ export const createOrganizationSchema = z.object({
     .number()
     .min(0, { message: 'Annual revenue must be non-negative' })
     .optional(),
-  currency: currencySchema.optional(),
+  currency: currencySchema,  // Required: ISO-4217 code, e.g. INR, USD, GBP, EUR
   metadata: z.record(z.unknown()).optional(),
 });
 

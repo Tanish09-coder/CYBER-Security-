@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { AlertCircle, Loader2, Play, Plus, X, ShieldAlert, ArrowRight, Activity } from 'lucide-react';
 import { WhatIfSimulationResponse, ScenarioActionDTO, WhatIfSimulationRequest } from '../types/risk';
 import { riskApi } from '../api/risk';
+import { formatCurrency, formatCurrencyCompact } from '../utils/currency';
 
 export const WhatIfSimulator: React.FC = () => {
   const [actions, setActions] = useState<ScenarioActionDTO[]>([]);
@@ -51,7 +52,8 @@ export const WhatIfSimulator: React.FC = () => {
       };
 
       const response = await riskApi.simulateWhatIf(request);
-      setData(response);
+      const unwrapped = (response as any)?.data ? (response as any).data : response;
+      setData(unwrapped);
     } catch (err: any) {
       setError(err.message || "Failed to execute simulation.");
     } finally {
@@ -210,25 +212,37 @@ export const WhatIfSimulator: React.FC = () => {
                 <div className="text-center">
                   <p className="text-xs text-text-muted uppercase mb-1">Baseline</p>
                   <p className="text-2xl font-bold text-text-primary line-through opacity-70">
-                    {data.baselineAvgRiskScore.toFixed(2)}
+                    {data.baselineAvgRiskScore !== null && data.baselineAvgRiskScore !== undefined
+                      ? data.baselineAvgRiskScore.toFixed(2)
+                      : 'N/A'}
                   </p>
                 </div>
                 <ArrowRight className="w-6 h-6 text-gray-300 mx-4" />
                 <div className="text-center">
                   <p className="text-xs text-text-muted uppercase mb-1">Simulated</p>
                   <p className="text-2xl font-bold text-green-700">
-                    {data.simulatedAvgRiskScore.toFixed(2)}
+                    {data.simulatedAvgRiskScore !== null && data.simulatedAvgRiskScore !== undefined
+                      ? data.simulatedAvgRiskScore.toFixed(2)
+                      : 'N/A'}
                   </p>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-app-border flex justify-between">
                 <div>
                   <p className="text-xs text-text-muted">Reduction</p>
-                  <p className="text-sm font-bold text-brand-primary">-{data.riskScoreDelta.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-brand-primary">
+                    {data.riskScoreDelta !== null && data.riskScoreDelta !== undefined
+                      ? `-${data.riskScoreDelta.toFixed(2)}`
+                      : 'N/A'}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-text-muted">% Improved</p>
-                  <p className="text-sm font-bold text-green-600">{data.riskReductionPct.toFixed(1)}%</p>
+                  <p className="text-sm font-bold text-green-600">
+                    {data.riskReductionPct !== null && data.riskReductionPct !== undefined
+                      ? `${data.riskReductionPct.toFixed(1)}%`
+                      : 'N/A'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -245,14 +259,18 @@ export const WhatIfSimulator: React.FC = () => {
                 <div className="text-center">
                   <p className="text-xs text-text-muted uppercase mb-1">Baseline</p>
                   <p className="text-2xl font-bold text-text-primary line-through opacity-70">
-                    {data.baselineTotalEal ? `${data.currency} ${(data.baselineTotalEal/1000).toFixed(1)}k` : 'N/A'}
+                    {data.baselineTotalEal !== null && data.baselineTotalEal !== undefined
+                      ? formatCurrencyCompact(data.baselineTotalEal, data.currency ?? null)
+                      : 'NOT_AVAILABLE'}
                   </p>
                 </div>
                 <ArrowRight className="w-6 h-6 text-gray-300 mx-4" />
                 <div className="text-center">
                   <p className="text-xs text-text-muted uppercase mb-1">Simulated</p>
                   <p className="text-2xl font-bold text-green-700">
-                     {data.simulatedTotalEal ? `${data.currency} ${(data.simulatedTotalEal/1000).toFixed(1)}k` : 'N/A'}
+                    {data.simulatedTotalEal !== null && data.simulatedTotalEal !== undefined
+                      ? formatCurrencyCompact(data.simulatedTotalEal, data.currency ?? null)
+                      : 'NOT_AVAILABLE'}
                   </p>
                 </div>
               </div>
@@ -260,13 +278,17 @@ export const WhatIfSimulator: React.FC = () => {
                 <div>
                   <p className="text-xs text-text-muted">Saved Exposure</p>
                   <p className="text-sm font-bold text-brand-primary">
-                    {data.ealDelta ? `${data.currency} ${(data.ealDelta).toLocaleString()}` : 'N/A'}
+                    {data.ealDelta !== null && data.ealDelta !== undefined
+                      ? formatCurrency(data.ealDelta, data.currency ?? null)
+                      : 'NOT_AVAILABLE'}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-text-muted">% Improved</p>
                   <p className="text-sm font-bold text-green-600">
-                    {data.ealReductionPct ? `${data.ealReductionPct.toFixed(1)}%` : 'N/A'}
+                    {data.ealReductionPct !== null && data.ealReductionPct !== undefined
+                      ? `${data.ealReductionPct.toFixed(1)}%`
+                      : 'NOT_AVAILABLE'}
                   </p>
                 </div>
               </div>
@@ -286,8 +308,8 @@ export const WhatIfSimulator: React.FC = () => {
                      <tr>
                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Action</th>
                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Asset</th>
-                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Risk Score ⬇</th>
-                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">EAL ⬇</th>
+                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Risk Score â¬‡</th>
+                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">EAL â¬‡</th>
                      </tr>
                    </thead>
                    <tbody className="bg-white divide-y divide-app-border">
@@ -300,10 +322,14 @@ export const WhatIfSimulator: React.FC = () => {
                            {impact.targetAssetId}
                          </td>
                          <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-primary font-medium text-right">
-                           -{impact.riskScoreReduction.toFixed(2)}
+                           {impact.riskScoreReduction !== null && impact.riskScoreReduction !== undefined
+                             ? `-${impact.riskScoreReduction.toFixed(2)}`
+                             : 'N/A'}
                          </td>
                          <td className="px-6 py-4 whitespace-nowrap text-sm text-purple-700 font-medium text-right">
-                           {impact.ealReduction ? `${impact.currency} ${impact.ealReduction.toLocaleString()}` : 'N/A'}
+                           {impact.ealReduction !== null && impact.ealReduction !== undefined
+                             ? `${impact.currency} ${impact.ealReduction.toLocaleString()}`
+                             : 'NOT_AVAILABLE'}
                          </td>
                        </tr>
                      ))}

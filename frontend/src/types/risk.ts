@@ -8,26 +8,32 @@ export interface RiskFactor {
 }
 
 export interface AssetRiskResult {
+  id?: string;
   assetId: string;
   assetName?: string;
   cveId: string;
+  score: number | null;
+  level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+  dataCompleteness: number;
+  inputProvenanceHash: string;
   baseCvss: number | null;
-  riskScore: number | null;
-  evaluationStatus?: 'CALCULATED' | 'NOT_CALCULABLE' | 'INCOMPLETE';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
-  factors: RiskFactor[];
-  missingDataWarnings: string[];
-  dataCompletenessScore: number;
-  riskFlags: string[];
   modelVersion: string;
-  provenanceHash: string;
   evaluatedAt: string;
+  // Documented compatibility aliases
+  riskScore?: number | null;
+  severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+  dataCompletenessScore?: number;
+  provenanceHash?: string;
+  evaluationStatus?: 'CALCULATED' | 'NOT_CALCULABLE' | 'INCOMPLETE';
+  factors?: RiskFactor[];
+  missingDataWarnings?: string[];
+  riskFlags?: string[];
   isCached?: boolean;
 }
 
 export interface RiskCalculationResponse {
   items: AssetRiskResult[];
-  data: AssetRiskResult[];
+  data?: AssetRiskResult[];
   total: number;
   pagination: {
     page: number;
@@ -100,10 +106,14 @@ export interface RemediationCandidateActionDTO {
 }
 
 export interface OptimizerRequest {
-  budgetLimit: number;
+  budgetLimit?: number;
+  organizationId?: string;
+  businessUnitId?: string;
   currency?: string;
   objective?: 'MAX_MODELED_RISK_REDUCTION' | 'MAX_MODELED_EAL_REDUCTION' | 'MAX_ROSI';
   candidateActions?: RemediationCandidateActionDTO[];
+  baselinePortfolioRisk?: number | null;
+  baselinePortfolioEal?: number | null;
 }
 
 export interface StrategyResultDTO {
@@ -125,6 +135,7 @@ export interface StrategyResultDTO {
 }
 
 export interface OptimizerResponse {
+  optimizationResultId?: string;
   budgetLimit: number;
   currency: string;
   strategies: StrategyResultDTO[];

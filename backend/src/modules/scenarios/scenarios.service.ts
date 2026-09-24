@@ -288,7 +288,7 @@ export class ScenariosService {
               recoveryCost: finRow.recovery_cost !== null ? parseFloat(finRow.recovery_cost) : null,
               estimatedOutageHours: finRow.estimated_outage_hours !== null ? parseFloat(finRow.estimated_outage_hours) : null,
               annualizedLossEventFrequency: finRow.alef !== null ? parseFloat(finRow.alef) : null,
-              currency: finRow.currency || 'USD',
+              currency: finRow.currency ?? null, // null = org currency was unavailable at original evaluation
             },
             vulnerability: {
               cveId: vuln.cve_id,

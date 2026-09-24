@@ -27,10 +27,10 @@ describe('Organizations API', () => {
   let createdOrgId: string;
 
   describe('POST /api/organizations', () => {
-    it('should create an organization with required fields', async () => {
+    it('should create an organization with required fields including ISO-4217 currency', async () => {
       const res = await request(app)
         .post('/api/organizations')
-        .send({ name: 'Acme Corp' })
+        .send({ name: 'Acme Corp', currency: 'USD' })
         .expect(201);
 
       expect(res.body).toHaveProperty('id');
@@ -39,6 +39,24 @@ describe('Organizations API', () => {
       expect(res.body).toHaveProperty('createdAt');
       expect(res.body).toHaveProperty('updatedAt');
       createdOrgId = res.body.id;
+    });
+
+    it('should reject organization creation when currency is missing (no silent fallback)', async () => {
+      const res = await request(app)
+        .post('/api/organizations')
+        .send({ name: 'No Currency Corp' })
+        .expect(400);
+
+      expect(res.body.error).toBe('Validation Error');
+    });
+
+    it('should reject invalid ISO-4217 currency code', async () => {
+      const res = await request(app)
+        .post('/api/organizations')
+        .send({ name: 'Invalid Currency Corp', currency: 'DOLLARS' })
+        .expect(400);
+
+      expect(res.body.error).toBe('Validation Error');
     });
 
     it('should create an organization with all fields', async () => {
@@ -158,7 +176,7 @@ describe('Organizations API', () => {
       // Create a throwaway org for deletion
       const createRes = await request(app)
         .post('/api/organizations')
-        .send({ name: 'Deletable Corp' })
+        .send({ name: 'Deletable Corp', currency: 'USD' })
         .expect(201);
 
       await request(app)
@@ -187,7 +205,7 @@ describe('Business Units API', () => {
   beforeAll(async () => {
     const res = await request(app)
       .post('/api/organizations')
-      .send({ name: 'BU Parent Org' })
+      .send({ name: 'BU Parent Org', currency: 'USD' })
       .expect(201);
     orgId = res.body.id;
   });

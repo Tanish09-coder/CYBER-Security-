@@ -23,7 +23,7 @@ export interface FinancialAssetInputDTO {
   recoveryCost?: number | null;
   estimatedOutageHours?: number | null;
   annualizedLossEventFrequency?: number | null;
-  currency?: string;
+  currency?: string | null;
 }
 
 export interface FinancialVulnerabilityInputDTO {
@@ -54,7 +54,7 @@ export interface FinancialExposureResultDTO {
   alef: number | null; // Annual Loss Event Frequency (null if unconfigured)
   eal: number | null; // Estimated Annualized Loss (null if ALEF or SLE unconfigured)
   ealStatus: 'CALCULATED' | 'NOT_AVAILABLE';
-  currency: string;
+  currency: string | null;
   primaryLoss: number | null;
   secondaryLoss: number | null;
   estimatedOutageHours: number | null;
@@ -75,7 +75,7 @@ export interface BatchFinancialExposureResultDTO {
   totalEvaluated: number;
   totalModeledEal: number | null;
   availableEalCount?: number;
-  currency: string;
+  currency: string | null;
   modelVersion: string;
 }
 
@@ -101,7 +101,7 @@ export interface StoredFinancialResultRecord {
   alef: number | null;
   eal: number | null;
   eal_status: string;
-  currency: string;
+  currency: string | null;
   primary_loss: number | null;
   secondary_loss: number | null;
   estimated_outage_hours: number | null;
@@ -120,7 +120,7 @@ export interface StoredFinancialResultRecord {
 
 export interface EnterpriseFinancialSummaryDTO {
   totalModeledEal: number;
-  currency: string;
+  currency: string | null;
   totalEvaluatedAssets: number;
   totalEvaluatedVulnerabilities: number;
   highestEalAsset: {

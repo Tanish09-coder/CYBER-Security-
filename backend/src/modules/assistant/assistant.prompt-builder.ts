@@ -34,8 +34,9 @@ function fmtNum(n: number, decimals = 2): string {
   return n.toFixed(decimals);
 }
 
-function fmtCurrency(n: number | null, currency: string): string {
+function fmtCurrency(n: number | null, currency: string | null): string {
   if (n === null) return 'NOT AVAILABLE';
+  if (!currency) return `NOT_AVAILABLE`;
   return `${currency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 

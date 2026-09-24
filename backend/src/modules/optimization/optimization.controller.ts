@@ -31,7 +31,20 @@ export class OptimizationController {
         return;
       }
 
-      const result = await this.service.solve(parsed.data);
+      let result;
+      if (
+        parsed.data.organizationId &&
+        (!parsed.data.candidateActions || parsed.data.candidateActions.length === 0)
+      ) {
+        result = await this.service.solveForOrganization(parsed.data.organizationId, {
+          budgetLimit: parsed.data.budgetLimit,
+          businessUnitId: parsed.data.businessUnitId,
+          objective: parsed.data.objective,
+        });
+      } else {
+        result = await this.service.solve(parsed.data as any);
+      }
+
       res.status(200).json({
         success: true,
         data: result,
@@ -49,6 +62,75 @@ export class OptimizationController {
       res.status(500).json({
         error: 'Optimization Execution Failed',
         message: err.message || 'An unexpected error occurred during investment optimization.',
+      });
+    }
+  };
+
+  /**
+   * GET /api/optimization/candidates?organizationId=...
+   * Resolves Harsh-owned remediation actions and budgets into authoritative candidate actions for an organization.
+   */
+  getCandidates = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const organizationId = (req.query.organizationId as string) || (req.params.organizationId as string);
+      if (!organizationId) {
+        res.status(400).json({ error: 'Validation Error', message: 'organizationId is required' });
+        return;
+      }
+      const budgetLimit = req.query.budgetLimit ? parseFloat(req.query.budgetLimit as string) : undefined;
+      const businessUnitId = req.query.businessUnitId as string | undefined;
+      const objective = req.query.objective as any;
+
+      const adapted = await this.service.adaptRemediationActionsToOptimizationRequest(organizationId, {
+        budgetLimit,
+        businessUnitId,
+        objective,
+      });
+      res.status(200).json({
+        success: true,
+        data: adapted,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        error: 'Failed to retrieve optimization candidates',
+        message: err.message,
+      });
+    }
+  };
+
+  /**
+   * POST /api/optimization/organizations/:organizationId/solve
+   * Explicit organization solve endpoint.
+   */
+  solveForOrganization = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const organizationId = req.params.organizationId || req.body.organizationId;
+      if (!organizationId) {
+        res.status(400).json({ error: 'Validation Error', message: 'organizationId is required' });
+        return;
+      }
+      const { budgetLimit, businessUnitId, objective } = req.body;
+      const result = await this.service.solveForOrganization(organizationId, {
+        budgetLimit,
+        businessUnitId,
+        objective,
+      });
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (err: any) {
+      if (err instanceof OptimizationEngineServiceError) {
+        res.status(err.statusCode).json({
+          error: err.statusCode === 503 ? 'Service Unavailable' : 'Gateway Error',
+          code: err.code,
+          message: err.message,
+        });
+        return;
+      }
+      res.status(500).json({
+        error: 'Optimization Execution Failed',
+        message: err.message,
       });
     }
   };

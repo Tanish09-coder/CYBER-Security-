@@ -22,13 +22,26 @@ export const remediationCandidateActionSchema = z.object({
   description: z.string().optional().nullable(),
 });
 
-export const optimizationRequestSchema = z.object({
-  budgetLimit: z.number().min(0.0, 'Budget limit must be non-negative'),
-  currency: z.string().max(10).default('USD'),
-  candidateActions: z.array(remediationCandidateActionSchema).optional(),
-  baselinePortfolioRisk: z.number().min(0.0).max(100.0).optional().nullable(),
-  baselinePortfolioEal: z.number().min(0.0).optional().nullable(),
-});
+export const optimizationRequestSchema = z
+  .object({
+    budgetLimit: z.number().min(0.0, 'Budget limit must be non-negative').optional(),
+    organizationId: z.string().uuid().optional(),
+    businessUnitId: z.string().uuid().optional(),
+    currency: z.string().max(10).optional().nullable(), // Authoritative from org when organizationId provided
+    objective: z
+      .enum(['MAX_MODELED_RISK_REDUCTION', 'MAX_MODELED_EAL_REDUCTION', 'MAX_ROSI'])
+      .optional(),
+    candidateActions: z.array(remediationCandidateActionSchema).optional(),
+    baselinePortfolioRisk: z.number().min(0.0).max(100.0).optional().nullable(),
+    baselinePortfolioEal: z.number().min(0.0).optional().nullable(),
+  })
+  .refine(
+    (data) => data.budgetLimit !== undefined || data.organizationId !== undefined,
+    {
+      message: 'Either budgetLimit or organizationId must be provided to run investment optimization.',
+      path: ['budgetLimit'],
+    }
+  );
 
 export const strategyComparisonSchema = z.object({
   budgetLimit: z.number().min(0.0),

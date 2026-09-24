@@ -64,7 +64,7 @@ export class OptimizationService {
 
     const payload: OptimizationRequestDTO = {
       budgetLimit: request.budgetLimit,
-      currency: request.currency || 'USD',
+      currency: request.currency ?? null, // null if not provided — org resolution below may supply it
       objective: request.objective,
       candidateActions,
       baselinePortfolioRisk: request.baselinePortfolioRisk,
@@ -99,7 +99,7 @@ export class OptimizationService {
       `SELECT currency FROM organizations WHERE id = $1 LIMIT 1`,
       [organizationId]
     );
-    const currency = orgRes.rows[0]?.currency || 'USD';
+    const currency: string | null = orgRes.rows[0]?.currency ?? null; // null = org has no currency on record
 
     let budgetLimit = options?.budgetLimit;
     if (budgetLimit === undefined || budgetLimit === null) {
@@ -193,17 +193,17 @@ export class OptimizationService {
       });
     }
 
-    // 4. Query baseline portfolio metrics
-    const baselineSql = `
-      SELECT 
-        COALESCE(AVG(score), 0.0) AS avg_risk,
-        COALESCE(SUM(eal), 0.0) AS total_eal
-      FROM risk_results
-      WHERE organization_id = $1;
-    `;
-    const baselineRes = await query<{ avg_risk: string; total_eal: string }>(baselineSql, [organizationId]);
-    const baselinePortfolioRisk = parseFloat(baselineRes.rows[0]?.avg_risk || '0.0');
-    const baselinePortfolioEal = parseFloat(baselineRes.rows[0]?.total_eal || '0.0');
+    // 4. Query baseline portfolio metrics from authoritative tables (risk from risk_results, eal from financial_results)
+    const riskBaselineRes = await query<{ avg_risk: string }>(
+      `SELECT COALESCE(AVG(score), 0.0) AS avg_risk FROM risk_results WHERE organization_id = $1`,
+      [organizationId]
+    );
+    const finBaselineRes = await query<{ total_eal: string }>(
+      `SELECT COALESCE(SUM(eal), 0.0) AS total_eal FROM financial_results WHERE organization_id = $1 AND eal IS NOT NULL`,
+      [organizationId]
+    );
+    const baselinePortfolioRisk = parseFloat(riskBaselineRes.rows[0]?.avg_risk || '0.0');
+    const baselinePortfolioEal = parseFloat(finBaselineRes.rows[0]?.total_eal || '0.0');
 
     return {
       budgetLimit,

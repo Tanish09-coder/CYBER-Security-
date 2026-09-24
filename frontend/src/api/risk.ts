@@ -25,17 +25,24 @@ export const riskApi = {
     return fetchApi<FinancialExposureResponse>(`/v1/financial/exposure?${query.toString()}`);
   },
   
-  simulateWhatIf: (data: WhatIfSimulationRequest) => {
-    return fetchApi<WhatIfSimulationResponse>('/v1/scenarios/simulate', {
+  simulateWhatIf: async (data: WhatIfSimulationRequest): Promise<WhatIfSimulationResponse> => {
+    const res = await fetchApi<any>('/v1/scenarios/simulate', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
+    return res && res.data ? res.data : res;
   },
 
-  optimizeBudget: (data: OptimizerRequest) => {
-    return fetchApi<OptimizerResponse>('/v1/optimization/solve', {
+  optimizeBudget: async (data: OptimizerRequest): Promise<OptimizerResponse> => {
+    const res = await fetchApi<any>('/v1/optimization/solve', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
-  }
+    return res && res.data ? res.data : res;
+  },
+
+  getOptimizationCandidates: async (organizationId: string): Promise<any> => {
+    const res = await fetchApi<any>(`/v1/optimization/candidates?organizationId=${encodeURIComponent(organizationId)}`);
+    return res && res.data ? res.data : res;
+  },
 };

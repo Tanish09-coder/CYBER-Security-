@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { AlertCircle, Loader2, BarChart2, ShieldAlert, Activity, PieChart, Info, DollarSign } from 'lucide-react';
 import { executiveApi } from '../api/executive';
 import { 
@@ -6,6 +6,7 @@ import {
   ExecutiveTopRiskDTO, 
   ExecutiveFinancialSummaryDTO 
 } from '../types/executive';
+import { formatCurrency } from '../utils/currency';
 
 export const ExecutiveDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -109,7 +110,9 @@ export const ExecutiveDashboard: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className="text-4xl font-bold text-purple-700">
-                {financial.currency} {(financial.totalModeledEal || 0).toLocaleString()}
+                {financial.totalModeledEal !== null && financial.totalModeledEal !== undefined
+                  ? formatCurrency(financial.totalModeledEal, financial.currency ?? null)
+                  : <span className="text-amber-600 text-2xl">NOT_AVAILABLE</span>}
               </p>
               {financial.isPartialCoverage && (
                 <p className="text-xs text-amber-600 mt-2 font-medium">
@@ -120,11 +123,11 @@ export const ExecutiveDashboard: React.FC = () => {
             <div className="text-right space-y-2">
                <div>
                  <p className="text-xs text-text-muted uppercase">Primary Loss</p>
-                 <p className="text-sm font-semibold text-text-primary">{financial.currency} {financial.totalPrimaryLoss.toLocaleString()}</p>
+                 <p className="text-sm font-semibold text-text-primary">{formatCurrency(financial.totalPrimaryLoss, financial.currency ?? null)}</p>
                </div>
                <div>
                  <p className="text-xs text-text-muted uppercase">Secondary Loss</p>
-                 <p className="text-sm font-semibold text-text-primary">{financial.currency} {financial.totalSecondaryLoss.toLocaleString()}</p>
+                 <p className="text-sm font-semibold text-text-primary">{formatCurrency(financial.totalSecondaryLoss, financial.currency ?? null)}</p>
                </div>
             </div>
           </div>

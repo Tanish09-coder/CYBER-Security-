@@ -133,7 +133,7 @@ export interface ResolvedStrategyComparisonContext {
   strategyA: StrategyItemDTO;
   strategyB: StrategyItemDTO;
   budgetLimit: number;
-  currency: string;
+  currency: string | null;
 }
 
 // ---------------------------------------------------------------------------

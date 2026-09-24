@@ -126,6 +126,11 @@ export interface RiskScoreItemDTO {
   riskFlags: string[];
   evaluatedAt: string;
   isCached?: boolean;
+  // Documented compatibility aliases
+  riskScore?: number | null;
+  severity?: RiskSeverity;
+  dataCompletenessScore?: number;
+  provenanceHash?: string;
 }
 
 export interface PaginatedRiskScoresResponseDTO {

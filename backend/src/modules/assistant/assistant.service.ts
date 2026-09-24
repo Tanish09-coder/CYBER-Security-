@@ -275,7 +275,7 @@ export class AssistantService {
       alef: getNum(record.alef, null),
       eal: getNum(record.eal, null),
       ealStatus,
-      currency: record.currency || 'USD',
+      currency: record.currency ?? null, // null = org currency unavailable at financial evaluation time
       primaryLoss: getNum(record.primary_loss, record.primaryLoss),
       secondaryLoss: getNum(record.secondary_loss, record.secondaryLoss),
       estimatedOutageHours: getNum(record.estimated_outage_hours, record.estimatedOutageHours),
@@ -298,7 +298,7 @@ export class AssistantService {
     if (!optResult && req.candidateActions && req.candidateActions.length > 0 && req.budgetLimit !== undefined) {
       optResult = await optimizationService.solve({
         budgetLimit: req.budgetLimit,
-        currency: req.currency || 'USD',
+        currency: req.currency ?? null, // null = caller did not supply authoritative currency
         candidateActions: req.candidateActions,
       });
     }

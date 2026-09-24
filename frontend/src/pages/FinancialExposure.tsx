@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AlertCircle, Loader2, Info, ShieldAlert } from 'lucide-react';
 import { FinancialExposureResponse } from '../types/risk';
 import { riskApi } from '../api/risk';
+import { formatCurrency } from '../utils/currency';
 
 export const FinancialExposure: React.FC = () => {
   const [data, setData] = useState<FinancialExposureResponse | null>(null);
@@ -68,8 +69,37 @@ export const FinancialExposure: React.FC = () => {
   }
 
   const items = data.items;
-  const totalEal = items.reduce((sum, item) => sum + (item.eal || 0), 0);
-  const currency = items.length > 0 ? items[0].currency : 'USD';
+  const availableEalItems = items.filter(
+    (item) => item.eal !== null && item.eal !== undefined && item.ealStatus !== 'NOT_AVAILABLE'
+  );
+  const availableCount = availableEalItems.length;
+  const totalRelevantCount = items.length;
+  const modeledEalTotal =
+    availableCount > 0
+      ? availableEalItems.reduce((sum, item) => sum + (item.eal as number), 0)
+      : null;
+
+  const coverageLabel =
+    availableCount === totalRelevantCount
+      ? 'FULL COVERAGE'
+      : availableCount > 0
+      ? `PARTIAL COVERAGE (${availableCount}/${totalRelevantCount})`
+      : 'NOT_AVAILABLE';
+
+  // Authoritative currency: take from first item that has it. null = CURRENCY_UNAVAILABLE.
+  const authoritativeCurrency: string | null = items.find((item) => item.currency)?.currency ?? null;
+
+  const avgCompleteness =
+    items.length > 0
+      ? (
+          (items.reduce(
+            (acc, curr) => acc + (curr.dataCompletenessScore ?? (curr as any).dataCompleteness ?? 0),
+            0
+          ) /
+            items.length) *
+          100
+        ).toFixed(1)
+      : '0.0';
 
   // 4. POPULATED STATE
   return (
@@ -92,9 +122,29 @@ export const FinancialExposure: React.FC = () => {
       {/* High Level Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
-          <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Total Modeled Annual Exposure</h3>
-          <p className="text-4xl font-bold text-text-primary text-purple-700">
-            {currency} {totalEal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Modeled EAL Total</h3>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded font-semibold border ${
+                availableCount === totalRelevantCount
+                  ? 'bg-green-50 text-green-700 border-green-200'
+                  : availableCount > 0
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-gray-100 text-gray-700 border-gray-200'
+              }`}
+            >
+              {coverageLabel}
+            </span>
+          </div>
+          <p className="text-3xl font-bold text-text-primary text-purple-700">
+            {modeledEalTotal !== null ? (
+              formatCurrency(modeledEalTotal, authoritativeCurrency)
+            ) : (
+              <span className="text-amber-600 text-xl font-medium">NOT_AVAILABLE</span>
+            )}
+          </p>
+          <p className="text-xs text-text-muted mt-2">
+            {availableCount} of {totalRelevantCount} records available
           </p>
         </div>
         <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
@@ -102,11 +152,17 @@ export const FinancialExposure: React.FC = () => {
           <p className="text-4xl font-bold text-text-primary">
             {data.total.toLocaleString()}
           </p>
+          <p className="text-xs text-text-muted mt-2">
+            Relevant records evaluated
+          </p>
         </div>
         <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
           <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Data Completeness (Avg)</h3>
           <p className="text-4xl font-bold text-text-primary">
-            {((items.reduce((acc, curr) => acc + curr.dataCompletenessScore, 0) / items.length) * 100).toFixed(1)}%
+            {avgCompleteness}%
+          </p>
+          <p className="text-xs text-text-muted mt-2">
+            Input parameter completeness
           </p>
         </div>
       </div>
@@ -129,28 +185,40 @@ export const FinancialExposure: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-app-border">
-              {items.map((item, idx) => (
-                <tr key={`${item.assetId}-${item.cveId}-${idx}`} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
-                    {item.assetName || item.assetId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                    {item.cveId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
-                    {item.primaryLoss ? `${item.currency} ${item.primaryLoss.toLocaleString()}` : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
-                    {item.secondaryLoss ? `${item.currency} ${item.secondaryLoss.toLocaleString()}` : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary text-right">
-                    {item.sle ? `${item.currency} ${item.sle.toLocaleString()}` : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-purple-700 text-right">
-                    {item.eal ? `${item.currency} ${item.eal.toLocaleString()}` : 'N/A'}
-                  </td>
-                </tr>
-              ))}
+              {items.map((item, idx) => {
+                // Use item-level currency if present, otherwise org-level. Never fall back to USD.
+                const itemCurrency: string | null = item.currency ?? authoritativeCurrency ?? null;
+                return (
+                  <tr key={`${item.assetId}-${item.cveId}-${idx}`} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
+                      {item.assetName || item.assetId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                      {item.cveId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
+                      {item.primaryLoss !== null && item.primaryLoss !== undefined
+                        ? formatCurrency(item.primaryLoss, itemCurrency)
+                        : <span className="text-text-muted text-xs">NOT_AVAILABLE</span>}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
+                      {item.secondaryLoss !== null && item.secondaryLoss !== undefined
+                        ? formatCurrency(item.secondaryLoss, itemCurrency)
+                        : <span className="text-text-muted text-xs">NOT_AVAILABLE</span>}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary text-right">
+                      {item.sle !== null && item.sle !== undefined && item.sleStatus !== 'NOT_AVAILABLE'
+                        ? formatCurrency(item.sle, itemCurrency)
+                        : <span className="text-text-muted text-xs">NOT_AVAILABLE</span>}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
+                      {item.eal !== null && item.eal !== undefined && item.ealStatus !== 'NOT_AVAILABLE'
+                        ? <span className="text-purple-700">{formatCurrency(item.eal, itemCurrency)}</span>
+                        : <span className="text-amber-600 font-medium text-xs">NOT_AVAILABLE</span>}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

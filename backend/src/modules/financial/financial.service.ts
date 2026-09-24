@@ -116,7 +116,7 @@ export class FinancialService {
     const misses: { index: number; input: FinancialExposureInputDTO }[] = [];
     let totalEal = 0.0;
     let availableEalCount = 0;
-    let currency = 'USD';
+    let currency: string | null = null; // Authoritative currency resolved from org context
 
     for (let i = 0; i < payload.evaluations.length; i++) {
       const item = payload.evaluations[i];
@@ -253,7 +253,8 @@ export class FinancialService {
     `;
     const vulnsRes = await query(vulnsSql, [assetId]);
 
-    const orgCurrency = assetRow.org_currency || 'USD';
+    // Authoritative currency from organization — if null, financial evaluation cannot label amounts
+    const orgCurrency: string | null = assetRow.org_currency ?? null;
     const hourlyDowntimeCost =
       assetRow.hourly_downtime_cost !== null && assetRow.hourly_downtime_cost !== undefined
         ? parseFloat(assetRow.hourly_downtime_cost)
@@ -284,7 +285,7 @@ export class FinancialService {
         assetId,
         evaluatedCount: 0,
         totalModeledEal: 0.0,
-        currency: orgCurrency,
+        currency: orgCurrency, // null = CURRENCY_UNAVAILABLE
         results: [],
       };
     }

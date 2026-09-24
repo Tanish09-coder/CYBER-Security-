@@ -60,7 +60,7 @@ export const AttackPath: React.FC = () => {
         </span>
       </div>
       <p className="text-xs text-text-secondary mb-6">
-        Visualize structural choke points and exploit paths across the enterprise network topology.
+        Visualize structural choke points and exploit paths across the enterprise network topology with deterministic structural severity and priority scores.
       </p>
 
       {/* High-level metrics */}
@@ -70,7 +70,7 @@ export const AttackPath: React.FC = () => {
             <p className="text-4xl font-bold text-text-primary">{graphData.totalPathsFound}</p>
          </div>
          <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-sm text-center flex flex-col items-center justify-center">
-            <h3 className="text-xs font-semibold text-text-muted uppercase mb-2">Max Path Risk</h3>
+            <h3 className="text-xs font-semibold text-text-muted uppercase mb-2">Max Path Exposure</h3>
             <p className="text-4xl font-bold text-red-600">{graphData.maxPathRisk.toFixed(1)}</p>
          </div>
          <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-sm text-center flex flex-col items-center justify-center">
@@ -96,7 +96,7 @@ export const AttackPath: React.FC = () => {
                  <tr>
                    <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Asset</th>
                    <th className="px-4 py-3 text-center text-xs font-medium text-text-muted uppercase">Intercepted Paths</th>
-                   <th className="px-4 py-3 text-right text-xs font-medium text-text-muted uppercase">Choke Score</th>
+                   <th className="px-4 py-3 text-right text-xs font-medium text-text-muted uppercase">Structural Severity</th>
                  </tr>
                </thead>
                <tbody className="bg-white divide-y divide-app-border">
@@ -128,7 +128,7 @@ export const AttackPath: React.FC = () => {
          <div className="bg-app-surface border border-app-border rounded-lg shadow-sm overflow-hidden">
            <div className="px-6 py-4 border-b border-app-border bg-surface-secondary flex items-center">
              <Activity className="w-4 h-4 mr-2 text-text-secondary" />
-             <h3 className="text-sm font-semibold text-text-primary">Highest Risk Attack Paths</h3>
+             <h3 className="text-sm font-semibold text-text-primary">Prioritized Attack Paths</h3>
            </div>
            <div className="p-0 overflow-x-auto">
              <table className="min-w-full divide-y divide-app-border">
@@ -136,7 +136,7 @@ export const AttackPath: React.FC = () => {
                  <tr>
                    <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Entry → Target</th>
                    <th className="px-4 py-3 text-center text-xs font-medium text-text-muted uppercase">Hops</th>
-                   <th className="px-4 py-3 text-right text-xs font-medium text-text-muted uppercase">Cumulative Risk</th>
+                   <th className="px-4 py-3 text-right text-xs font-medium text-text-muted uppercase">Path Priority Score</th>
                  </tr>
                </thead>
                <tbody className="bg-white divide-y divide-app-border">

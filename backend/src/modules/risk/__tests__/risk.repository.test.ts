@@ -35,7 +35,7 @@ describe('RiskRepository (014_risk_results persistence)', () => {
 
     // 1. Seed test organization
     await query(
-      `INSERT INTO organizations (id, name) VALUES ($1, 'Repo Test Org') ON CONFLICT (id) DO NOTHING;`,
+      `INSERT INTO organizations (id, name, currency) VALUES ($1, 'Repo Test Org', 'USD') ON CONFLICT (id) DO NOTHING;`,
       [testOrgId]
     );
 

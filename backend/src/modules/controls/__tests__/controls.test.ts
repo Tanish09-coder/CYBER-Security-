@@ -27,7 +27,7 @@ beforeAll(async () => {
   // Setup parent org and asset
   const orgRes = await request(app)
     .post('/api/organizations')
-    .send({ name: 'Controls Test Organization' });
+    .send({ name: 'Controls Test Organization', currency: 'USD' });
   testOrgId = orgRes.body.id;
 
   const assetRes = await request(app)

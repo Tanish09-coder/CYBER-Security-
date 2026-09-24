@@ -110,7 +110,7 @@ export interface CreateComplianceEvidenceInput {
 // Aggregated Enterprise Risk Inputs Bundle for Tanish's Risk Engine
 export interface EnterpriseRiskInputsBundle {
   organizationId: string;
-  currency: string;
+  currency: string | null;
   financialParameters: {
     hourlyDowntimeCost: number | null;
     hourlyRecoveryRate: number | null;

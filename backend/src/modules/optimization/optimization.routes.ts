@@ -14,6 +14,8 @@ export function createOptimizationRouter(
   const router = Router();
 
   router.post('/solve', controller.solve);
+  router.get('/candidates', controller.getCandidates);
+  router.post('/organizations/:organizationId/solve', controller.solveForOrganization);
   router.get('/strategies', controller.getStrategies);
   router.post('/compare', controller.compare);
 

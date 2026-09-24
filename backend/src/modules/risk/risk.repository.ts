@@ -233,25 +233,34 @@ export class RiskRepository {
     const dataValues = [...values, limit, offset];
     const dataRes = await query(dataSql, dataValues);
 
-    const items: RiskScoreItemDTO[] = dataRes.rows.map((row: any) => ({
-      id: row.id,
-      assetId: row.asset_id,
-      cveId: row.cve_id,
-      score: parseFloat(row.score),
-      level: row.level,
-      baseCvss: row.base_cvss !== null ? parseFloat(row.base_cvss) : null,
-      modelVersion: row.model_version,
-      inputProvenanceHash: row.input_provenance_hash,
-      dataCompleteness: parseFloat(row.data_completeness),
-      factors: typeof row.factors === 'string' ? JSON.parse(row.factors) : row.factors,
-      missingDataWarnings:
-        typeof row.missing_data_warnings === 'string'
-          ? JSON.parse(row.missing_data_warnings)
-          : row.missing_data_warnings,
-      riskFlags:
-        typeof row.risk_flags === 'string' ? JSON.parse(row.risk_flags) : row.risk_flags,
-      evaluatedAt: row.evaluated_at instanceof Date ? row.evaluated_at.toISOString() : String(row.evaluated_at),
-    }));
+    const items: RiskScoreItemDTO[] = dataRes.rows.map((row: any) => {
+      const score = row.score !== null && row.score !== undefined ? parseFloat(row.score) : null;
+      const dataCompleteness = row.data_completeness !== null && row.data_completeness !== undefined ? parseFloat(row.data_completeness) : 0.0;
+      return {
+        id: row.id,
+        assetId: row.asset_id,
+        cveId: row.cve_id,
+        score,
+        level: row.level,
+        baseCvss: row.base_cvss !== null ? parseFloat(row.base_cvss) : null,
+        modelVersion: row.model_version,
+        inputProvenanceHash: row.input_provenance_hash,
+        dataCompleteness,
+        factors: typeof row.factors === 'string' ? JSON.parse(row.factors) : row.factors,
+        missingDataWarnings:
+          typeof row.missing_data_warnings === 'string'
+            ? JSON.parse(row.missing_data_warnings)
+            : row.missing_data_warnings,
+        riskFlags:
+          typeof row.risk_flags === 'string' ? JSON.parse(row.risk_flags) : row.risk_flags,
+        evaluatedAt: row.evaluated_at instanceof Date ? row.evaluated_at.toISOString() : String(row.evaluated_at),
+        // Documented compatibility aliases
+        riskScore: score,
+        severity: row.level,
+        dataCompletenessScore: dataCompleteness,
+        provenanceHash: row.input_provenance_hash,
+      };
+    });
 
     return {
       items,
