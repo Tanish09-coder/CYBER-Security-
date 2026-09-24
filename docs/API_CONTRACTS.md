@@ -734,6 +734,82 @@ Every endpoint entry must declare:
 
 ---
 
+### 2.4 Aggregated Enterprise Risk Inputs Bundle
+- **Method**: `GET`
+- **Path**: `/api/enterprise-context/risk-inputs/:orgId`
+- **Owner**: Harsh
+- **Consumer**: Tanish (Risk Engine)
+- **Purpose**: Retrieve authoritative enterprise risk inputs bundle (currency, financial parameters, asset profiles with controls, remediation catalog) for quantitative risk evaluation without querying database tables directly.
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "organizationId": "uuid",
+    "currency": "USD",
+    "financialParameters": {
+      "hourlyDowntimeCost": 15000.0,
+      "hourlyRecoveryRate": 200.0,
+      "costPerSensitiveRecord": 180.0,
+      "regulatoryBreachPenalty": 1000000.0,
+      "dailyTransactionVolume": 500000.0
+    },
+    "assets": [
+      {
+        "assetId": "uuid",
+        "assetName": "Core Payment Gateway",
+        "assetType": "server",
+        "businessUnit": "Digital Banking",
+        "criticalityTier": 1,
+        "isInternetFacing": true,
+        "dataClassification": "Financial",
+        "revenueDependencyPct": 45.0,
+        "operationalImportanceScore": 1.5,
+        "controls": [
+          {
+            "controlCode": "MFA",
+            "status": "IMPLEMENTED",
+            "effectivenessScore": 1.0,
+            "mitigationWeight": 0.85
+          }
+        ],
+        "upstreamDependencies": []
+      }
+    ],
+    "remediationActions": [
+      {
+        "actionId": "uuid",
+        "actionType": "ENABLE_CONTROL",
+        "title": "Enforce MFA on Admin Portals",
+        "remediationCost": 12000.0,
+        "targetControlCode": "MFA",
+        "affectedAssetIds": ["uuid"]
+      }
+    ]
+  }
+  ```
+- **Status**: **LIVE**
+
+---
+
+### 2.5 Financial Parameters Setup
+- **Method**: `GET` / `POST`
+- **Path**: `/api/organizations/:orgId/financial-parameters`
+- **Owner**: Harsh
+- **Consumer**: Nishit (Screen N1 / Calibration UI), Tanish (Risk Engine)
+- **Purpose**: Retrieve and configure enterprise financial assumptions (hourly downtime cost, recovery rate, cost per record, regulatory breach penalty).
+- **Status**: **LIVE**
+
+---
+
+### 2.6 Remediation Action Catalog
+- **Method**: `GET` / `POST`
+- **Path**: `/api/remediation-actions`
+- **Owner**: Harsh
+- **Consumer**: Nishit (Screen N7 / Optimizer UI), Tanish (Optimizer Engine)
+- **Purpose**: Manage candidate remediation initiatives and action costs for ROSI and budget optimization.
+- **Status**: **LIVE**
+
+---
+
 ## 3. Top-Level Unified Threat Intelligence (Owner: TANISH)
 
 ### 3.1 Unified Threat Intel Summary
