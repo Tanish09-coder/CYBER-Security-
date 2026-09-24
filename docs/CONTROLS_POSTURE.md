@@ -5,8 +5,14 @@
 
 ---
 
-## 1. Overview
+## 1. Overview & Methodological Guardrails
 The Security Controls Posture module manages the organization's defensive controls architecture. It enables security teams to track the implementation status, verified effectiveness, and provenance of defensive capabilities across enterprise assets.
+
+> [!IMPORTANT]
+> **Deterministic Risk Quantification Guardrail (Risk Model v1):**
+> Controls must not imply arbitrary quantitative risk reduction unless a validated effectiveness methodology actually exists.
+> In CyberRiskOS Risk Model v1, security controls serve strictly as **control posture/context** and qualitative audit evidence (`FactorCategory.DEFENSIVE_POSTURE`).
+> They are kept out of deterministic score reduction (`weight = 0.00`, `contribution = 0.00`), logging active compensating controls without fabricating ungrounded mathematical discounts. Catalog reference weights serve only as non-operational taxonomy metadata for future empirical studies.
 
 ---
 
@@ -14,7 +20,7 @@ The Security Controls Posture module manages the organization's defensive contro
 
 The system defines 7 authoritative defensive controls:
 
-| Code | Control Name | Category | Default Mitigation Weight | Purpose & Description |
+| Code | Control Name | Category | Reference Posture Weight | Purpose & Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **MFA** | Multi-Factor Authentication | Identity & Access | **0.85** | Multi-Factor Authentication enforcement across privileged and administrative pathways. |
 | **EDR** | Endpoint Detection & Response | Endpoint Security | **0.80** | Active sensor coverage with behavioral anomaly detection and automated containment. |

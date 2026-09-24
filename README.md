@@ -21,7 +21,7 @@
 | **Performance Benchmarking** | ✅ MEASURED | Real measured endpoints: p95 < 60ms across all core endpoints |
 | **Fresh Database Migration Gate** | ✅ VERIFIED | 13 sequential migrations applied zero-to-head cleanly |
 | **Docker Container Topology** | ✅ VERIFIED | Internal network isolation for Python engine & PostgreSQL |
-| **No-Synthetic Production Audit** | ✅ VERIFIED | Zero synthetic CVEs, assets, or budgets in production code |
+| **No-Synthetic Production Audit** | ✅ VERIFIED | Zero synthetic CVEs, assets, or budgets in production code. Synthetic fixtures are isolated to recognized automated-test/fixture paths (__tests__, __fixtures__) and are unreachable from production/demo runtime paths. |
 | **Frontend TypeScript & Production Build** | ✅ VERIFIED | `tsc --noEmit` clean, Vite production bundle (368 kB JS gzip 94 kB) |
 | **Backend TypeScript & Test Suite** | ✅ VERIFIED | `tsc --noEmit` clean, 100% test pass rate across 40+ test suites |
 
@@ -32,7 +32,7 @@
 CyberRiskOS translates real-world technical cyber threat signals into defensible, quantitative financial risk metrics:
 - **Threat Intelligence Provenance**: Direct ingestion from NIST NVD, CISA KEV, MITRE ATT&CK, and VCDB/VERIS with SHA-256 integrity verification.
 - **Enterprise Context Correlation**: Automated CPE 2.3 software inventory matching against vulnerability criteria without manual intervention.
-- **Deterministic Risk Model v1**: Continuous multi-factor evaluation combining CVSS v3.1/v4.0 base metrics, CISA KEV active exploitation flags, asset business criticality tier, internet-facing exposure, and implemented defensive controls.
+- **Deterministic Risk Model v1**: Continuous multi-factor evaluation combining CVSS v3.1/v4.0 base metrics, CISA KEV active exploitation flags, asset business criticality tier, perimeter internet exposure, and verified defensive control posture/context.
 - **Deterministic Financial Model**: Single Loss Expectancy (SLE) and Estimated Annualized Loss (EAL) calculated from authoritative enterprise financial parameters (downtime cost, recovery rate, outage duration, annualized loss frequency).
 - **Investment Optimization**: Multi-strategy portfolio knapsack solver identifying optimal remediation actions under capital budget constraints to maximize modeled risk and EAL reduction.
 - **Grounded AI Assistant**: Strict audit-anchored LLM decision support with deterministic fallback; never hallucinates scores, never invents loss guarantees, and never recommends a single "winner".
@@ -59,7 +59,7 @@ CyberRiskOS implements strict enterprise multi-currency handling:
 3. **No Mixed-Currency Arithmetic**:
    - Monetary inputs with mismatched currencies are rejected with `400 Bad Request` (`CURRENCY_MISMATCH`) unless accompanied by authoritative FX provenance metadata.
 4. **Currency-Independent Scores**:
-   - CVSS scores, Risk Scores (0.0–10.0), ALEF, ROSI percentages, attack path structural severity scores, and compliance coverage percentages remain purely dimensionless.
+   - CVSS scores, Risk Scores (0.0–100.0), ALEF, ROSI percentages, attack path structural severity scores, and compliance coverage percentages remain purely dimensionless.
 5. **Frontend Rendering**:
    - Uses browser-native `Intl.NumberFormat` with appropriate locale formatting (e.g. `en-IN` for INR, `en-US` for USD). Currency symbols are never hardcoded in JSX.
 
@@ -76,17 +76,27 @@ CyberRiskOS implements strict enterprise multi-currency handling:
 
 ---
 
-## 5. Measured Performance Benchmarks
+## 5. LOCAL / CI PERFORMANCE BENCHMARK
 
-*Benchmarked on Node.js v24 / PostgreSQL in-memory engine, 50 requests per endpoint across 25 production-scale enterprise assets and correlated CVE vulnerabilities.*
+> [!IMPORTANT]
+> **Benchmark Scope & Environment Specifications:**
+> - **Environment**: Local / CI Development & Automated Pipeline Benchmark
+> - **Node.js Runtime**: Node.js v24.18.1
+> - **Database Engine**: In-memory PostgreSQL-compatible test engine (`pg-mem`)
+> - **Test Workload**: 25 assets, 20 correlated CVEs, authentic graph topology
+> - **Load Profile**: 50 requests per endpoint
+> 
+> *These measurements reflect local/CI in-memory execution and should not be represented as production-scale PostgreSQL performance.*
 
-| Endpoint | Target | Measured Median | Measured p95 | Measured p99 | Error Rate | Status |
+| Endpoint | Target | Measured Median (p50) | Measured p95 | Measured p99 | Error Rate | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Risk List** (`GET /api/v1/risk/scores`) | < 250 ms | **4.4 ms** | **7.7 ms** | 39.2 ms | **0.0%** | ✅ PASS |
-| **Financial Exposure** (`GET /api/v1/financial/exposure`) | < 250 ms | **3.7 ms** | **5.9 ms** | 10.3 ms | **0.0%** | ✅ PASS |
-| **Executive Posture** (`GET /api/v1/executive/posture`) | < 250 ms | **10.7 ms** | **15.1 ms** | 48.6 ms | **0.0%** | ✅ PASS |
-| **Compliance Coverage** (`GET /api/v1/compliance/frameworks`) | < 250 ms | **2.1 ms** | **4.2 ms** | 5.3 ms | **0.0%** | ✅ PASS |
-| **Attack Graph Query** (`GET /api/v1/attack-paths`) | < 250 ms | **7.4 ms** | **57.2 ms** | 605.8 ms | **0.0%** | ✅ PASS |
+| **Risk List** (`GET /api/v1/risk/scores`) | < 250 ms | **4.4 ms** | **7.7 ms** | **39.2 ms** | **0.0%** | ✅ PASS |
+| **Financial Exposure** (`GET /api/v1/financial/exposure`) | < 250 ms | **3.7 ms** | **5.9 ms** | **10.3 ms** | **0.0%** | ✅ PASS |
+| **Executive Posture** (`GET /api/v1/executive/posture`) | < 250 ms | **10.7 ms** | **15.1 ms** | **48.6 ms** | **0.0%** | ✅ PASS |
+| **Compliance Coverage** (`GET /api/v1/compliance/frameworks`) | < 250 ms | **2.1 ms** | **4.2 ms** | **5.3 ms** | **0.0%** | ✅ PASS |
+| **Attack Graph Query** (`GET /api/v1/attack-paths`) | < 250 ms | **7.4 ms** | **57.2 ms** | **605.8 ms** | **0.0%** | ✅ PASS |
+
+*Note: Attack path query p99 latency (605.8 ms) reflects complete recursive traversal and cycle detection across deep dependency graphs during single-threaded test execution.*
 
 ---
 
@@ -98,7 +108,7 @@ For the Smart India Hackathon (SIH) live evaluation, execute this repeatable 12-
 2. **Real Vulnerability Examination**: Select an active CVE (e.g. `CVE-2021-44228` Log4Shell) showing CVSS v3.1 10.0 and official CISA KEV Ransomware Campaign flag.
 3. **Enterprise Asset Inventory**: Navigate to Assets; inspect enterprise assets with user-defined criticality tiers and network exposure.
 4. **Automated CPE Matching**: View correlated asset vulnerabilities matched automatically by software version bounds without synthetic assumptions.
-5. **Modeled Risk Evaluation**: Trigger atomic risk evaluation; inspect the deterministic factor breakdown (base CVSS, exploitability, asset tier, internet exposure).
+5. **Modeled Risk Evaluation & Control Posture**: Trigger atomic risk evaluation; inspect the deterministic factor breakdown (base CVSS, exploitability, asset tier, perimeter exposure). Verify active controls evaluated as **control posture/context** (defensive audit context without arbitrary quantitative score reduction).
 6. **Authoritative Financial Exposure**: Navigate to Financial Exposure; view calculated SLE, ALEF, and EAL formatted in the organization's base currency (e.g. `₹` INR for the Indian demo entity).
 7. **What-If Scenario Simulation**: Launch What-If Simulator; apply a patch remediation action to observe deterministic risk and EAL reduction with ZERO database mutations.
 8. **Remediation Action Catalog**: Review the organization's remediation initiative catalog with explicit implementation costs.
