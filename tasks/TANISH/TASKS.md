@@ -121,7 +121,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `risk-engine/app/schemas/risk_input.py`
 - **EXPECTED OUTPUT**: Comprehensive DTO contracts specifying verified input schema, factor bounds, explainability breakdown, null behavior, and score bounds strictly [0.0, 100.0].
 - **TEST REQUIREMENTS**: Schema validation tests in TypeScript (Zod) and Python (Pydantic); null-handling assertions.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 #### TASK ID: TANISH-P2-02
 - **PHASE**: Phase 2 — Risk Quantification
@@ -133,22 +133,35 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `risk-engine/tests/test_risk_model_v1.py`
 - **EXPECTED OUTPUT**: Deterministic scoring function returning `{ score: number, severity: 'LOW'|'MEDIUM'|'HIGH'|'CRITICAL', factors: [...], missingDataWarnings: [...], modelVersion: '1.0.0', provenanceHash: string }`.
 - **TEST REQUIREMENTS**: 100% deterministic calculation unit tests; boundary tests (0.0 to 100.0); edge cases (zero CVSS, missing controls, maximum exposure, unverified factor treatment).
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 #### TASK ID: TANISH-P2-03
 - **PHASE**: Phase 2 — Risk Quantification
 - **DESCRIPTION**: Implement Node.js backend integration layer, orchestration client to Python risk-engine, database migration for risk score caching/persistence, and REST APIs (`GET /api/risk/assets/:assetId`, `GET /api/risk/vulnerabilities/:cveId`, `GET /api/risk/scores`, `POST /api/risk/evaluate`).
-- **DEPENDENCIES**: TANISH-P2-02, HARSH-P2-02
+  - **Mandatory Corrections & Parallel-Branch Rules**:
+    - Migration schedule: strictly use `backend/src/db/migrations/014_risk_results.sql` (reserving 010–013 for Harsh).
+    - CISA KEV severity floor documented explicitly as `CYBERRISKOS MODEL-POLICY RULE` (not an empirical physical constant or CISA-prescribed numerical rule).
+    - Node → Python client (`risk.client.ts`): explicit timeout, configurable URL, no secrets in logs, strictly NO silent fallback score generation in Node (propagates structured 503 `RiskEngineServiceError`).
+    - Cache & Staleness: deterministic cache hit on identical canonical `input_provenance_hash` + identical `model_version`. Invalidates and re-evaluates when inputs change.
+    - Harsh branch independence: isolated fixtures used only inside automated tests. Harsh enterprise inputs are a final merge dependency.
+- **DEPENDENCIES**: TANISH-P2-02, HARSH-P2-02 (Final Integration Merge Dependency)
 - **OWNED FILES/MODULE**:
   - `backend/src/modules/risk/risk.client.ts`
+  - `backend/src/modules/risk/risk.repository.ts`
   - `backend/src/modules/risk/risk.service.ts`
   - `backend/src/modules/risk/risk.controller.ts`
   - `backend/src/modules/risk/risk.routes.ts`
-  - `backend/src/db/migrations/010_risk_results.sql` (or next sequential)
+  - `backend/src/modules/risk/risk.types.ts`
+  - `backend/src/modules/risk/risk.validation.ts`
+  - `backend/src/db/migrations/014_risk_results.sql`
+  - `backend/src/modules/risk/__tests__/risk.client.test.ts`
+  - `backend/src/modules/risk/__tests__/risk.repository.test.ts`
+  - `backend/src/modules/risk/__tests__/risk.service.test.ts`
+  - `backend/src/modules/risk/__tests__/risk.validation.test.ts`
   - `backend/src/modules/risk/__tests__/risk.integration.test.ts`
-- **EXPECTED OUTPUT**: Production-ready Express REST endpoints serving normalized risk scores with factor explainability, model versioning, and pagination.
-- **TEST REQUIREMENTS**: Backend Jest integration tests; mock service fallbacks; HTTP 400 on invalid query params; response time < 150ms.
-- **STATUS**: TODO
+- **EXPECTED OUTPUT**: Production-ready Express REST endpoints serving normalized risk scores with factor explainability, model versioning, pagination, and deterministic caching.
+- **TEST REQUIREMENTS**: 5 risk test suites (61 tests), full backend Jest suite (247 tests), Python pytest (28 tests), clean TypeScript build.
+- **STATUS**: TANISH-P2-03 IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 
 ---
@@ -165,13 +178,14 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `risk-engine/app/schemas/financial_input.py`
 - **EXPECTED OUTPUT**: Mathematical specification and DTOs for financial risk modeling, currency normalization, and calculation explainability.
 - **TEST REQUIREMENTS**: Pydantic and Zod schema validation tests; negative cost rejection tests.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 #### TASK ID: TANISH-P3-02
 - **PHASE**: Phase 3 — Financial Exposure / EAL
 - **DESCRIPTION**: Implement deterministic Financial Exposure & EAL Engine in Python risk-engine and Node.js gateway with REST APIs (`GET /api/financial/exposure`, `GET /api/financial/assets/:id`, `GET /api/financial/summary`).
 - **DEPENDENCIES**: TANISH-P3-01, HARSH-P3-02 (Enterprise financial inputs delivery)
 - **OWNED FILES/MODULE**:
+  - `backend/src/db/migrations/015_financial_results.sql`
   - `risk-engine/app/calculators/financial_exposure.py`
   - `risk-engine/tests/test_financial_exposure.py`
   - `backend/src/modules/financial/financial.service.ts`
@@ -180,7 +194,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/financial/__tests__/financial.integration.test.ts`
 - **EXPECTED OUTPUT**: Deterministic EAL and financial exposure results with breakdown of contributing downtime and recovery costs, data completeness warnings, and model versioning.
 - **TEST REQUIREMENTS**: Calculation tests validating deterministic math, zero-downtime edge cases, high-volume asset aggregation tests.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 ---
 
@@ -196,11 +210,11 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/scenarios/scenarios.types.ts`
 - **EXPECTED OUTPUT**: Stateless, deterministic scenario evaluator computing baseline vs scenario delta for both risk score and modeled financial exposure.
 - **TEST REQUIREMENTS**: In-memory mutation tests proving zero database writes; calculation accuracy comparing baseline against hypothetical states.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 #### TASK ID: TANISH-P4-02
 - **PHASE**: Phase 4 — What-If Simulation
-- **DESCRIPTION**: Implement What-If Simulation REST APIs (`POST /api/scenarios/simulate`, `GET /api/scenarios/baseline`, `POST /api/scenarios/compare`).
+- **DESCRIPTION**: Implement What-If Simulation REST APIs (`POST /api/scenarios/simulate`, `POST /api/scenarios/assets/:assetId/simulate`, `GET /api/scenarios/presets`).
 - **DEPENDENCIES**: TANISH-P4-01
 - **OWNED FILES/MODULE**:
   - `backend/src/modules/scenarios/scenarios.service.ts`
@@ -209,7 +223,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/scenarios/__tests__/scenarios.integration.test.ts`
 - **EXPECTED OUTPUT**: Production REST APIs returning baseline metrics, simulated metrics, risk delta, financial exposure delta, and missing data warnings.
 - **TEST REQUIREMENTS**: Jest API integration tests; invalid override validation tests; concurrency tests.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 ---
 
@@ -226,7 +240,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `risk-engine/tests/test_budget_optimizer.py`
 - **EXPECTED OUTPUT**: Multi-strategy optimizer returning discrete, feasible action subsets respecting dependencies and budget ceilings.
 - **TEST REQUIREMENTS**: Deterministic algorithm tests; budget boundary limit tests; mutually exclusive action tests; ROSI division-by-zero tests.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 #### TASK ID: TANISH-P5-02
 - **PHASE**: Phase 5 — Investment Optimization + ROSI
@@ -239,7 +253,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/optimization/__tests__/optimization.integration.test.ts`
 - **EXPECTED OUTPUT**: REST endpoints delivering feasible strategy candidates, total costs, modeled risk reduction, modeled financial benefit, and ROSI.
 - **TEST REQUIREMENTS**: Backend integration tests; invalid budget payload handling; performance check under 100+ candidate actions (< 500ms).
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 ---
 
@@ -254,7 +268,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/executive/executive.repository.ts`
 - **EXPECTED OUTPUT**: Fast, pre-aggregated executive metrics respecting authentic PostgreSQL data with provenance timestamps and data completeness metrics.
 - **TEST REQUIREMENTS**: Aggregation unit tests; empty database handling; verified zero synthetic KPIs.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 #### TASK ID: TANISH-P6-02
 - **PHASE**: Phase 6 — Executive Decision Dashboard
@@ -266,7 +280,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/executive/__tests__/executive.integration.test.ts`
 - **EXPECTED OUTPUT**: Real HTTP APIs returning executive posture, KEV exposure metrics, business unit rollups, and freshness indicators.
 - **TEST REQUIREMENTS**: Integration tests; response time < 200ms; contract compliance tests.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 ---
 
@@ -280,7 +294,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/compliance/compliance.query-builder.ts`
 - **EXPECTED OUTPUT**: Optimized PostgreSQL queries for framework coverage, gap identification, and evidence aggregation.
 - **TEST REQUIREMENTS**: SQL explain-analyze tests on joined control-compliance queries.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 ---
 
@@ -297,7 +311,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `risk-engine/tests/test_attack_graph.py`
 - **EXPECTED OUTPUT**: Directed graph model returning discovered paths, hop count, cumulative risk weight, choke points, and critical destinations.
 - **TEST REQUIREMENTS**: Graph cycle detection tests; acyclic path discovery tests; zero-path disconnected asset tests; choke-point ranking verification.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 #### TASK ID: TANISH-P7B-02
 - **PHASE**: Phase 7B — Attack Path Intelligence
@@ -310,7 +324,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/attack-paths/__tests__/attack-paths.integration.test.ts`
 - **EXPECTED OUTPUT**: Graph payload formatted for frontend visualization (nodes array, edges array, path metadata, provenance references).
 - **TEST REQUIREMENTS**: API integration tests; payload structure validation; response time benchmarking.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — FINAL CROSS-MODULE INTEGRATION PENDING
 
 ---
 
@@ -327,7 +341,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/assistant/__tests__/assistant.service.test.ts`
 - **EXPECTED OUTPUT**: Grounded AI reasoning engine explaining *why* an asset is high risk, *why* financial exposure changed, or *how* Strategy A differs from Strategy B.
 - **TEST REQUIREMENTS**: Anti-hallucination unit tests (verifying rejected claims that deviate from input numbers); prompt grounding assertions; safe error handling on API timeout.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — LOCAL IMPLEMENTATION VERIFIED / FINAL CROSS-MODULE INTEGRATION PENDING
 
 #### TASK ID: TANISH-P8-02
 - **PHASE**: Phase 8 — AI Explanation Assistant
@@ -339,7 +353,7 @@ TANISH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/assistant/__tests__/assistant.integration.test.ts`
 - **EXPECTED OUTPUT**: REST endpoints delivering structured AI explanations with explicit citation of underlying deterministic factors.
 - **TEST REQUIREMENTS**: Integration tests; mock AI provider tests; payload validation tests.
-- **STATUS**: TODO
+- **STATUS**: IMPLEMENTED — LOCAL IMPLEMENTATION VERIFIED / FINAL CROSS-MODULE INTEGRATION PENDING
 
 ---
 

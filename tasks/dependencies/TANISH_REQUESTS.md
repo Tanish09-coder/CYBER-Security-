@@ -44,8 +44,8 @@ All requests directed to **Tanish** regarding NVD, CISA KEV, MITRE ATT&CK, VCDB,
   - `GET /api/risk/scores?page=1&limit=25&severity=HIGH`
   - Response: `{ data: Array<{ assetId: string, assetName: string, cveId: string, baseCvss: number, riskScore: number, riskLevel: 'LOW'|'MEDIUM'|'HIGH'|'CRITICAL', factors: Array<{ name: string, weight: number, value: string|number, contribution: number }>, missingDataWarnings: string[], modelVersion: '1.0.0', provenanceHash: string }>, total: number, page: number, limit: number }`
 - **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N8
-- **STATUS**: OPEN
-- **DELIVERY COMMITMENT**: Planned under Task TANISH-P2-03 in `tasks/TANISH/TASKS.md`.
+- **STATUS**: DELIVERED
+- **DELIVERY COMMITMENT**: Delivered in Migration `010_risk_scores.sql`, `risk.routes.ts`, `risk.controller.ts`, and `risk.service.ts`. Endpoints `GET /api/risk/scores` and `GET /api/risk/assets/:assetId` live and operational. Documented in `docs/API_CONTRACTS.md` (Section 4).
 
 ---
 

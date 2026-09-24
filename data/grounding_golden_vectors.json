@@ -1,0 +1,77 @@
+[
+  {
+    "testCaseId": "GOLDEN-01-RISK-PASS",
+    "requestType": "EXPLAIN_RISK",
+    "authoritativeContext": {
+      "riskScore": 84.5,
+      "severity": "HIGH",
+      "cveId": "CVE-2021-44228",
+      "assetName": "Payment Gateway Server"
+    },
+    "candidateText": "The asset Payment Gateway Server has a risk score of 84.5 for CVE-2021-44228.",
+    "expectedPassed": true
+  },
+  {
+    "testCaseId": "GOLDEN-02-RISK-HALLUCINATED-SCORE",
+    "requestType": "EXPLAIN_RISK",
+    "authoritativeContext": {
+      "riskScore": 84.5,
+      "severity": "HIGH",
+      "cveId": "CVE-2021-44228",
+      "assetName": "Payment Gateway Server"
+    },
+    "candidateText": "The asset Payment Gateway Server has a critical risk score of 98.9 for CVE-2021-44228.",
+    "expectedPassed": false
+  },
+  {
+    "testCaseId": "GOLDEN-03-FINANCIAL-CALCULATED-PASS",
+    "requestType": "EXPLAIN_FINANCIAL",
+    "authoritativeContext": {
+      "sle": 250000.0,
+      "alef": 0.15,
+      "eal": 37500.0,
+      "ealStatus": "CALCULATED",
+      "currency": "USD"
+    },
+    "candidateText": "Single Loss Expectancy is USD 250,000.00 with ALEF of 0.15 yielding an Estimated Annualized Loss of 37,500.00 USD.",
+    "expectedPassed": true
+  },
+  {
+    "testCaseId": "GOLDEN-04-FINANCIAL-NOT-AVAILABLE-PASS",
+    "requestType": "EXPLAIN_FINANCIAL",
+    "authoritativeContext": {
+      "sle": 250000.0,
+      "alef": null,
+      "eal": null,
+      "ealStatus": "NOT_AVAILABLE",
+      "currency": "USD"
+    },
+    "candidateText": "Single Loss Expectancy is USD 250,000.00. The Annual Loss Event Frequency was not provided, so EAL is NOT AVAILABLE.",
+    "expectedPassed": true
+  },
+  {
+    "testCaseId": "GOLDEN-05-FINANCIAL-FABRICATED-EAL",
+    "requestType": "EXPLAIN_FINANCIAL",
+    "authoritativeContext": {
+      "sle": 250000.0,
+      "alef": null,
+      "eal": null,
+      "ealStatus": "NOT_AVAILABLE",
+      "currency": "USD"
+    },
+    "candidateText": "Single Loss Expectancy is USD 250,000.00. Based on CVSS score, the estimated annual loss is USD 15,000.00.",
+    "expectedPassed": false
+  },
+  {
+    "testCaseId": "GOLDEN-06-STRATEGY-COMPARE-PASS",
+    "requestType": "COMPARE_STRATEGIES",
+    "authoritativeContext": {
+      "strategyACost": 40000.0,
+      "strategyARosi": 125.0,
+      "strategyBCost": 15000.0,
+      "strategyBRosi": 210.0
+    },
+    "candidateText": "Strategy A costs USD 40,000.00 with ROSI 125%. Strategy B costs USD 15,000.00 with ROSI 210%.",
+    "expectedPassed": true
+  }
+]

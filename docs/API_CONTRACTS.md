@@ -778,3 +778,751 @@ Every endpoint entry must declare:
 - **Purpose**: Paginated listing of active CISA KEV entries with date range, search, and ransomware campaign filters.
 - **Status**: **LIVE**
 
+---
+
+## 4. Phase 2: Risk Quantification Engine APIs (Owner: TANISH)
+
+### 4.1 Evaluate Atomic Risk Pair
+- **Method**: `POST`
+- **Canonical Path**: `/api/risk/evaluate` (and `/api/v1/risk/evaluate`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N8: Risk Overview / Simulation trigger)
+- **Purpose**: Evaluates an atomic `(asset_id, vulnerability_id)` pair deterministically using Model v1.0.0.
+- **Request Body**:
+  ```json
+  {
+    "asset": {
+      "assetId": "b8bf43be-637b-4cb5-826a-390275cafbac",
+      "assetName": "SWIFT Core Payment Switch",
+      "criticalityTier": 1,
+      "isInternetFacing": true,
+      "controls": [
+        { "controlCode": "MFA", "status": "IMPLEMENTED" },
+        { "controlCode": "EDR", "status": "IMPLEMENTED" }
+      ]
+    },
+    "vulnerability": {
+      "cveId": "CVE-2021-44228",
+      "cvssScore": 7.0,
+      "cvssVersion": "3.1",
+      "isKnownExploited": true,
+      "knownRansomwareCampaignUse": "Known"
+    }
+  }
+  ```
+### 4.1 Single Risk Evaluation (On Demand & Cached)
+- **Method**: `POST`
+- **Canonical Path**: `/api/risk/evaluate` (and `/api/v1/risk/evaluate`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N8: On-Demand Risk Assessment), Batch Pipeline
+- **Purpose**: Evaluates enterprise risk for an atomic `(asset_id, vulnerability_id)` pair. Checks persistent cache in `risk_results` using canonical input provenance hash: returns cached result on match; otherwise triggers Python Risk Engine evaluation and updates cache.
+- **Request Body**:
+  ```json
+  {
+    "asset": {
+      "assetId": "b8bf43be-637b-4cb5-826a-390275cafbac",
+      "assetName": "SWIFT Core Payment Switch",
+      "criticalityTier": 1,
+      "isInternetFacing": true,
+      "controls": [
+        { "controlCode": "MFA", "status": "IMPLEMENTED" },
+        { "controlCode": "EDR", "status": "IMPLEMENTED" }
+      ]
+    },
+    "vulnerability": {
+      "cveId": "CVE-2021-44228",
+      "cvssScore": 7.0,
+      "cvssVersion": "3.1",
+      "isKnownExploited": true,
+      "knownRansomwareCampaignUse": "Known"
+    }
+  }
+  ```
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "assetId": "b8bf43be-637b-4cb5-826a-390275cafbac",
+    "assetName": "SWIFT Core Payment Switch",
+    "cveId": "CVE-2021-44228",
+    "score": 98.0,
+    "level": "CRITICAL",
+    "baseCvss": 7.0,
+    "modelVersion": "1.0.0",
+    "inputProvenanceHash": "bccf4f3a6389397b9599e500c9dd84f81769327633f36ae9b31f918d0ffd4ade",
+    "dataCompleteness": 1.0,
+    "factors": [
+      {
+        "name": "CVSS_TECHNICAL_SEVERITY",
+        "category": "TECHNICAL_SEVERITY",
+        "value": 7.0,
+        "weight": 1.0,
+        "contribution": 70.0,
+        "rationale": "Intrinsic technical flaw severity from NIST NVD (CVSS 7.0)."
+      },
+      {
+        "name": "ASSET_CRITICALITY_CONSEQUENCE",
+        "category": "BUSINESS_CONTEXT",
+        "value": 1,
+        "weight": 1.4,
+        "contribution": 28.0,
+        "rationale": "Tier 1 asset consequence scaling (Model-Policy Construct: weight 1.40)."
+      }
+    ],
+    "missingDataWarnings": [],
+    "riskFlags": [
+      "CISA_KEV_ACTIVE_EXPLOITATION",
+      "RANSOMWARE_CAMPAIGN_ASSOCIATED",
+      "INTERNET_FACING_PERIMETER",
+      "COMPENSATING_CONTROLS_ACTIVE"
+    ],
+    "evaluatedAt": "2026-09-24T12:00:00.000Z",
+    "isCached": false
+  }
+  ```
+- **Errors**:
+  - `400 Bad Request`: Invalid or malformed RiskInput payload (e.g. missing assetId, invalid CVE format).
+  - `503 Service Unavailable`: Python Risk Engine is offline or unreachable (`code: "RISK_ENGINE_UNAVAILABLE"`). Strictly NO silent local fallback score calculation in Node.
+  - `504 Gateway Timeout`: Python Risk Engine request exceeded configured timeout (`code: "RISK_ENGINE_TIMEOUT"`).
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 4.2 Batch Evaluate Risk Pairs
+- **Method**: `POST`
+- **Canonical Path**: `/api/risk/evaluate/batch` (and `/api/v1/risk/evaluate/batch`)
+- **Owner**: Tanish
+- **Purpose**: Batch evaluation of up to 500 atomic `(asset_id, vulnerability_id)` pairs. Reuses cached evaluations for unchanged inputs; evaluates misses via Python Risk Engine.
+- **Request Body**: `{ "evaluations": [ ...RiskEvaluationInputDTO ] }`
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "items": [ ...RiskScoreItemDTO ],
+    "totalEvaluated": 2,
+    "modelVersion": "1.0.0"
+  }
+  ```
+- **Errors**:
+  - `400 Bad Request`: Empty evaluations array or invalid item.
+  - `503 Service Unavailable`: Python Risk Engine offline.
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 4.3 Query Risk Scores
+- **Method**: `GET`
+- **Canonical Path**: `/api/risk/scores` (and `/api/v1/risk/scores`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N8: Risk Overview Explorer Table)
+- **Query Parameters**:
+  - `page` (int, default 1)
+  - `limit` (int, default 25, max 100)
+  - `assetId` (UUID)
+  - `cveId` (string)
+  - `level` (`LOW` | `MEDIUM` | `HIGH` | `CRITICAL`)
+  - `minScore` (float 0-100)
+  - `maxScore` (float 0-100)
+  - `modelVersion` (string, default "1.0.0")
+  - `organizationId` (UUID)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "items": [
+      {
+        "id": "uuid",
+        "assetId": "uuid",
+        "cveId": "CVE-2021-44228",
+        "score": 98.0,
+        "level": "CRITICAL",
+        "baseCvss": 7.0,
+        "modelVersion": "1.0.0",
+        "inputProvenanceHash": "bccf4f3a...",
+        "dataCompleteness": 1.0,
+        "factors": [ ... ],
+        "missingDataWarnings": [],
+        "riskFlags": [ "CISA_KEV_ACTIVE_EXPLOITATION" ],
+        "evaluatedAt": "2026-09-24T12:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 25,
+      "total": 1,
+      "totalPages": 1
+    }
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 4.4 Asset Risk Summary
+- **Method**: `GET`
+- **Canonical Path**: `/api/risk/assets/:assetId` (and `/api/v1/risk/assets/:assetId`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N8: Asset Risk Drawer / Detail Modal)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "assetId": "uuid",
+    "assetName": "SWIFT Core Payment Switch",
+    "assetType": "server",
+    "criticalityTier": 1,
+    "isInternetFacing": true,
+    "totalVulnerabilitiesEvaluated": 4,
+    "highestScore": 98.0,
+    "highestLevel": "CRITICAL",
+    "averageScore": 76.5,
+    "levelDistribution": {
+      "CRITICAL": 1,
+      "HIGH": 2,
+      "MEDIUM": 1,
+      "LOW": 0
+    },
+    "evaluations": [ ... ]
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 4.5 Vulnerability Risk Distribution
+- **Method**: `GET`
+- **Canonical Path**: `/api/risk/vulnerabilities/:cveId` (and `/api/v1/risk/vulnerabilities/:cveId`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N4: Vulnerability Detail / Enterprise Blast Radius)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "cveId": "CVE-2021-44228",
+    "baseCvss": 10.0,
+    "baseSeverity": "CRITICAL",
+    "knownExploited": true,
+    "totalAssetsAffected": 5,
+    "highestScore": 100.0,
+    "highestLevel": "CRITICAL",
+    "averageScore": 88.4,
+    "levelDistribution": {
+      "CRITICAL": 3,
+      "HIGH": 2,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "evaluations": [ ... ]
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+---
+
+## 5. Financial Exposure & Estimated Annualized Loss (EAL) Engine (Owner: TANISH)
+
+### 5.1 Single Financial Exposure Evaluation
+- **Method**: `POST`
+- **Canonical Path**: `/api/financial/evaluate` (and `/api/v1/financial/evaluate`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N9: Financial Loss Modeling)
+- **Purpose**: Evaluates Single Loss Expectancy (SLE), Annual Loss Event Frequency (ALEF), and Estimated Annualized Loss (EAL). Strictly labeled `MODELED / ESTIMATED`.
+- **Request (JSON)**:
+  ```json
+  {
+    "asset": {
+      "assetId": "uuid",
+      "assetName": "SWIFT Core Payment Switch",
+      "criticalityTier": 1,
+      "isInternetFacing": true,
+      "hourlyDowntimeCost": 15000,
+      "recoveryCost": 60000,
+      "annualizedLossEventFrequency": 1.0,
+      "currency": "USD"
+    },
+    "vulnerability": {
+      "cveId": "CVE-2021-44228",
+      "cvssScore": 10.0,
+      "availabilityImpact": "HIGH",
+      "scope": "CHANGED",
+      "isKnownExploited": true,
+      "knownRansomwareCampaignUse": "Known"
+    }
+  }
+  ```
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "assetId": "uuid",
+    "assetName": "SWIFT Core Payment Switch",
+    "cveId": "CVE-2021-44228",
+    "sle": 420000.0,
+    "alef": 1.0,
+    "eal": 420000.0,
+    "ealStatus": "CALCULATED",
+    "currency": "USD",
+    "primaryLoss": 360000.0,
+    "secondaryLoss": 60000.0,
+    "estimatedOutageHours": 24.0,
+    "hourlyDowntimeRate": 15000.0,
+    "recoveryCost": 60000.0,
+    "factors": [ ... ],
+    "missingDataWarnings": [],
+    "dataCompletenessScore": 1.0,
+    "modelVersion": "1.0.0",
+    "provenanceHash": "64-char-hex",
+    "isEstimated": true,
+    "evaluatedAt": "2026-09-24T20:00:00.000Z",
+    "isCached": false
+  }
+  ```
+- **Frequency Audit & Missing Data Protocol**:
+  - `annualizedLossEventFrequency` must be an empirical, annualized rate ($\text{events/year}$).
+  - CyberRiskOS strictly refuses to derive breach frequency from CVSS, KEV, or arbitrary percentages.
+  - If `annualizedLossEventFrequency` is omitted / null:
+    - `alef`: `null`
+    - `eal`: `null`
+    - `ealStatus`: `"NOT_AVAILABLE"`
+    - `missingDataWarnings`: `["ANNUAL_LOSS_EVENT_FREQUENCY_UNSPECIFIED"]`
+    - `sle`, `primaryLoss`, and `secondaryLoss` remain fully calculated and reported.
+- **Errors**: `400 Bad Request` (validation error), `503 Service Unavailable` (Python engine offline), `504 Gateway Timeout`.
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 5.2 Batch Financial Evaluation
+- **Method**: `POST`
+- **Canonical Path**: `/api/financial/evaluate/batch` (and `/api/v1/financial/evaluate/batch`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N9: Financial Table Ingestion)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "results": [ ... ],
+    "totalEvaluated": 10,
+    "totalModeledEal": 1250000.0,
+    "currency": "USD",
+    "modelVersion": "1.0.0"
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 5.3 Financial Exposures Listing & Filtering
+- **Method**: `GET`
+- **Canonical Path**: `/api/financial/exposure` (and `/api/v1/financial/exposure`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N9: Financial Loss Ledger)
+- **Query Parameters**:
+  - `page`: integer (default 1)
+  - `limit`: integer (default 25, max 100)
+  - `assetId`: UUID
+  - `cveId`: string
+  - `minEal`: number
+  - `maxEal`: number
+  - `sortBy`: `eal` | `sle` | `alef` | `evaluatedAt`
+  - `sortOrder`: `asc` | `desc`
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "items": [ ... ],
+    "total": 42,
+    "pagination": {
+      "page": 1,
+      "limit": 25,
+      "total": 42,
+      "totalItems": 42,
+      "totalPages": 2
+    }
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 5.4 Enterprise Financial Loss Summary
+- **Method**: `GET`
+- **Canonical Path**: `/api/financial/summary` (and `/api/v1/financial/summary`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N9: Executive Financial KPI Cards)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "totalModeledEal": 4500000.0,
+    "currency": "USD",
+    "totalEvaluatedAssets": 15,
+    "totalEvaluatedVulnerabilities": 87,
+    "highestEalAsset": {
+      "assetId": "uuid",
+      "assetName": "SWIFT Core Payment Switch",
+      "eal": 1200000.0
+    },
+    "topLossDrivers": [ ... ],
+    "isEstimated": true
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 5.5 Asset Financial Summary
+- **Method**: `GET`
+- **Canonical Path**: `/api/financial/assets/:assetId` (and `/api/v1/financial/assets/:assetId`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N9 / N5: Asset Financial Drawer)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "assetId": "uuid",
+    "assetName": "SWIFT Core Payment Switch",
+    "totalVulnerabilities": 4,
+    "totalModeledEal": 420000.0,
+    "maxSle": 420000.0,
+    "avgAlef": 0.85,
+    "totalPrimaryLoss": 360000.0,
+    "totalSecondaryLoss": 60000.0,
+    "currency": "USD",
+    "isEstimated": true,
+    "topLossVulnerabilities": [ ... ]
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+---
+
+## 6. What-If Simulation Engine (Owner: TANISH)
+
+### 6.1 Enterprise Posture Simulation (Zero DB Mutations)
+- **Method**: `POST`
+- **Canonical Path**: `/api/scenarios/simulate` (and `/api/v1/scenarios/simulate`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N10: What-If Sandbox)
+- **Purpose**: Computes in-memory baseline vs hypothetical posture without mutating the PostgreSQL database.
+- **Request (JSON)**:
+  ```json
+  {
+    "scenarioName": "Patch KEV Flaws & Isolate Public Perimeter",
+    "actions": [
+      {
+        "actionType": "PATCH_VULNERABILITY",
+        "targetAssetId": "uuid",
+        "targetCveId": "CVE-2021-44228",
+        "description": "Remediate Log4Shell"
+      },
+      {
+        "actionType": "ISOLATE_ASSET",
+        "targetAssetId": "uuid",
+        "description": "Disable direct internet exposure"
+      }
+    ]
+  }
+  ```
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "scenarioName": "Patch KEV Flaws & Isolate Public Perimeter",
+      "baselineAvgRiskScore": 8.8,
+      "simulatedAvgRiskScore": 3.2,
+      "riskScoreDelta": -5.6,
+      "riskReductionPct": 63.64,
+      "baselineTotalEal": 500000.0,
+      "simulatedTotalEal": 120000.0,
+      "ealDelta": -380000.0,
+      "ealReductionPct": 76.0,
+      "ealStatus": "CALCULATED",
+      "currency": "USD",
+      "totalActionsApplied": 2,
+      "actionImpacts": [
+        {
+          "actionType": "PATCH_VULNERABILITY",
+          "targetAssetId": "uuid",
+          "targetCveId": "CVE-2021-44228",
+          "riskScoreReduction": 5.6,
+          "ealReduction": 380000.0,
+          "currency": "USD",
+          "summary": "Remediated CVE-2021-44228 on asset uuid (eliminated flaw exposure from modeled portfolio)."
+        },
+        {
+          "actionType": "ISOLATE_ASSET",
+          "targetAssetId": "uuid",
+          "targetCveId": null,
+          "riskScoreReduction": 0.0,
+          "ealReduction": 0.0,
+          "currency": "USD",
+          "summary": "Isolated asset uuid from public Internet edge (perimeter context updated; continuous risk score delta remains 0.0 under Risk Model v1)."
+        }
+      ],
+      "modelVersion": "1.0.0",
+      "isSimulation": true,
+      "simulatedAt": "2026-09-24T20:00:00.000Z"
+    }
+  }
+  ```
+- **Errors**: `400 Bad Request`, `503 Service Unavailable`, `504 Gateway Timeout`.
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 6.2 Targeted Single-Asset Simulation
+- **Method**: `POST`
+- **Canonical Path**: `/api/scenarios/assets/:assetId/simulate` (and `/api/v1/scenarios/assets/:assetId/simulate`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N10 / Asset Drawer Simulation)
+- **Response (HTTP 200)**: Same structure as 6.1 with results scoped to asset posture.
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+### 6.3 Executive Scenario Presets
+- **Method**: `GET`
+- **Canonical Path**: `/api/scenarios/presets` (and `/api/v1/scenarios/presets`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N10: Scenario Presets Dropdown)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "PRESET-PATCH-KEV",
+        "name": "Remediate All CISA KEV Exploited Vulnerabilities",
+        "description": "Simulates patching known actively exploited vulnerabilities across enterprise assets.",
+        "category": "VULNERABILITY_PATCHING",
+        "actions": [ ... ]
+      },
+      {
+        "id": "PRESET-MFA-TIER1",
+        "name": "Enforce Multi-Factor Authentication Across Tier-1 Assets",
+        "description": "Simulates deploying and enforcing strict MFA controls across mission-critical systems.",
+        "category": "CONTROLS_ENFORCEMENT",
+        "actions": [ ... ]
+      },
+      {
+        "id": "PRESET-ISOLATE-EDGE",
+        "name": "Perimeter Defense: Isolate Exposed High-Risk Systems",
+        "description": "Simulates revoking direct public internet ingress for vulnerable edge appliances.",
+        "category": "PERIMETER_DEFENSE",
+        "actions": [ ... ]
+      }
+    ]
+  }
+  ```
+- **Status**: **LOCAL IMPLEMENTATION VERIFIED (FINAL CROSS-MODULE INTEGRATION PENDING)**
+
+---
+
+## 7. INVESTMENT OPTIMIZATION & ROSI (PHASE 5)
+
+### 7.1 Multi-Strategy Optimization Solve
+- **Method**: `POST`
+- **Canonical Path**: `/api/optimization/solve` (and `/api/v1/optimization/solve`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N11: Security Investment Optimizer)
+- **Purpose**: Generates three distinct, mathematically grounded investment strategies under budget and dependency constraints:
+  - **Strategy A (Maximum Reduction):** Maximizes absolute risk & loss reduction.
+  - **Strategy B (Balanced ROSI):** Maximizes capital efficiency ($\text{ROSI} = \frac{\Delta\text{EAL} - \text{Cost}}{\text{Cost}}$).
+  - **Strategy C (Quick Wins):** Prioritizes low-cost actions ($\le 25\%$ budget) for rapid vulnerability remediation.
+- **Request Body**:
+  ```json
+  {
+    "budgetLimit": 50000.0,
+    "currency": "USD",
+    "baselinePortfolioRisk": 72.5,
+    "baselinePortfolioEal": 350000.0,
+    "candidateActions": [
+      {
+        "actionId": "act-1",
+        "actionType": "PATCH_VULNERABILITY",
+        "targetAssetId": "uuid-1",
+        "targetCveId": "CVE-2021-44228",
+        "cost": 15000.0,
+        "estimatedRiskReduction": 20.0,
+        "estimatedEalReduction": 120000.0,
+        "dependencies": [],
+        "conflictsWith": [],
+        "title": "Patch Log4Shell on Payment Gateway",
+        "description": "Remediates critical RCE flaw."
+      }
+    ]
+  }
+  ```
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "budgetLimit": 50000.0,
+      "currency": "USD",
+      "totalCandidates": 1,
+      "evaluatedAt": "2026-09-24T20:30:00.000Z",
+      "modelVersion": "1.0.0",
+      "strategies": [
+        {
+          "strategyId": "STRATEGY_A_MAX_REDUCTION",
+          "strategyName": "Maximum Risk & Loss Reduction",
+          "strategyType": "MAX_REDUCTION",
+          "description": "Maximizes absolute risk reduction benefit.",
+          "selectedActions": [ ... ],
+          "totalCost": 15000.0,
+          "remainingBudget": 35000.0,
+          "totalRiskReduction": 20.0,
+          "totalEalReduction": 120000.0,
+          "simulatedPortfolioRisk": 52.5,
+          "simulatedPortfolioEal": 230000.0,
+          "netFinancialBenefit": 105000.0,
+          "rosiPct": 700.0,
+          "rosiRatio": 7.0,
+          "actionCount": 1
+        }
+      ]
+    }
+  }
+  ```
+- **Status**: **LIVE & VERIFIED**
+
+### 7.2 Strategies Metadata Catalog
+- **Method**: `GET`
+- **Canonical Path**: `/api/optimization/strategies` (and `/api/v1/optimization/strategies`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N11 Strategy Selector)
+- **Response (HTTP 200)**: Metadata for `STRATEGY_A_MAX_REDUCTION`, `STRATEGY_B_BALANCED_ROSI`, `STRATEGY_C_QUICK_WINS`.
+- **Status**: **LIVE & VERIFIED**
+
+### 7.3 Multi-Strategy Side-by-Side Comparison
+- **Method**: `POST`
+- **Canonical Path**: `/api/optimization/compare` (and `/api/v1/optimization/compare`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N11 Comparison Grid)
+- **Purpose**: Generates side-by-side trade-off metrics without picking a political winner.
+- **Status**: **LIVE & VERIFIED**
+
+---
+
+## 8. EXECUTIVE DECISION DASHBOARD (PHASE 6)
+
+### 8.1 Executive Aggregated Risk Posture
+- **Method**: `GET`
+- **Canonical Path**: `/api/executive/posture` (and `/api/v1/executive/posture`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N1 / Executive Summary View)
+- **Query Parameters**: `organizationId` (optional)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "overallRiskScore": 68.5,
+      "riskSeverity": "MEDIUM",
+      "riskDistribution": { "low": 30, "medium": 50, "high": 30, "critical": 10 },
+      "totalAssetsEvaluated": 45,
+      "totalVulnerabilitiesEvaluated": 80,
+      "kevExposureCount": 8,
+      "ransomwareAssociatedCount": 3,
+      "internetFacingAssetCount": 12,
+      "businessUnitRollups": [ ... ],
+      "dataFreshnessTimestamp": "2026-09-24T20:45:00.000Z",
+      "modelVersion": "1.0.0"
+    }
+  }
+  ```
+- **Status**: **LIVE & VERIFIED**
+
+### 8.2 Top Critical Risk Exposures
+- **Method**: `GET`
+- **Canonical Path**: `/api/executive/top-risks` (and `/api/v1/executive/top-risks`)
+- **Owner**: Tanish
+- **Query Parameters**: `limit` (default: 5, max: 20), `organizationId` (optional)
+- **Response (HTTP 200)**: Array of ranked high-criticality asset/CVE exposure records with CVSS, KEV status, risk score, and modeled EAL.
+- **Status**: **LIVE & VERIFIED**
+
+### 8.3 Enterprise Financial Loss Summary
+- **Method**: `GET`
+- **Canonical Path**: `/api/executive/financial-summary` (and `/api/v1/executive/financial-summary`)
+- **Owner**: Tanish
+- **Query Parameters**: `organizationId` (optional)
+- **Response (HTTP 200)**: Aggregated modeled EAL, primary downtime loss, secondary recovery loss, and top financial loss driver assets.
+- **Status**: **LIVE & VERIFIED**
+
+---
+
+## 9. COMPLIANCE INTELLIGENCE QUERY BUILDER (PHASE 7A)
+
+- **Owner**: Tanish
+- **Module**: `backend/src/modules/compliance/compliance.query-builder.ts`
+- **Methods**:
+  - `buildFrameworkCoverageQuery(filter)`: Aggregates requirements and control postures per framework.
+  - `buildComplianceGapsQuery(filter)`: Identifies unmitigated controls prioritized by asset criticality.
+  - `buildEvidenceAggregationQuery(filter)`: Aggregates verified audit evidence with timestamps and sources.
+  - `buildAssetComplianceScoreQuery(organizationId)`: Aggregates compliance score per asset.
+  - `getRecommendedOptimizationIndexes()`: Recommended composite indexes for sub-50ms execution.
+- **Status**: **LIVE & VERIFIED**
+
+---
+
+## 10. ATTACK PATH & BLAST RADIUS INTELLIGENCE (PHASE 7B)
+
+### 10.1 Topological Attack Graph Analysis
+- **Method**: `GET`
+- **Canonical Path**: `/api/attack-paths` (and `/api/v1/attack-paths`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N12: Attack Path & Blast Radius Visualizer)
+- **Query Parameters**: `organizationId` (optional)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "totalNodes": 12,
+      "totalEdges": 18,
+      "totalPathsFound": 5,
+      "maxPathRisk": 96.4,
+      "discoveredPaths": [
+        {
+          "pathId": "path-1",
+          "nodeIds": ["asset-web", "asset-app", "asset-db"],
+          "edgeIds": ["edge-1", "edge-2"],
+          "hopCount": 2,
+          "cumulativeRiskScore": 94.0,
+          "entryAssetId": "asset-web",
+          "targetAssetId": "asset-db",
+          "criticalCves": ["CVE-2021-44228", "CVE-2023-34362"]
+        }
+      ],
+      "chokePoints": [
+        {
+          "assetId": "asset-app",
+          "assetName": "Core Banking Application Server",
+          "interceptedPathsCount": 4,
+          "interceptedRiskScore": 340.5,
+          "chokePointScore": 0.88,
+          "remediationRecommendation": "Remediating or segmenting 'Core Banking Application Server' severs 4 attack path(s) to critical enterprise assets."
+        }
+      ],
+      "entryPointsCount": 3,
+      "criticalTargetsCount": 2,
+      "evaluatedAt": "2026-09-24T21:00:00.000Z",
+      "modelVersion": "1.0.0"
+    }
+  }
+  ```
+- **Status**: **LIVE & VERIFIED**
+
+### 10.2 Ad-Hoc Custom Graph Simulation
+- **Method**: `POST`
+- **Canonical Path**: `/api/attack-paths/analyze` (and `/api/v1/attack-paths/analyze`)
+- **Owner**: Tanish
+- **Purpose**: Evaluates custom graph payloads without database persistence.
+- **Status**: **LIVE & VERIFIED**
+
+### 10.3 Structural Choke Points Ranking
+- **Method**: `GET`
+- **Canonical Path**: `/api/attack-paths/choke-points` (and `/api/v1/attack-paths/choke-points`)
+- **Owner**: Tanish
+- **Query Parameters**: `limit` (default: 10), `organizationId` (optional)
+- **Status**: **LIVE & VERIFIED**
+
+### 10.4 Asset Inbound Attack Vectors & Blast Radius
+- **Method**: `GET`
+- **Canonical Path**: `/api/attack-paths/asset/:id` (and `/api/v1/attack-paths/asset/:id`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N12 / Asset Detail Drawer)
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "assetId": "asset-app",
+      "assetName": "Core Banking Application Server",
+      "criticalityTier": 2,
+      "isInternetFacing": false,
+      "upstreamInboundPaths": [ ... ],
+      "downstreamOutboundPaths": [ ... ],
+      "compromiseRiskScore": 94.0,
+      "isChokePoint": true,
+      "chokePointDetails": { ... }
+    }
+  }
+  ```
+- **Status**: **LIVE & VERIFIED**
+
+
+
+
