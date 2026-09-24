@@ -14,11 +14,11 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  success: 'bg-green-100 text-risk-low border border-green-200',
-  warning: 'bg-yellow-100 text-risk-moderate border border-yellow-200',
-  critical: 'bg-red-100 text-risk-critical border border-red-200',
-  info: 'bg-blue-100 text-brand-primary border border-blue-200',
-  neutral: 'bg-gray-100 text-text-secondary border border-gray-200',
+  success: 'bg-risk-success/10 text-risk-success border border-risk-success/20',
+  warning: 'bg-risk-warning/10 text-risk-warning border border-risk-warning/20',
+  critical: 'bg-risk-critical/10 text-risk-critical border border-risk-critical/20',
+  info: 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20',
+  neutral: 'bg-app-surfaceSecondary text-text-secondary border border-app-border',
 };
 
 export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', className, children, ...props }) => {

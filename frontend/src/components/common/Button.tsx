@@ -6,7 +6,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -14,9 +14,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-primary text-white hover:bg-blue-700 focus:ring-blue-500',
-  secondary: 'bg-app-secondary text-text-primary hover:bg-gray-200 focus:ring-gray-500 border border-transparent',
-  outline: 'bg-transparent text-text-primary border border-app-border hover:bg-app-bg focus:ring-gray-500',
+  primary: 'bg-brand-primary text-white border-transparent hover:bg-brand-primary/90 shadow-sm',
+  secondary: 'bg-app-surfaceSecondary text-text-primary hover:bg-app-border border border-app-border shadow-sm',
+  outline: 'bg-transparent text-text-primary border border-app-border hover:bg-app-surfaceSecondary',
+  ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-app-surfaceSecondary border-transparent',
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -25,8 +26,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm transition-colors',
-          'focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
+          'inline-flex items-center justify-center px-4 py-2 border text-sm font-medium rounded-md transition-colors',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50 disabled:cursor-not-allowed',
           variantStyles[variant],
           className
         )}

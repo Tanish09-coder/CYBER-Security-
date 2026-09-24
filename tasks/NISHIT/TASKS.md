@@ -11,6 +11,14 @@
 | **N5** | Asset Explorer | Harsh (`/api/assets`) | **COMPLETED** | Enterprise assets, criticality tiers, potential CVE matches |
 | **N6** | Security Controls UI | Harsh (`/api/controls`) | **COMPLETED** | Implementation matrix for MFA, EDR, PAM, Backups |
 | **N7** | Threat Intelligence Dashboard | Tanish (`/api/threat-intel/*`) | **COMPLETED** | ATT&CK matrix view and empirical VCDB distributions |
+| **P2-1** | Risk Overview UI | Risk Engine API | **PARTIALLY_INTEGRATED** | High-level risk score, ALE, and top risk drivers |
+| **P2-2** | Financial Exposure UI | Risk Engine API | **PARTIALLY_INTEGRATED** | Detailed Monte Carlo loss exceedance visualizations |
+| **P2-3** | What-If Simulator UI | Risk Engine API | **PARTIALLY_INTEGRATED** | Sandbox for testing control changes against risk score |
+| **P2-4** | Investment Optimizer UI | Risk Engine API | **PARTIALLY_INTEGRATED** | ROI / ROSI optimizer for security investments |
+| **P2-5** | Executive Dashboard | All | **BLOCKED** | High-level boardroom-ready rollups |
+| **P2-6** | Compliance UI | Harsh / Tanish | **BLOCKED** | NIST, ISO, CIS, RBI, SEBI compliance mappings |
+| **P2-7** | Attack Path Visualization | Tanish / Harsh | **BLOCKED** | Graph-based attack path modeling |
+| **P2-8** | AI Assistant UI | Risk Engine API | **BLOCKED** | Grounded AI decision support chat interface |
 
 ---
 

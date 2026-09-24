@@ -35,7 +35,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="bg-white border border-app-border rounded-lg p-6 shadow-sm">
+      <div className="bg-app-surface border border-app-border rounded-lg p-6 shadow-sm">
         <div className="flex justify-between items-start mb-6">
           <div>
             <Skeleton className="h-6 w-48 mb-2" />
@@ -66,10 +66,10 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
   const statusConfig = getStatusConfig(status);
 
   return (
-    <div className="bg-white border border-app-border rounded-lg p-6 shadow-sm flex flex-col h-full">
+    <div className="bg-app-surface border border-app-border rounded-lg p-6 shadow-sm flex flex-col h-full">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-text-primary">{sourceName}</h3>
+          <h3 className="text-lg font-bold text-text-primary">{sourceName}</h3>
           <p className="text-sm text-text-secondary">Provider: {provider}</p>
         </div>
         <Badge variant={statusConfig.variant}>
@@ -79,12 +79,12 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
       </div>
 
       {error ? (
-        <div className="flex-1 bg-red-50 border border-red-100 rounded p-4 text-sm text-risk-critical">
+        <div className="flex-1 bg-risk-critical/5 border border-risk-critical/20 rounded p-4 text-sm text-risk-critical">
           <div className="flex items-start">
             <AlertCircle className="w-5 h-5 mr-2 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold mb-1">Unable to load integration status</p>
-              <p>{error}</p>
+              <p className="font-bold mb-1">Unable to load integration status</p>
+              <p className="opacity-90">{error}</p>
             </div>
           </div>
         </div>
@@ -92,19 +92,19 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
         <div className="flex-1 flex flex-col space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Last Sync</span>
+              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Last Sync</span>
               <span className="text-sm text-text-primary font-mono">
                 {lastSyncAt ? new Date(lastSyncAt).toLocaleString() : '—'}
               </span>
             </div>
             <div>
-              <span className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Data Age</span>
+              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Data Age</span>
               <span className="text-sm text-text-primary">
                 {dataAgeHours !== undefined ? `${dataAgeHours} hours` : '—'}
               </span>
             </div>
             <div>
-              <span className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Total Records</span>
+              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Total Records</span>
               <span className="text-sm text-text-primary font-mono">
                 {recordCount !== undefined ? recordCount.toLocaleString() : 'Not provided'}
               </span>
@@ -113,7 +113,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 
           {sourceUrl && (
             <div className="pt-2">
-              <span className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Source Endpoint</span>
+              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Source Endpoint</span>
               <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-primary hover:underline break-all">
                 {sourceUrl}
               </a>

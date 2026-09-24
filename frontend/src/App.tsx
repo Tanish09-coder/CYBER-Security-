@@ -10,6 +10,14 @@ import { VulnerabilityDetail } from './pages/VulnerabilityDetail';
 import { Assets } from './pages/Assets';
 import { Controls } from './pages/Controls';
 import { ThreatIntel } from './pages/ThreatIntel';
+import { RiskOverview } from './pages/RiskOverview';
+import { FinancialExposure } from './pages/FinancialExposure';
+import { WhatIfSimulator } from './pages/WhatIfSimulator';
+import { InvestmentOptimizer } from './pages/InvestmentOptimizer';
+import { ExecutiveDashboard } from './pages/ExecutiveDashboard';
+import { Compliance } from './pages/Compliance';
+import { AttackPath } from './pages/AttackPath';
+import { AIAssistant } from './pages/AIAssistant';
 
 export const App: React.FC = () => {
   return (
@@ -26,6 +34,14 @@ export const App: React.FC = () => {
             <Route path="/assets" element={<Assets />} />
             <Route path="/controls" element={<Controls />} />
             <Route path="/threat-intel" element={<ThreatIntel />} />
+            <Route path="/risk-overview" element={<RiskOverview />} />
+            <Route path="/financial-exposure" element={<FinancialExposure />} />
+            <Route path="/what-if-simulator" element={<WhatIfSimulator />} />
+            <Route path="/investment-optimizer" element={<InvestmentOptimizer />} />
+            <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
+            <Route path="/compliance" element={<Compliance />} />
+            <Route path="/attack-path" element={<AttackPath />} />
+            <Route path="/ai-assistant" element={<AIAssistant />} />
             <Route path="*" element={<Navigate to="/integrations" replace />} />
           </Routes>
         </PageContainer>

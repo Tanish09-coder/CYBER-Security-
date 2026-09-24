@@ -8,7 +8,7 @@ function cn(...inputs: ClassValue[]) {
 
 export const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="w-full overflow-auto rounded-md border border-app-border">
+    <div className="w-full overflow-auto rounded-md border border-app-border bg-app-surface">
       <table
         ref={ref}
         className={cn('w-full caption-bottom text-sm', className)}
@@ -21,14 +21,14 @@ Table.displayName = 'Table';
 
 export const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn('[&_tr]:border-b border-app-border bg-app-secondary', className)} {...props} />
+    <thead ref={ref} className={cn('[&_tr]:border-b border-app-border bg-app-surfaceSecondary', className)} {...props} />
   )
 );
 TableHeader.displayName = 'TableHeader';
 
 export const TableBody = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <tbody ref={ref} className={cn('[&_tr:last-child]:border-0 bg-white', className)} {...props} />
+    <tbody ref={ref} className={cn('[&_tr:last-child]:border-0 bg-transparent', className)} {...props} />
   )
 );
 TableBody.displayName = 'TableBody';
@@ -38,7 +38,7 @@ export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttribut
     <tr
       ref={ref}
       className={cn(
-        'border-b border-app-border transition-colors hover:bg-app-bg data-[state=selected]:bg-gray-100',
+        'border-b border-app-border transition-colors hover:bg-app-surfaceSecondary data-[state=selected]:bg-app-surfaceSecondary group',
         className
       )}
       {...props}
@@ -52,7 +52,7 @@ export const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttr
     <th
       ref={ref}
       className={cn(
-        'h-12 px-4 text-left align-middle font-medium text-text-secondary',
+        'h-11 px-4 text-left align-middle font-semibold text-text-secondary uppercase tracking-wider text-[11px]',
         className
       )}
       {...props}

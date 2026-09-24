@@ -146,8 +146,8 @@ export const ThreatIntel: React.FC = () => {
   // Render Helpers
   // ==========================================
   const renderSummaryCard = (title: string, value: number | string | undefined, loading: boolean, error: string | null) => (
-    <div className="bg-white border border-app-border rounded-lg p-5 shadow-sm">
-      <h4 className="text-sm font-medium text-text-secondary mb-2">{title}</h4>
+    <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-sm hover:border-brand-primary/30 transition-colors">
+      <h4 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-2">{title}</h4>
       {loading ? (
         <Skeleton className="h-8 w-16" />
       ) : error ? (
@@ -162,8 +162,8 @@ export const ThreatIntel: React.FC = () => {
     <div className="space-y-8 pb-12">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-text-primary">Threat Intelligence</h2>
-        <p className="text-text-secondary mt-1">
+        <h2 className="text-2xl font-bold text-text-primary tracking-tight">Threat Intelligence</h2>
+        <p className="text-text-secondary mt-1 text-sm">
           Modeled and observed intelligence from trusted authoritative sources including CISA Known Exploited Vulnerabilities and MITRE ATT&CK.
         </p>
       </div>
@@ -181,11 +181,11 @@ export const ThreatIntel: React.FC = () => {
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <ShieldAlert className="w-5 h-5 text-brand-primary" />
-          <h3 className="text-lg font-semibold text-text-primary">CISA Known Exploited Vulnerabilities</h3>
+          <h3 className="text-lg font-bold text-text-primary">CISA Known Exploited Vulnerabilities</h3>
         </div>
 
         {/* KEV Filters */}
-        <div className="bg-white border border-app-border rounded-lg p-4 shadow-sm flex flex-col xl:flex-row xl:items-center space-y-4 xl:space-y-0 xl:space-x-4">
+        <div className="bg-app-surface border border-app-border rounded-lg p-4 shadow-sm flex flex-col xl:flex-row xl:items-center space-y-4 xl:space-y-0 xl:space-x-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input
@@ -193,7 +193,7 @@ export const ThreatIntel: React.FC = () => {
               placeholder="Search CVE ID or Vendor/Product..."
               value={kevSearch}
               onChange={(e) => setKevSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-app-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary"
+              className="w-full pl-9 pr-4 py-2 border border-app-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary bg-app-surface text-text-primary placeholder-text-muted transition-colors"
             />
           </div>
           
@@ -203,25 +203,25 @@ export const ThreatIntel: React.FC = () => {
                 type="checkbox"
                 checked={kevRansomware}
                 onChange={(e) => setKevRansomware(e.target.checked)}
-                className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+                className="rounded border-app-border bg-app-surface text-brand-primary focus:ring-brand-primary"
               />
               <span className="text-sm text-text-primary whitespace-nowrap">Known Ransomware Only</span>
             </label>
 
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-text-muted" />
-              <span className="text-sm text-text-secondary whitespace-nowrap">Added:</span>
-              <input type="date" value={dateAddedFrom} onChange={(e) => setDateAddedFrom(e.target.value)} className="py-1 px-2 border border-app-border rounded text-sm" />
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest whitespace-nowrap">Added:</span>
+              <input type="date" value={dateAddedFrom} onChange={(e) => setDateAddedFrom(e.target.value)} className="py-1 px-2 border border-app-border bg-app-surface text-text-primary rounded text-sm" />
               <span className="text-sm text-text-muted">-</span>
-              <input type="date" value={dateAddedTo} onChange={(e) => setDateAddedTo(e.target.value)} className="py-1 px-2 border border-app-border rounded text-sm" />
+              <input type="date" value={dateAddedTo} onChange={(e) => setDateAddedTo(e.target.value)} className="py-1 px-2 border border-app-border bg-app-surface text-text-primary rounded text-sm" />
             </div>
 
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-text-muted" />
-              <span className="text-sm text-text-secondary whitespace-nowrap">Due:</span>
-              <input type="date" value={dueDateFrom} onChange={(e) => setDueDateFrom(e.target.value)} className="py-1 px-2 border border-app-border rounded text-sm" />
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest whitespace-nowrap">Due:</span>
+              <input type="date" value={dueDateFrom} onChange={(e) => setDueDateFrom(e.target.value)} className="py-1 px-2 border border-app-border bg-app-surface text-text-primary rounded text-sm" />
               <span className="text-sm text-text-muted">-</span>
-              <input type="date" value={dueDateTo} onChange={(e) => setDueDateTo(e.target.value)} className="py-1 px-2 border border-app-border rounded text-sm" />
+              <input type="date" value={dueDateTo} onChange={(e) => setDueDateTo(e.target.value)} className="py-1 px-2 border border-app-border bg-app-surface text-text-primary rounded text-sm" />
             </div>
 
             {(kevSearch || kevRansomware || dateAddedFrom || dateAddedTo || dueDateFrom || dueDateTo) && (
@@ -240,11 +240,11 @@ export const ThreatIntel: React.FC = () => {
         </div>
 
         {/* KEV Table */}
-        <div className="bg-white border border-app-border rounded-lg shadow-sm flex flex-col">
+        <div className="bg-app-surface border border-app-border rounded-lg shadow-sm flex flex-col">
           {kevError ? (
-            <div className="p-8 text-center">
+            <div className="p-8 text-center bg-risk-critical/5">
               <AlertCircle className="w-8 h-8 text-risk-critical mx-auto mb-3" />
-              <h3 className="text-lg font-medium text-text-primary mb-1">Failed to load KEV Catalog</h3>
+              <h3 className="text-lg font-bold text-text-primary mb-1">Failed to load KEV Catalog</h3>
               <p className="text-sm text-text-secondary mb-4">{kevError}</p>
               <Button variant="outline" onClick={fetchKev}>Retry</Button>
             </div>
@@ -274,21 +274,21 @@ export const ThreatIntel: React.FC = () => {
               </TableHeader>
               <TableBody>
                 {kevData.data.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.cveId}</TableCell>
+                  <TableRow key={item.id} className="group">
+                    <TableCell className="font-bold">{item.cveId}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="text-sm text-text-primary">{item.vendorProject || 'Unknown Vendor'}</span>
+                        <span className="text-sm font-medium">{item.vendorProject || 'Unknown Vendor'}</span>
                         <span className="text-xs text-text-secondary">{item.product || 'Unknown Product'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm truncate max-w-xs" title={item.vulnerabilityName || ''}>
                       {item.vulnerabilityName || '—'}
                     </TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">
+                    <TableCell className="text-sm whitespace-nowrap text-text-secondary">
                       {item.dateAdded ? new Date(item.dateAdded).toLocaleDateString() : '—'}
                     </TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">
+                    <TableCell className="text-sm whitespace-nowrap text-text-secondary">
                       {item.dueDate ? new Date(item.dueDate).toLocaleDateString() : '—'}
                     </TableCell>
                     <TableCell>
@@ -308,18 +308,18 @@ export const ThreatIntel: React.FC = () => {
               </TableBody>
             </Table>
           ) : (
-            <div className="p-12 text-center">
-              <ShieldAlert className="w-10 h-10 text-text-muted mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-text-primary">No CISA KEV records found</h3>
+            <div className="p-12 text-center bg-app-surfaceSecondary rounded-b-lg">
+              <ShieldAlert className="w-10 h-10 text-text-muted mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-bold text-text-primary">No CISA KEV records found</h3>
               <p className="text-sm text-text-secondary mt-1">Adjust filters or verify ingestion status.</p>
             </div>
           )}
 
           {/* KEV Pagination */}
           {!kevError && !kevLoading && kevData && kevData.pagination.total > 0 && (
-            <div className="px-6 py-4 border-t border-app-border flex items-center justify-between bg-app-bg/50 rounded-b-lg">
+            <div className="px-6 py-4 border-t border-app-border flex items-center justify-between bg-app-surfaceSecondary rounded-b-lg">
               <div className="text-sm text-text-secondary">
-                Showing <span className="font-medium text-text-primary">{((kevData.pagination.page - 1) * kevData.pagination.limit) + 1}</span> to <span className="font-medium text-text-primary">{Math.min(kevData.pagination.page * kevData.pagination.limit, kevData.pagination.total)}</span> of <span className="font-medium text-text-primary">{kevData.pagination.total.toLocaleString()}</span> entries
+                Showing <span className="font-bold text-text-primary">{((kevData.pagination.page - 1) * kevData.pagination.limit) + 1}</span> to <span className="font-bold text-text-primary">{Math.min(kevData.pagination.page * kevData.pagination.limit, kevData.pagination.total)}</span> of <span className="font-bold text-text-primary">{kevData.pagination.total.toLocaleString()}</span> entries
               </div>
               <div className="flex space-x-2">
                 <Button
@@ -349,16 +349,16 @@ export const ThreatIntel: React.FC = () => {
       {/* MITRE ATT&CK Section */}
       <div className="mt-12 space-y-6">
         <div className="flex items-center space-x-2 border-b border-app-border pb-2">
-          <Target className="w-5 h-5 text-indigo-600" />
-          <h3 className="text-lg font-semibold text-text-primary">MITRE ATT&CK Knowledge Base</h3>
+          <Target className="w-5 h-5 text-brand-primary" />
+          <h3 className="text-lg font-bold text-text-primary">MITRE ATT&CK Knowledge Base</h3>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Tactics */}
-          <div className="bg-white border border-app-border rounded-lg p-5 shadow-sm">
+          <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-text-primary flex items-center">
-                <Crosshair className="w-4 h-4 mr-2 text-indigo-500" /> Tactics
+              <h4 className="font-bold text-text-primary flex items-center">
+                <Crosshair className="w-4 h-4 mr-2 text-brand-primary" /> Tactics
               </h4>
             </div>
             {tacticsError ? (
@@ -372,7 +372,7 @@ export const ThreatIntel: React.FC = () => {
             ) : tactics.length > 0 ? (
               <div className="max-h-80 overflow-y-auto space-y-2 pr-2">
                 {tactics.map(t => (
-                  <div key={t.id} className="p-3 border border-app-border rounded-md hover:bg-gray-50">
+                  <div key={t.id} className="p-3 border border-app-border rounded-md hover:bg-app-surfaceSecondary bg-app-surface transition-colors">
                     <div className="flex justify-between">
                       <span className="font-medium text-sm text-text-primary">{t.name}</span>
                       <Badge variant="neutral">{t.attackId}</Badge>
@@ -381,15 +381,15 @@ export const ThreatIntel: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-text-muted text-center py-4">No tactics available.</div>
+              <div className="text-sm text-text-muted text-center py-4 bg-app-surfaceSecondary rounded">No tactics available.</div>
             )}
           </div>
 
           {/* Techniques */}
-          <div className="bg-white border border-app-border rounded-lg p-5 shadow-sm">
+          <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-text-primary flex items-center">
-                <Target className="w-4 h-4 mr-2 text-indigo-500" /> Techniques (Preview)
+              <h4 className="font-bold text-text-primary flex items-center">
+                <Target className="w-4 h-4 mr-2 text-brand-primary" /> Techniques (Preview)
               </h4>
             </div>
             {techniquesError ? (
@@ -403,7 +403,7 @@ export const ThreatIntel: React.FC = () => {
             ) : techniques.length > 0 ? (
               <div className="max-h-80 overflow-y-auto space-y-2 pr-2">
                 {techniques.map(t => (
-                  <div key={t.id} className="p-3 border border-app-border rounded-md hover:bg-gray-50">
+                  <div key={t.id} className="p-3 border border-app-border rounded-md hover:bg-app-surfaceSecondary bg-app-surface transition-colors">
                     <div className="flex justify-between">
                       <span className="font-medium text-sm text-text-primary">{t.name}</span>
                       <Badge variant="neutral">{t.attackId}</Badge>
@@ -412,7 +412,7 @@ export const ThreatIntel: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-text-muted text-center py-4">No techniques available.</div>
+              <div className="text-sm text-text-muted text-center py-4 bg-app-surfaceSecondary rounded">No techniques available.</div>
             )}
           </div>
         </div>
@@ -447,7 +447,7 @@ export const ThreatIntel: React.FC = () => {
               <p className="text-sm text-text-secondary whitespace-pre-wrap">{selectedKev.shortDescription || 'Not available'}</p>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-md border border-app-border">
+            <div className="bg-app-surfaceSecondary p-4 rounded-md border border-app-border">
               <h4 className="text-sm font-semibold text-text-primary mb-2 flex items-center">
                 <AlertCircle className="w-4 h-4 mr-2 text-brand-primary" /> Required Action
               </h4>

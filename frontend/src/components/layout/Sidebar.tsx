@@ -7,70 +7,269 @@ import {
   ShieldAlert,
   Flame,
   Lock,
-  Building2
+  Building2,
+  DollarSign,
+  TrendingUp,
+  CheckCircle2
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
-  const navItems = [
-    { key: 'integrations', label: 'Integrations', icon: Radio, to: '/integrations' },
-    { key: 'vulnerabilities', label: 'Vulnerabilities', icon: Bug, to: '/vulnerabilities' },
-    { key: 'assets', label: 'Assets', icon: Server, to: '/assets' },
-    { key: 'controls', label: 'Security Controls', icon: ShieldAlert, to: '/controls' },
-    { key: 'threat-intel', label: 'Threat Intelligence', icon: Flame, to: '/threat-intel' },
-  ];
-
   return (
-    <aside className="w-64 bg-white border-r border-app-border flex flex-col justify-between select-none">
+    <aside className="w-64 bg-app-surface border-r border-app-border flex flex-col justify-between select-none z-10 relative">
       <div>
         {/* Brand Header */}
-        <div className="h-16 flex items-center px-6 border-b border-app-border space-x-3">
-          <div className="w-8 h-8 rounded bg-brand-primary flex items-center justify-center text-white font-bold text-sm">
+        <div className="h-16 flex items-center px-6 border-b border-app-border space-x-3 bg-app-surface">
+          <div className="w-8 h-8 rounded bg-brand-primary flex items-center justify-center text-white font-bold text-sm shadow-sm">
             <Lock className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="font-semibold text-sm tracking-tight text-text-primary">CyberRiskOS</h1>
-            <p className="text-[11px] text-text-secondary">SIH 2026 Enterprise</p>
+            <h1 className="font-bold text-sm tracking-tight text-text-primary">CyberRiskOS</h1>
+            <p className="text-[10px] text-text-muted font-medium tracking-wide uppercase">Cyber Risk Intelligence</p>
           </div>
         </div>
 
         {/* Navigation Links */}
-        <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
-          <div className="px-3 py-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-wider">
-            Modules
+        <nav className="p-3 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)] scrollbar-hide mt-2">
+          
+          {/* OVERVIEW */}
+          <div>
+            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
+              Overview
+            </div>
+            <NavLink
+              to="/integrations"
+              className={({ isActive }) =>
+                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <Radio className="w-4 h-4 mr-3" />
+              <span>Integrations</span>
+            </NavLink>
           </div>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.key}
-                to={item.to}
-                className={({ isActive }) =>
-                  `w-full flex items-center px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-app-secondary text-brand-primary'
-                      : 'text-text-secondary hover:bg-app-bg hover:text-text-primary'
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon className={`w-4 h-4 mr-2.5 ${isActive ? 'text-brand-primary' : 'text-text-muted'}`} />
-                    <span>{item.label}</span>
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
+
+          {/* INTELLIGENCE */}
+          <div>
+            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
+              Intelligence
+            </div>
+            <NavLink
+              to="/vulnerabilities"
+              className={({ isActive }) =>
+                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <Bug className="w-4 h-4 mr-3" />
+              <span>Vulnerabilities</span>
+            </NavLink>
+            <NavLink
+              to="/threat-intel"
+              className={({ isActive }) =>
+                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <Flame className="w-4 h-4 mr-3" />
+              <span>Threat Intelligence</span>
+            </NavLink>
+          </div>
+
+          {/* ENVIRONMENT */}
+          <div>
+            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
+              Environment
+            </div>
+            <NavLink
+              to="/assets"
+              className={({ isActive }) =>
+                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <Server className="w-4 h-4 mr-3" />
+              <span>Assets</span>
+            </NavLink>
+            <NavLink
+              to="/controls"
+              className={({ isActive }) =>
+                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <ShieldAlert className="w-4 h-4 mr-3" />
+              <span>Security Controls</span>
+            </NavLink>
+          </div>
+
+          {/* FINANCIAL RISK */}
+          <div>
+            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
+              Financial Risk
+            </div>
+            <NavLink
+              to="/risk-overview"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <DollarSign className="w-4 h-4 mr-3" />
+                <span>Risk Overview</span>
+              </div>
+            </NavLink>
+            <NavLink
+              to="/financial-exposure"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <DollarSign className="w-4 h-4 mr-3" />
+                <span>Financial Exposure</span>
+              </div>
+            </NavLink>
+            <NavLink
+              to="/investment-optimizer"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <TrendingUp className="w-4 h-4 mr-3" />
+                <span>Investment Analysis</span>
+              </div>
+            </NavLink>
+            <NavLink
+              to="/what-if-simulator"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <Bug className="w-4 h-4 mr-3" />
+                <span>What-If Simulator</span>
+              </div>
+            </NavLink>
+          </div>
+
+          {/* BOARDROOM & REPORTING */}
+          <div>
+            <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1 mt-3">
+              Reporting
+            </div>
+            <NavLink
+              to="/executive-dashboard"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <CheckCircle2 className="w-4 h-4 mr-3" />
+                <span>Executive Dashboard</span>
+              </div>
+            </NavLink>
+            <NavLink
+              to="/compliance"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <ShieldAlert className="w-4 h-4 mr-3" />
+                <span>Compliance</span>
+              </div>
+            </NavLink>
+            <NavLink
+              to="/attack-path"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <Flame className="w-4 h-4 mr-3" />
+                <span>Attack Path</span>
+              </div>
+            </NavLink>
+            <NavLink
+              to="/ai-assistant"
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-app-surfaceSecondary text-brand-primary font-semibold'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-text-primary'
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <Radio className="w-4 h-4 mr-3" />
+                <span>AI Assistant</span>
+              </div>
+            </NavLink>
+          </div>
         </nav>
       </div>
 
       {/* User / Org Bottom Status */}
-      <div className="p-3 border-t border-app-border bg-white">
-        <div className="flex items-center space-x-2 px-2 py-1.5 rounded bg-app-bg border border-app-border">
-          <Building2 className="w-4 h-4 text-text-secondary" />
-          <div className="overflow-hidden">
-            <p className="text-[11px] font-medium text-text-primary truncate">BharatFin Demo Corp</p>
-            <p className="text-[10px] text-text-secondary">Role: CISO / Risk Officer</p>
+      <div className="border-t border-app-border bg-app-surface">
+        <div className="p-3 border-b border-app-border">
+          <div className="flex items-center text-[10px] font-medium text-text-secondary">
+            <CheckCircle2 className="w-3 h-3 text-risk-success mr-1.5" />
+            SYSTEM OPERATIONAL
+          </div>
+        </div>
+        <div className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-1.5 rounded-md bg-app-surfaceSecondary border border-app-border">
+               <Building2 className="w-4 h-4 text-text-secondary" />
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-[11px] font-bold text-text-primary truncate">BharatFin Demo Corp</p>
+              <p className="text-[10px] text-text-secondary font-medium">Role: CISO / Risk Officer</p>
+            </div>
           </div>
         </div>
       </div>
