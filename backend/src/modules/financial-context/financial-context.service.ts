@@ -69,6 +69,18 @@ export class FinancialContextService {
     return this.repo.listComplianceEvidence(organizationId);
   }
 
+  async getRemediationBudgetSummary(organizationId: string) {
+    return this.repo.getRemediationBudgetSummary(organizationId);
+  }
+
+  async getFrameworkCoverage(frameworkCode: string, organizationId: string) {
+    return this.repo.getFrameworkCoverage(frameworkCode, organizationId);
+  }
+
+  async getComplianceGaps(organizationId: string) {
+    return this.repo.getComplianceGaps(organizationId);
+  }
+
   async getAggregatedRiskInputsBundle(organizationId: string): Promise<EnterpriseRiskInputsBundle> {
     return this.repo.getAggregatedRiskInputsBundle(organizationId);
   }

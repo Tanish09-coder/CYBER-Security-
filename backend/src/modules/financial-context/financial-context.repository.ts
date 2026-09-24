@@ -289,6 +289,163 @@ export class FinancialContextRepository {
     }));
   }
 
+  async getRemediationBudgetSummary(organizationId: string): Promise<{
+    organizationId: string;
+    totalPlannedCost: number;
+    totalApprovedCost: number;
+    totalCompletedCost: number;
+    totalOrganizationBudget: number | null;
+    actionCount: number;
+  }> {
+    const actionsRes = await query<any>(
+      `SELECT status, SUM(remediation_cost) as total_cost, COUNT(*) as count
+       FROM remediation_actions
+       WHERE organization_id = $1
+       GROUP BY status`,
+      [organizationId]
+    );
+
+    const budgetRes = await query<any>(
+      `SELECT SUM(budget) as total_budget FROM business_units WHERE organization_id = $1`,
+      [organizationId]
+    );
+
+    let totalPlannedCost = 0;
+    let totalApprovedCost = 0;
+    let totalCompletedCost = 0;
+    let actionCount = 0;
+
+    for (const row of actionsRes.rows) {
+      const cost = parseFloat(row.total_cost || '0');
+      const cnt = parseInt(row.count, 10);
+      actionCount += cnt;
+
+      if (row.status === 'PLANNED') totalPlannedCost += cost;
+      if (row.status === 'APPROVED' || row.status === 'IN_PROGRESS') totalApprovedCost += cost;
+      if (row.status === 'COMPLETED') totalCompletedCost += cost;
+    }
+
+    const totalBudget = budgetRes.rows[0]?.total_budget ? parseFloat(budgetRes.rows[0].total_budget) : null;
+
+    return {
+      organizationId,
+      totalPlannedCost,
+      totalApprovedCost,
+      totalCompletedCost,
+      totalOrganizationBudget: totalBudget,
+      actionCount,
+    };
+  }
+
+  async getFrameworkCoverage(frameworkCode: string, organizationId: string): Promise<{
+    frameworkCode: string;
+    organizationId: string;
+    totalFrameworkControls: number;
+    implementedControls: number;
+    partialControls: number;
+    notImplementedControls: number;
+    coveragePercentage: number;
+  }> {
+    const fwRes = await query<any>(`SELECT id FROM compliance_frameworks WHERE code = $1`, [frameworkCode]);
+    if (fwRes.rows.length === 0) {
+      return {
+        frameworkCode,
+        organizationId,
+        totalFrameworkControls: 0,
+        implementedControls: 0,
+        partialControls: 0,
+        notImplementedControls: 0,
+        coveragePercentage: 0,
+      };
+    }
+
+    const frameworkId = fwRes.rows[0].id;
+    const ctrlRes = await query<any>(
+      `SELECT cc.requirement_code, ccm.security_control_code
+       FROM compliance_controls cc
+       LEFT JOIN control_compliance_mappings ccm ON cc.id = ccm.compliance_control_id
+       WHERE cc.framework_id = $1`,
+      [frameworkId]
+    );
+
+    const totalFrameworkControls = ctrlRes.rows.length;
+    if (totalFrameworkControls === 0) {
+      return {
+        frameworkCode,
+        organizationId,
+        totalFrameworkControls: 0,
+        implementedControls: 0,
+        partialControls: 0,
+        notImplementedControls: 0,
+        coveragePercentage: 0,
+      };
+    }
+
+    // Get asset controls status for this org
+    const postureRes = await query<any>(
+      `SELECT sc.code as control_code, ac.status
+       FROM asset_controls ac
+       JOIN security_controls sc ON ac.control_id = sc.id
+       JOIN assets a ON ac.asset_id = a.id
+       WHERE a.organization_id = $1`,
+      [organizationId]
+    );
+
+    const statusMap = new Map<string, string>();
+    for (const r of postureRes.rows) {
+      statusMap.set(r.control_code, r.status);
+    }
+
+    let implemented = 0;
+    let partial = 0;
+    let notImplemented = 0;
+
+    for (const ctrl of ctrlRes.rows) {
+      const code = ctrl.security_control_code;
+      const status = code ? statusMap.get(code) : undefined;
+      if (status === 'IMPLEMENTED') implemented++;
+      else if (status === 'PARTIAL') partial++;
+      else notImplemented++;
+    }
+
+    const coveragePercentage = Math.round((implemented / totalFrameworkControls) * 100 * 100) / 100;
+
+    return {
+      frameworkCode,
+      organizationId,
+      totalFrameworkControls,
+      implementedControls: implemented,
+      partialControls: partial,
+      notImplementedControls: notImplemented,
+      coveragePercentage,
+    };
+  }
+
+  async getComplianceGaps(organizationId: string): Promise<Array<{
+    controlCode: string;
+    controlTitle: string;
+    unprotectedAssetsCount: number;
+    severity: string;
+  }>> {
+    const gapsRes = await query<any>(
+      `SELECT sc.code, sc.name, COUNT(ac.asset_id) as unprotected_count
+       FROM asset_controls ac
+       JOIN security_controls sc ON ac.control_id = sc.id
+       JOIN assets a ON ac.asset_id = a.id
+       WHERE a.organization_id = $1 AND ac.status IN ('NOT_IMPLEMENTED', 'UNKNOWN')
+       GROUP BY sc.code, sc.name
+       ORDER BY unprotected_count DESC`,
+      [organizationId]
+    );
+
+    return gapsRes.rows.map(row => ({
+      controlCode: row.code,
+      controlTitle: row.name,
+      unprotectedAssetsCount: parseInt(row.unprotected_count, 10),
+      severity: parseInt(row.unprotected_count, 10) > 5 ? 'HIGH' : 'MEDIUM',
+    }));
+  }
+
   // ---------------------------------------------------------------------------
   // Aggregated Risk Inputs Bundle for Tanish's Risk Engine
   // ---------------------------------------------------------------------------
