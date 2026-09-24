@@ -10,9 +10,8 @@ export default {
         app: {
           bg: '#F7F8FA',
           surface: '#FFFFFF',
-          secondary: '#F1F3F5',
+          surfaceSecondary: '#F1F3F5',
           border: '#E5E7EB',
-          borderSecondary: '#D1D5DB',
         },
         text: {
           primary: '#111827',
@@ -21,20 +20,34 @@ export default {
         },
         brand: {
           primary: '#2563EB',
-          accent: '#0F766E',
+          secondary: '#0F766E',
           financial: '#7C3AED',
         },
         risk: {
-          low: '#15803D',
-          moderate: '#D97706',
-          high: '#EA580C',
+          success: '#15803D',
+          warning: '#D97706',
           critical: '#DC2626',
         }
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['IBM Plex Mono', 'monospace'],
-      }
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.15s ease-out forwards',
+        'slide-up': 'slideUp 0.15s ease-out forwards',
+        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(5px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
     },
   },
   plugins: [],

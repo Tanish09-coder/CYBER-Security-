@@ -1,44 +1,34 @@
 # NISHIT — Live Progress Tracker
 
 # Current Task
-Screen N1: Application Shell & Light Enterprise Analytics Design Tokens.
+Final Team Merge + Frontend/Backend Integration (IMPLEMENTATION)
 
 # Status
-NOT_STARTED
+COMPLETED / INTEGRATED
 
 # Work Completed
-- Completed design system implementation against PRD Section 32 (Light Enterprise Analytics Theme `#F7F8FA`, `#2563EB`, `#111827`).
-- Implemented foundational application shell: `Sidebar.tsx`, `Header.tsx`, `Badge.tsx`, `Button.tsx`, `Table.tsx`, `Modal.tsx`, `Skeleton.tsx`.
-- Implemented and verified Phase 1 screens:
-  - Screen N2: Integration Center (`/integrations`, `Integrations.tsx`)
-  - Screen N3: Vulnerability Explorer (`/vulnerabilities`, `Vulnerabilities.tsx`)
-  - Screen N4: Vulnerability Detail View (`/vulnerabilities/:cveId`, `VulnerabilityDetail.tsx`)
-  - Screen N5: Enterprise Asset Explorer (`/assets`, `Assets.tsx`)
-  - Screen N6: Security Controls Posture (`/controls`, `Controls.tsx`)
-  - Screen N7: Threat Intelligence Feed (`/threat-intel`, `ThreatIntel.tsx`)
-- Integrated all Phase 1 API clients (`integrations.ts`, `vulnerabilities.ts`, `assets.ts`, `controls.ts`, `threatIntel.ts`).
-- Passed production build (`npm run build` in 21s with 0 errors).
-- Completed Post-Merge Integration Verification Pass across all screens with 0 mock data violations.
+- **Integration**: Performed final team merge with Tanish and Harsh's backend changes.
+- **N8 (Risk Overview)**: Updated types and UI to consume the new `RiskCalculationResponse` with `items` and pagination. Removed the NISHIT-006 blocker.
+- **N9 (Financial Exposure)**: Updated types and UI to consume the new `/v1/financial/scores` API. Implemented SLE, EAL, PrimaryLoss, SecondaryLoss breakdowns. Removed NISHIT-004/005 blockers.
+- **N10 (What-If Simulator)**: Updated to consume `/v1/scenarios/simulate` endpoint with Risk Score deltas. Removed NISHIT-007 blocker.
+- **N11 (Investment Optimizer)**: Updated to map to the new Knapsack solver DTOs, removed obsolete returns curve, added objective selector.
+- **N12 (Executive Dashboard)**: Unblocked and implemented! Created DTOs mapping to Tanish's newly implemented Executive Posture, Financial Summary, and Top Risks endpoints. UI displays business unit rollups, KEV exposure, and global risk score.
+- **N13 (Compliance UI)**: Confirmed as remaining gracefully blocked via standard 501 Not Implemented response handling (the backend route actively rejects with 501).
+- **N14 (Attack Path UI)**: Unblocked and implemented! Designed DTOs and API integrations for `getAttackGraph()` from the newly provisioned backend. UI visuals built for structural choke points and highest risk attack paths.
+- **N15 (AI Assistant)**: Unblocked and implemented! Mapped ID-based schema payload logic to backend's `explainRisk` and `explainFinancial` services. Implemented chat interface showing explanation status, text response, grounding violations, and warnings.
+- **Verification Pass**: Completed end-to-end frontend type checking and passed `npm run build` with 0 compilation or linter errors.
 
 ---
 
-## Phase 2 Status & Progress Tracker
+## Final Phase Integration Tracker
 
 ### COMPLETED
-- Foundation Screens N1 through N7 fully integrated, verified, and operational.
-- Frontend API contracts aligned with backend services.
-- Post-Merge Integration Pass across all 3 domains.
-- Ownership freeze and Phase 2–9 Task Roadmap established.
-
-### IN PROGRESS
-- **OWNERSHIP_FROZEN_FOR_PHASE_2**: All task boundaries, file maps, and dependency interfaces frozen. No active implementation during freeze phase.
+- All frontend data contracts aligned exactly with `backend/src/modules/` endpoints.
+- Components smoothly intercept loading states, error states (501 or otherwise), empty states, and fully populated runtime schemas.
+- DTO alignment across `risk.ts`, `executive.ts`, `attack-paths.ts`, and `assistant.ts` with no mock/invented fallback data values.
 
 ### BLOCKED
-- **BLOCKED ON TANISH & HARSH**: Screen N8 (Risk Overview) is gated on:
-  1. Harsh delivering `docs/RISK_ENTERPRISE_INPUTS.md` & `GET /api/assets/:id/risk-inputs`.
-  2. Tanish delivering `docs/RISK_ENGINE_CONTRACT.md` & `GET /api/risk/scores`.
+- **NISHIT-008 & 009 (Compliance UI - Screen N13)**: The backend structurally blocks the compliance route (`/api/v1/compliance`). UI logic handles the backend 501 rejection safely and visibly. 
 
 ### NEXT
-1. Await delivery and documentation of Phase 2 Risk Quantification API contracts in `docs/API_CONTRACTS.md`.
-2. Begin **Task NISHIT-P2-01**: Implement Screen N8 (Risk Overview UI) under `frontend/src/pages/RiskOverview.tsx` with color-coded risk badges, factor breakdown drawer, and filter toolbar.
-
+End-to-End Acceptance Testing by QA. All development tasks assigned to Nishit are complete.

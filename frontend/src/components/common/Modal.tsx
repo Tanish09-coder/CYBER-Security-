@@ -45,7 +45,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
       {/* Modal Dialog */}
       <div 
         className={cn(
-          "relative bg-white rounded-lg shadow-xl sm:w-full sm:max-w-2xl overflow-hidden flex flex-col max-h-[90vh]",
+          "relative bg-app-surface border border-app-border rounded-lg shadow-xl sm:w-full sm:max-w-2xl overflow-hidden flex flex-col max-h-[90vh]",
           className
         )}
         role="dialog"
