@@ -115,6 +115,18 @@ export class OrganizationService {
     }
     return this.repo.deleteBusinessUnit(id);
   }
+
+  // ---------------------------------------------------------------------------
+  // Enterprise Dimension Aggregations (Phase 6)
+  // ---------------------------------------------------------------------------
+
+  async getBusinessUnitSummaries(organizationId?: string) {
+    return this.repo.getBusinessUnitSummaries(organizationId);
+  }
+
+  async getOrganizationDimensions(organizationId: string) {
+    return this.repo.getOrganizationDimensions(organizationId);
+  }
 }
 
 // =============================================================================

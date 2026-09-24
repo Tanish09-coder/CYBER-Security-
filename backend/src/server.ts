@@ -12,6 +12,14 @@ import { createSoftwareRouter } from './modules/software/software.routes';
 import { createCpeMatchingRouter } from './modules/cpe-matching/cpe-matching.routes';
 import { createControlsRouter } from './modules/controls/controls.routes';
 import { createThreatIntelRouter } from './modules/threat-intel/threat-intel.routes';
+import { createRiskRouter } from './modules/risk/risk.routes';
+import { createFinancialRouter } from './modules/financial/financial.routes';
+import { createScenariosRouter } from './modules/scenarios/scenarios.routes';
+import { createOptimizationRouter } from './modules/optimization/optimization.routes';
+import { createExecutiveRouter } from './modules/executive/executive.routes';
+import { createAttackPathsRouter } from './modules/attack-paths/attack-paths.routes';
+import { createAssistantRouter } from './modules/assistant/assistant.routes';
+import { financialContextRouter } from './modules/financial-context/financial-context.routes';
 import { runMigrations } from './db';
 import { logger } from './config/logger';
 
@@ -93,8 +101,46 @@ const controlsRouter = createControlsRouter();
 app.use('/api/controls', controlsRouter);
 app.use('/api/v1/controls', controlsRouter);
 
+// Enterprise Financial Context (Owner: HARSH - Phase 2)
+app.use('/api', financialContextRouter);
+
+// Risk Quantification Engine (Owner: TANISH - Phase 2)
+const riskRouter = createRiskRouter();
+app.use('/api/risk', riskRouter);
+app.use('/api/v1/risk', riskRouter);
+
+// Financial Exposure & EAL Engine (Owner: TANISH - Phase 3)
+const financialRouter = createFinancialRouter();
+app.use('/api/financial', financialRouter);
+app.use('/api/v1/financial', financialRouter);
+
+// What-If Simulation Sandbox Engine (Owner: TANISH - Phase 4)
+const scenariosRouter = createScenariosRouter();
+app.use('/api/scenarios', scenariosRouter);
+app.use('/api/v1/scenarios', scenariosRouter);
+
+// Investment Optimization Engine (Owner: TANISH - Phase 5)
+const optimizationRouter = createOptimizationRouter();
+app.use('/api/optimization', optimizationRouter);
+app.use('/api/v1/optimization', optimizationRouter);
+
+// Executive Decision Dashboard (Owner: TANISH - Phase 6)
+const executiveRouter = createExecutiveRouter();
+app.use('/api/executive', executiveRouter);
+app.use('/api/v1/executive', executiveRouter);
+
+// Attack Path & Blast Radius Analysis (Owner: TANISH - Phase 7B)
+const attackPathsRouter = createAttackPathsRouter();
+app.use('/api/attack-paths', attackPathsRouter);
+app.use('/api/v1/attack-paths', attackPathsRouter);
+
+// AI Explanation Assistant (Owner: TANISH - Phase 8)
+const assistantRouter = createAssistantRouter();
+app.use('/api/assistant', assistantRouter);
+app.use('/api/v1/assistant', assistantRouter);
+
 // -----------------------------------------------------------------------------
-// Structural Route Registrations (Phase 3+ Implementations)
+// Structural Route Registrations (Phase 5+ Implementations)
 // -----------------------------------------------------------------------------
 const routeNotice = (moduleName: string) => (req: Request, res: Response) => {
   res.status(501).json({
@@ -107,13 +153,8 @@ const routeNotice = (moduleName: string) => (req: Request, res: Response) => {
 // Domain Route Groups scheduled for future phases
 app.use('/api/v1/auth', routeNotice('Authentication & RBAC'));
 app.use('/api/v1/telemetry', routeNotice('Security Telemetry Ingestion (CSV/JSON/REST)'));
-app.use('/api/v1/risk', routeNotice('Risk Quantification & Snapshot Engine'));
-app.use('/api/v1/scenarios', routeNotice('What-If Simulation Sandbox'));
-app.use('/api/v1/optimizer', routeNotice('Security Investment Optimizer'));
-app.use('/api/v1/attack-paths', routeNotice('Attack Path & Blast Radius Analysis'));
 app.use('/api/v1/compliance', routeNotice('Compliance Mapping (NIST, ISO, CIS, RBI, SEBI)'));
 app.use('/api/v1/reports', routeNotice('Executive & Audit Reporting'));
-app.use('/api/v1/assistant', routeNotice('Grounded AI Decision Support'));
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

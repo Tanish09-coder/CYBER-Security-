@@ -30,6 +30,10 @@ export function createAssetRouter(controller?: AssetController): Router {
   router.post('/import/json', ctrl.importJson);
   router.post('/import/csv', textParser, ctrl.importCsv);
 
+  // Risk Inputs Endpoints (HARSH-P2-02)
+  router.get('/risk-inputs/summary', ctrl.getRiskInputsSummary);
+  router.get('/:id/risk-inputs', ctrl.getAssetRiskInputs);
+
   // Asset CRUD & Listing
   router.post('/', ctrl.createAsset);
   router.get('/', ctrl.listAssets);

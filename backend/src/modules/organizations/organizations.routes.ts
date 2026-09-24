@@ -13,6 +13,7 @@ export function createOrganizationRouter(controller?: OrganizationController): R
   // Organization CRUD
   router.post('/', ctrl.createOrganization);
   router.get('/', ctrl.listOrganizations);
+  router.get('/:id/dimensions', ctrl.getOrganizationDimensions);
   router.get('/:id', ctrl.getOrganization);
   router.patch('/:id', ctrl.updateOrganization);
   router.delete('/:id', ctrl.deleteOrganization);
@@ -24,7 +25,8 @@ export function createBusinessUnitRouter(controller?: OrganizationController): R
   const router = Router();
   const ctrl = controller || new OrganizationController();
 
-  // Business Unit CRUD
+  // Business Unit CRUD & Summary
+  router.get('/summary', ctrl.getBusinessUnitSummaries);
   router.post('/', ctrl.createBusinessUnit);
   router.get('/', ctrl.listBusinessUnits);
   router.get('/:id', ctrl.getBusinessUnit);

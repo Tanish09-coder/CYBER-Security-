@@ -59,6 +59,16 @@ export class AssetRepository {
     return result.rows[0] || null;
   }
 
+  async getAssetControls(assetId: string): Promise<Array<{ control_code: string; status: string; effectiveness_score: string; source: string }>> {
+    const result = await query<any>(
+      `SELECT control_code, status, effectiveness_score, source
+       FROM asset_controls
+       WHERE asset_id = $1`,
+      [assetId]
+    );
+    return result.rows;
+  }
+
   async findDuplicate(
     organizationId: string,
     identifiers: { hostname?: string | null; mac_address?: string | null; ip_address?: string | null },

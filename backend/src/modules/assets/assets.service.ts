@@ -240,6 +240,69 @@ export class AssetService {
       errors,
     };
   }
+
+  // ---------------------------------------------------------------------------
+  // Risk Inputs & Completeness (HARSH-P2-02)
+  // ---------------------------------------------------------------------------
+
+  async getAssetRiskInputs(id: string): Promise<any | null> {
+    const asset = await this.repo.findAssetById(id);
+    if (!asset) return null;
+
+    const controls = await this.repo.getAssetControls(id);
+
+    // Completeness Calculation Methodology:
+    // Criticality defined (1-5): 0.20
+    // Internet Facing defined: 0.20
+    // Data Classification defined: 0.20
+    // Control posture assigned (not empty/UNKNOWN): 0.20
+    // Business Unit assigned: 0.20
+    let completeness = 0;
+    if (asset.business_criticality >= 1 && asset.business_criticality <= 5) completeness += 0.20;
+    if (asset.is_internet_facing !== null && asset.is_internet_facing !== undefined) completeness += 0.20;
+    if (asset.data_classification && asset.data_classification !== 'Internal') completeness += 0.20;
+    if (controls.some(c => c.status !== 'UNKNOWN')) completeness += 0.20;
+    if (asset.business_unit_id) completeness += 0.20;
+
+    return {
+      assetId: asset.id,
+      assetName: asset.name,
+      assetType: asset.asset_type,
+      criticalityTier: asset.business_criticality,
+      isInternetFacing: asset.is_internet_facing,
+      dataClassification: asset.data_classification,
+      revenueDependencyPct: parseFloat(asset.revenue_dependency_pct || '0'),
+      operationalImportanceScore: parseFloat(asset.operational_importance || '1.0'),
+      controls: controls.map(c => ({
+        controlCode: c.control_code,
+        status: c.status,
+        effectivenessScore: parseFloat(c.effectiveness_score),
+        source: c.source || 'USER_CONFIG',
+      })),
+      completenessScore: Math.round(completeness * 100) / 100,
+      provenance: 'VERIFIED_ENTERPRISE_INPUT',
+    };
+  }
+
+  async getRiskInputsSummary(organizationId?: string): Promise<any> {
+    const { assets, total } = await this.repo.listAssets({
+      organizationId,
+      limit: 10000,
+    });
+
+    const internetFacingCount = assets.filter(a => a.is_internet_facing).length;
+    const criticalityDist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    assets.forEach(a => {
+      criticalityDist[a.business_criticality] = (criticalityDist[a.business_criticality] || 0) + 1;
+    });
+
+    return {
+      totalAssets: total,
+      internetFacingCount,
+      criticalityDistribution: criticalityDist,
+      provenance: 'USER_CONFIG_AND_SCANNER_IMPORT',
+    };
+  }
 }
 
 // =============================================================================

@@ -141,6 +141,8 @@ backend/src/modules/risk/
 backend/src/modules/financial/
   financial.types.ts
   financial.validation.ts
+  financial.client.ts
+  financial.repository.ts
   financial.service.ts
   financial.controller.ts
   financial.routes.ts
@@ -149,6 +151,7 @@ backend/src/modules/financial/
 backend/src/modules/scenarios/
   scenarios.types.ts
   scenarios.validation.ts
+  scenarios.client.ts
   scenarios.service.ts
   scenarios.controller.ts
   scenarios.routes.ts
@@ -170,8 +173,14 @@ backend/src/modules/executive/
   executive.routes.ts
   __tests__/executive.integration.test.ts
 
+backend/src/modules/compliance/
+  compliance.types.ts
+  compliance.query-builder.ts
+  __tests__/compliance.query-builder.test.ts
+
 backend/src/modules/attack-paths/
   attack-paths.types.ts
+  attack-paths.client.ts
   attack-paths.service.ts
   attack-paths.controller.ts
   attack-paths.routes.ts
@@ -194,12 +203,12 @@ docs/OPTIMIZATION.md
 docs/ATTACK_PATH_MODEL.md
 ```
 
-### 6.4 Database Migrations (Sequentially 010+)
+### 6.4 Database Migrations (Sequentially Reserved)
 ```text
-backend/src/db/migrations/010+_risk_*.sql
-backend/src/db/migrations/010+_financial_*.sql
-backend/src/db/migrations/010+_optimization_*.sql
-backend/src/db/migrations/010+_attack_paths_*.sql
+backend/src/db/migrations/014_risk_results.sql
+backend/src/db/migrations/015_financial_results.sql
+backend/src/db/migrations/016+_optimization_*.sql
+backend/src/db/migrations/017+_attack_paths_*.sql
 ```
 
 ### 6.5 Absolute Prohibitions for Tanish
