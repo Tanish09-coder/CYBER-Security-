@@ -328,4 +328,30 @@ export class OrganizationController {
       });
     }
   };
+
+  // ---------------------------------------------------------------------------
+  // Enterprise Dimension Aggregations (Phase 6)
+  // ---------------------------------------------------------------------------
+
+  getBusinessUnitSummaries = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const organizationId = req.query.organizationId as string | undefined;
+      const summaries = await this.service.getBusinessUnitSummaries(organizationId);
+      res.status(200).json({ businessUnits: summaries, total: summaries.length });
+    } catch (err: any) {
+      logger.error('Failed to get business unit summaries', { error: err.message });
+      res.status(500).json({ error: 'QueryError', message: err.message });
+    }
+  };
+
+  getOrganizationDimensions = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const dimensions = await this.service.getOrganizationDimensions(id);
+      res.status(200).json(dimensions);
+    } catch (err: any) {
+      logger.error('Failed to get organization dimensions', { error: err.message });
+      res.status(500).json({ error: 'QueryError', message: err.message });
+    }
+  };
 }

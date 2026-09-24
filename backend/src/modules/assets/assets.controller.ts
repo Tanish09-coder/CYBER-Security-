@@ -249,4 +249,39 @@ export class AssetController {
       res.status(500).json({ error: 'ImportError', message: err.message });
     }
   };
+
+  getAssetRiskInputs = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const idValidation = uuidSchema.safeParse(req.params.id);
+      if (!idValidation.success) {
+        res.status(400).json({
+          error: 'Validation Error',
+          details: idValidation.error.errors.map((e) => e.message),
+        });
+        return;
+      }
+
+      const riskInputs = await this.service.getAssetRiskInputs(idValidation.data);
+      if (!riskInputs) {
+        res.status(404).json({ error: 'NotFound', message: `Asset ${idValidation.data} not found` });
+        return;
+      }
+
+      res.status(200).json(riskInputs);
+    } catch (err: any) {
+      logger.error('Failed to get asset risk inputs', { error: err.message });
+      res.status(500).json({ error: 'QueryError', message: err.message });
+    }
+  };
+
+  getRiskInputsSummary = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const organizationId = req.query.organizationId as string | undefined;
+      const summary = await this.service.getRiskInputsSummary(organizationId);
+      res.status(200).json(summary);
+    } catch (err: any) {
+      logger.error('Failed to get risk inputs summary', { error: err.message });
+      res.status(500).json({ error: 'QueryError', message: err.message });
+    }
+  };
 }

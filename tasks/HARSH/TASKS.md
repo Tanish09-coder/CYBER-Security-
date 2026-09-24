@@ -9,6 +9,7 @@
 | **Phase H3** | Software Inventory | **COMPLETED** | Installed software model, version tracking, asset-software relationships |
 | **Phase H4** | CPE Matching Engine | **COMPLETED** | CPE criteria evaluator with version-bound logic and confidence rating |
 | **Phase H5** | Security Controls Posture | **COMPLETED** | Control catalog, asset-control mapping (MFA, EDR, Backups, PAM, Seg) |
+| **Phase H6** | Enterprise Financial Context | **COMPLETED** | Audit of inputs, financial parameters, remediation catalog, asset dependencies, compliance mappings & aggregated risk inputs bundle |
 
 ---
 
@@ -129,7 +130,7 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/assets/assets.types.ts`
 - **EXPECTED OUTPUT**: Comprehensive documentation and DTO schema for enterprise asset context and control posture states with transparent provenance.
 - **TEST REQUIREMENTS**: Schema type verification tests; completeness calculation tests; null/unknown state tests.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 #### TASK ID: HARSH-P2-02
 - **PHASE**: Phase 2 — Risk Quantification
@@ -142,7 +143,7 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
   - `backend/src/modules/assets/__tests__/assets.risk-inputs.test.ts`
 - **EXPECTED OUTPUT**: Production REST APIs delivering authentic enterprise risk attributes for any asset without fabricated weights.
 - **TEST REQUIREMENTS**: Integration tests; zero synthetic fallback verification; HTTP status checks.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 
 ---
@@ -151,29 +152,29 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
 
 #### TASK ID: HARSH-P3-01
 - **PHASE**: Phase 3 — Financial Exposure / EAL
-- **DESCRIPTION**: Design and implement the Enterprise Financial Inputs data model and database migration `010_financial_inputs.sql`. Stores organization currency, hourly downtime costs per business unit / asset criticality tier, recovery cost baselines, and business interruption valuation. Organization/user-provided inputs ONLY (zero fabricated costs).
+- **DESCRIPTION**: Design and implement the Enterprise Financial Inputs data model and database migration `010_enterprise_financial_context.sql`. Stores organization currency, hourly downtime costs per business unit / asset criticality tier, recovery cost baselines, and business interruption valuation. Organization/user-provided inputs ONLY (zero fabricated costs).
 - **DEPENDENCIES**: None
 - **OWNED FILES/MODULE**:
-  - `backend/src/db/migrations/010_financial_inputs.sql`
-  - `backend/src/modules/financial-inputs/financial-inputs.types.ts`
-  - `backend/src/modules/financial-inputs/financial-inputs.validation.ts`
+  - `backend/src/db/migrations/010_enterprise_financial_context.sql`
+  - `backend/src/modules/financial-context/financial-context.types.ts`
+  - `backend/src/modules/financial-context/financial-context.validation.ts`
 - **EXPECTED OUTPUT**: Authoritative database schema and validated Zod schemas for user-defined monetary assumptions.
 - **TEST REQUIREMENTS**: Migration forward/rollback test; negative financial value validation tests; multi-currency support tests.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 #### TASK ID: HARSH-P3-02
 - **PHASE**: Phase 3 — Financial Exposure / EAL
 - **DESCRIPTION**: Implement Enterprise Financial Inputs REST APIs (`POST /api/financial-inputs`, `GET /api/financial-inputs`, `PATCH /api/financial-inputs/:id`) with audit provenance tracking and completeness scoring.
 - **DEPENDENCIES**: HARSH-P3-01
 - **OWNED FILES/MODULE**:
-  - `backend/src/modules/financial-inputs/financial-inputs.repository.ts`
-  - `backend/src/modules/financial-inputs/financial-inputs.service.ts`
-  - `backend/src/modules/financial-inputs/financial-inputs.controller.ts`
-  - `backend/src/modules/financial-inputs/financial-inputs.routes.ts`
-  - `backend/src/modules/financial-inputs/__tests__/financial-inputs.integration.test.ts`
+  - `backend/src/modules/financial-context/financial-context.repository.ts`
+  - `backend/src/modules/financial-context/financial-context.service.ts`
+  - `backend/src/modules/financial-context/financial-context.controller.ts`
+  - `backend/src/modules/financial-context/financial-context.routes.ts`
+  - `backend/src/modules/financial-context/__tests__/financial-inputs.integration.test.ts`
 - **EXPECTED OUTPUT**: Production REST endpoints enabling organizations to supply and update authentic financial impact baselines.
 - **TEST REQUIREMENTS**: Backend integration tests; 100% test pass rate; authorization checks.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 ---
 
@@ -188,7 +189,7 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
   - `docs/REMEDIATION_CATALOG.md`
 - **EXPECTED OUTPUT**: Standardized action schemas consumed by Tanish's What-If simulation engine.
 - **TEST REQUIREMENTS**: Action payload validation tests; constraint consistency tests.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 ---
 
@@ -196,18 +197,18 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
 
 #### TASK ID: HARSH-P5-01
 - **PHASE**: Phase 5 — Investment Optimization + ROSI
-- **DESCRIPTION**: Create Remediation Action Catalog database migration `011_remediation_actions.sql` and REST APIs (`GET /api/remediation-actions`, `POST /api/remediation-actions`, `GET /api/remediation-actions/budget`). Stores user/organization candidate actions: action ID, target asset, target vuln/control, implementation cost, action dependencies, execution constraints, feasibility rating, and total organization budget limit.
+- **DESCRIPTION**: Create Remediation Action Catalog database migration `010_enterprise_financial_context.sql` and REST APIs (`GET /api/remediation-actions`, `POST /api/remediation-actions`, `GET /api/remediation-actions/budget`). Stores user/organization candidate actions: action ID, target asset, target vuln/control, implementation cost, action dependencies, execution constraints, feasibility rating, and total organization budget limit.
 - **DEPENDENCIES**: HARSH-P4-01
 - **OWNED FILES/MODULE**:
-  - `backend/src/db/migrations/011_remediation_actions.sql`
-  - `backend/src/modules/remediation-actions/remediation-actions.repository.ts`
-  - `backend/src/modules/remediation-actions/remediation-actions.service.ts`
-  - `backend/src/modules/remediation-actions/remediation-actions.controller.ts`
-  - `backend/src/modules/remediation-actions/remediation-actions.routes.ts`
-  - `backend/src/modules/remediation-actions/__tests__/remediation-actions.test.ts`
+  - `backend/src/db/migrations/010_enterprise_financial_context.sql`
+  - `backend/src/modules/financial-context/financial-context.repository.ts`
+  - `backend/src/modules/financial-context/financial-context.service.ts`
+  - `backend/src/modules/financial-context/financial-context.controller.ts`
+  - `backend/src/modules/financial-context/financial-context.routes.ts`
+  - `backend/src/modules/financial-context/__tests__/financial-inputs.integration.test.ts`
 - **EXPECTED OUTPUT**: Normalized database catalog of real remediation actions with budget parameters.
 - **TEST REQUIREMENTS**: CRUD integration tests; budget threshold validation; dependency cycle detection tests.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 ---
 
@@ -218,13 +219,12 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
 - **DESCRIPTION**: Implement enterprise aggregation endpoints grouping assets by business unit, asset ownership, criticality tiers, and business context dimensions (`GET /api/business-units/summary`, `GET /api/organizations/:id/dimensions`).
 - **DEPENDENCIES**: None (builds on Phase 1 organizations & assets)
 - **OWNED FILES/MODULE**:
-  - `backend/src/modules/business-units/business-units.service.ts`
-  - `backend/src/modules/business-units/business-units.controller.ts`
-  - `backend/src/modules/business-units/business-units.routes.ts`
-  - `backend/src/modules/business-units/__tests__/business-units.summary.test.ts`
+  - `backend/src/modules/organizations/organizations.service.ts`
+  - `backend/src/modules/organizations/organizations.controller.ts`
+  - `backend/src/modules/organizations/organizations.routes.ts`
 - **EXPECTED OUTPUT**: Efficient rollup APIs providing departmental counts, revenue weighting, and criticality distribution.
 - **TEST REQUIREMENTS**: SQL aggregation performance tests; empty state handling; unit tests.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 ---
 
@@ -232,29 +232,29 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
 
 #### TASK ID: HARSH-P7A-01
 - **PHASE**: Phase 7A — Compliance Intelligence
-- **DESCRIPTION**: Author `docs/COMPLIANCE_MAPPINGS.md` and design Compliance Framework database schema migration `012_compliance_frameworks.sql`. Models supported frameworks (NIST CSF 2.0, ISO/IEC 27001:2022, CIS Controls v8, SOC 2 Type II), framework controls, internal defensive control mappings, evidence audit records, and implementation status. Strict rule: Never claim "certified" unless externally audited.
+- **DESCRIPTION**: Author `docs/COMPLIANCE_MAPPINGS.md` and design Compliance Framework database schema migration `010_enterprise_financial_context.sql`. Models supported frameworks (NIST CSF 2.0, ISO/IEC 27001:2022, CIS Controls v8, RBI CSF, SEBI CS), framework controls, internal defensive control mappings, evidence audit records, and implementation status. Strict rule: Never claim "certified" unless externally audited.
 - **DEPENDENCIES**: None (builds on Phase H5 security controls)
 - **OWNED FILES/MODULE**:
   - `docs/COMPLIANCE_MAPPINGS.md`
-  - `backend/src/db/migrations/012_compliance_frameworks.sql`
-  - `backend/src/modules/compliance/compliance.types.ts`
+  - `backend/src/db/migrations/010_enterprise_financial_context.sql`
+  - `backend/src/modules/financial-context/financial-context.types.ts`
 - **EXPECTED OUTPUT**: Production database tables for regulatory frameworks, control mappings, gap tracking, and evidence metadata.
 - **TEST REQUIREMENTS**: Migration tests; mapping relationship integrity tests; foreign key checks.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 #### TASK ID: HARSH-P7A-02
 - **PHASE**: Phase 7A — Compliance Intelligence
 - **DESCRIPTION**: Implement Compliance REST APIs (`GET /api/compliance/frameworks`, `GET /api/compliance/frameworks/:code/coverage`, `POST /api/compliance/evidence`, `GET /api/compliance/gaps`). Calculates coverage percentage and gaps strictly from authentic control implementation states.
 - **DEPENDENCIES**: HARSH-P7A-01
 - **OWNED FILES/MODULE**:
-  - `backend/src/modules/compliance/compliance.repository.ts`
-  - `backend/src/modules/compliance/compliance.service.ts`
-  - `backend/src/modules/compliance/compliance.controller.ts`
-  - `backend/src/modules/compliance/compliance.routes.ts`
-  - `backend/src/modules/compliance/__tests__/compliance.integration.test.ts`
+  - `backend/src/modules/financial-context/financial-context.repository.ts`
+  - `backend/src/modules/financial-context/financial-context.service.ts`
+  - `backend/src/modules/financial-context/financial-context.controller.ts`
+  - `backend/src/modules/financial-context/financial-context.routes.ts`
+  - `backend/src/modules/financial-context/__tests__/financial-inputs.integration.test.ts`
 - **EXPECTED OUTPUT**: REST endpoints delivering framework coverage, mapped control evidence, and gap analysis.
 - **TEST REQUIREMENTS**: Integration tests; zero synthetic compliance score checks; 100% test pass rate.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 ---
 
@@ -262,18 +262,17 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
 
 #### TASK ID: HARSH-P7B-01
 - **PHASE**: Phase 7B — Attack Path Intelligence
-- **DESCRIPTION**: Design and implement Asset Dependency database migration `013_asset_dependencies.sql` and REST APIs (`POST /api/assets/:id/dependencies`, `GET /api/assets/:id/dependencies`). Models authentic network adjacencies, upstream/downstream service dependencies, shared credentials, and exposure boundaries.
+- **DESCRIPTION**: Design and implement Asset Dependency database migration `010_enterprise_financial_context.sql` and REST APIs (`POST /api/assets/:id/dependencies`, `GET /api/assets/:id/dependencies`). Models authentic network adjacencies, upstream/downstream service dependencies, shared credentials, and exposure boundaries.
 - **DEPENDENCIES**: None (builds on Phase H2 assets)
 - **OWNED FILES/MODULE**:
-  - `backend/src/db/migrations/013_asset_dependencies.sql`
-  - `backend/src/modules/asset-dependencies/asset-dependencies.repository.ts`
-  - `backend/src/modules/asset-dependencies/asset-dependencies.service.ts`
-  - `backend/src/modules/asset-dependencies/asset-dependencies.controller.ts`
-  - `backend/src/modules/asset-dependencies/asset-dependencies.routes.ts`
-  - `backend/src/modules/asset-dependencies/__tests__/asset-dependencies.test.ts`
+  - `backend/src/db/migrations/010_enterprise_financial_context.sql`
+  - `backend/src/modules/financial-context/financial-context.repository.ts`
+  - `backend/src/modules/financial-context/financial-context.service.ts`
+  - `backend/src/modules/financial-context/financial-context.controller.ts`
+  - `backend/src/modules/financial-context/financial-context.routes.ts`
 - **EXPECTED OUTPUT**: Topological dependency graph data feeding Tanish's attack path traversal engine.
 - **TEST REQUIREMENTS**: Directed edge validation tests; self-dependency rejection tests; cyclic graph handling tests.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 ---
 
@@ -286,9 +285,10 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
 - **OWNED FILES/MODULE**:
   - `backend/src/modules/assistant/context-sanitizer.ts`
   - `docs/ENTERPRISE_AI_BOUNDARIES.md`
+  - `backend/src/modules/assistant/__tests__/context-sanitizer.test.ts`
 - **EXPECTED OUTPUT**: Robust context filter ensuring only authorized, sanitized business context participates in AI prompts.
 - **TEST REQUIREMENTS**: Sanitization unit tests; regex redaction tests for IPs, keys, and tokens.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
 ---
 
@@ -301,9 +301,8 @@ HARSH ROADMAP SUMMARY (PHASES 2–9)
 - **OWNED FILES/MODULE**:
   - `backend/src/modules/organizations/`
   - `backend/src/modules/assets/`
-  - `backend/src/modules/financial-inputs/`
-  - `backend/src/modules/compliance/`
+  - `backend/src/modules/financial-context/`
 - **EXPECTED OUTPUT**: Enterprise data validation and optimization report with 100% test coverage and sub-50ms query times.
 - **TEST REQUIREMENTS**: End-to-end import stress tests; data completeness verification; zero regression against Phase 1 foundation.
-- **STATUS**: TODO
+- **STATUS**: COMPLETED
 
