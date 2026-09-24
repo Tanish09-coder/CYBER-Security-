@@ -19,7 +19,7 @@
 | **Organization Currency Architecture** | ✅ VERIFIED | ISO-4217 canonical base currency, `Intl.NumberFormat`, no silent fallback |
 | **Security & Auth Hardening** | ✅ VERIFIED | JWT Bearer, bcrypt cost 12, org-scoped isolation, helmet, rate limiting |
 | **Performance Benchmarking** | ✅ MEASURED | Real measured endpoints: p95 < 60ms across all core endpoints |
-| **Fresh Database Migration Gate** | ✅ VERIFIED | 13 sequential migrations applied zero-to-head cleanly |
+| **Fresh Database Migration Gate** | ✅ VERIFIED | All authoritative migrations currently present, up to migration 016 (13 files), successfully applied from a clean database. |
 | **Docker Container Topology** | ✅ VERIFIED | Internal network isolation for Python engine & PostgreSQL |
 | **No-Synthetic Production Audit** | ✅ VERIFIED | Zero synthetic CVEs, assets, or budgets in production code. Synthetic fixtures are isolated to recognized automated-test/fixture paths (__tests__, __fixtures__) and are unreachable from production/demo runtime paths. |
 | **Frontend TypeScript & Production Build** | ✅ VERIFIED | `tsc --noEmit` clean, Vite production bundle (368 kB JS gzip 94 kB) |
