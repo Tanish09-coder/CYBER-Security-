@@ -46,8 +46,8 @@ export interface StoredAsset {
   operating_system: string | null;
   environment: string;
   owner: string | null;
-  is_internet_facing: boolean;
-  business_criticality: number;
+  is_internet_facing: boolean | null;
+  business_criticality: number | null;
   data_classification: string;
   revenue_dependency_pct: string | null;
   operational_importance: string | null;
@@ -72,8 +72,8 @@ export interface CreateAssetRequest {
   operating_system?: string;
   environment?: string;
   owner?: string;
-  is_internet_facing?: boolean;
-  business_criticality?: number;
+  is_internet_facing?: boolean | null;
+  business_criticality?: number | null;
   data_classification?: string;
   revenue_dependency_pct?: number;
   operational_importance?: number;
@@ -91,8 +91,8 @@ export interface UpdateAssetRequest {
   operating_system?: string | null;
   environment?: string;
   owner?: string | null;
-  is_internet_facing?: boolean;
-  business_criticality?: number;
+  is_internet_facing?: boolean | null;
+  business_criticality?: number | null;
   data_classification?: string;
   revenue_dependency_pct?: number | null;
   operational_importance?: number | null;
@@ -116,8 +116,8 @@ export interface AssetResponse {
   operatingSystem: string | null;
   environment: string;
   owner: string | null;
-  isInternetFacing: boolean;
-  businessCriticality: number;
+  isInternetFacing: boolean | null;
+  businessCriticality: number | null;
   dataClassification: string;
   revenueDependencyPct: number | null;
   operationalImportance: number | null;

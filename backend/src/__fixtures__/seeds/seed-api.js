@@ -1,15 +1,17 @@
-// using built-in fetch
+// =============================================================================
+// CyberRiskOS — Test Fixture Seed: API-based (Test / Verification Only)
+// =============================================================================
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = process.env.API_URL || 'http://localhost:5000/api';
 
 async function seed() {
-  console.log('Starting API-based seed...');
+  console.log('[Test Fixtures] Starting API-based seed...');
 
   let res = await fetch(`${API_URL}/organizations`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: 'CyberCorp Global',
+      name: 'CyberCorp Global (Test Fixture)',
       industry: 'Finance',
       employee_count: 5000,
       annual_revenue: 1000000000,
@@ -24,7 +26,7 @@ async function seed() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: 'Acme Retail',
+      name: 'Acme Retail (Test Fixture)',
       industry: 'Retail',
       employee_count: 1000,
       annual_revenue: 50000000,
@@ -107,32 +109,46 @@ async function seed() {
   console.log('Org 2 assets created.');
 
   // 5. Assign Controls
-  const setControl = async (assetId, controlCode, status) => {
-    await fetch(`${API_URL}/assets/${assetId}/controls`, {
+  res = await fetch(`${API_URL}/controls`);
+  if (!res.ok) throw new Error(await res.text());
+  const controlsData = await res.json();
+  const controls = controlsData.controls;
+
+  const mfa = controls.find(c => c.code === 'MFA');
+  const edr = controls.find(c => c.code === 'EDR');
+  const backup = controls.find(c => c.code === 'BACKUP');
+  const encryption = controls.find(c => c.code === 'ENCRYPTION');
+
+  async function assignControl(assetId, controlId, status) {
+    let r = await fetch(`${API_URL}/assets/${assetId}/controls`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify([
-        { control_code: controlCode, status }
-      ])
+      body: JSON.stringify({ control_id: controlId, status })
     });
-  };
+    if (!r.ok) console.error('Failed to assign control:', await r.text());
+  }
 
-  await setControl(assetsOrg1[0].id, 'MFA', 'IMPLEMENTED');
-  await setControl(assetsOrg1[0].id, 'EDR', 'IMPLEMENTED');
-  await setControl(assetsOrg1[0].id, 'BACKUP', 'PARTIAL');
-  await setControl(assetsOrg1[0].id, 'ENCRYPTION', 'IMPLEMENTED');
+  if (mfa && edr && backup && encryption) {
+    await assignControl(assetsOrg1[0].id, mfa.id, 'IMPLEMENTED');
+    await assignControl(assetsOrg1[0].id, edr.id, 'IMPLEMENTED');
+    await assignControl(assetsOrg1[0].id, backup.id, 'PARTIAL');
+    await assignControl(assetsOrg1[0].id, encryption.id, 'IMPLEMENTED');
 
-  await setControl(assetsOrg1[1].id, 'MFA', 'NOT_IMPLEMENTED');
-  await setControl(assetsOrg1[1].id, 'EDR', 'UNKNOWN');
-  
-  await setControl(assetsOrg1[2].id, 'MFA', 'PARTIAL');
-  await setControl(assetsOrg1[2].id, 'EDR', 'IMPLEMENTED');
+    await assignControl(assetsOrg1[1].id, mfa.id, 'NOT_IMPLEMENTED');
+    await assignControl(assetsOrg1[1].id, edr.id, 'UNKNOWN');
 
-  await setControl(assetsOrg2[0].id, 'MFA', 'IMPLEMENTED');
-  await setControl(assetsOrg2[0].id, 'EDR', 'IMPLEMENTED');
+    await assignControl(assetsOrg1[2].id, mfa.id, 'PARTIAL');
+    await assignControl(assetsOrg1[2].id, edr.id, 'IMPLEMENTED');
 
-  console.log('Controls assigned.');
-  console.log('Seed complete!');
+    await assignControl(assetsOrg2[0].id, mfa.id, 'IMPLEMENTED');
+    await assignControl(assetsOrg2[0].id, edr.id, 'IMPLEMENTED');
+  }
+
+  console.log('[Test Fixtures] Seed complete!');
 }
 
-seed().catch(console.error);
+if (typeof module !== 'undefined' && require.main === module) {
+  seed().catch(console.error);
+}
+
+module.exports = { seed };

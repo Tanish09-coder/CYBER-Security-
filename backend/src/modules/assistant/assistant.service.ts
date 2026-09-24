@@ -18,6 +18,8 @@ import axios, { AxiosError } from 'axios';
 import { logger } from '../../config/logger';
 import { riskRepository } from '../risk/risk.repository';
 import { financialRepository } from '../financial/financial.repository';
+import { OptimizationService, optimizationService } from '../optimization/optimization.service';
+import { OptimizationResultDTO } from '../optimization/optimization.types';
 import {
   RiskExplanationRequestDTO,
   FinancialExplanationRequestDTO,
@@ -25,6 +27,7 @@ import {
   ResolvedRiskContext,
   ResolvedFinancialContext,
   ResolvedStrategyComparisonContext,
+  StrategyItemDTO,
   AIExplanationResponseDTO,
   GroundingAnchor,
   GroundingValidationDTO,
@@ -272,7 +275,7 @@ export class AssistantService {
       alef: getNum(record.alef, null),
       eal: getNum(record.eal, null),
       ealStatus,
-      currency: req.currency || record.currency || 'USD',
+      currency: record.currency || 'USD',
       primaryLoss: getNum(record.primary_loss, record.primaryLoss),
       secondaryLoss: getNum(record.secondary_loss, record.secondaryLoss),
       estimatedOutageHours: getNum(record.estimated_outage_hours, record.estimatedOutageHours),
@@ -284,39 +287,66 @@ export class AssistantService {
   async resolveStrategyComparisonContext(
     req: StrategyComparisonRequestDTO
   ): Promise<ResolvedStrategyComparisonContext> {
-    // Authoritative budget & currency loaded from stored optimization context.
-    // Client-supplied calculation values (cost, ROSI, EAL reduction) are strictly prohibited from overriding stored results.
-    const budgetLimit = 50000.0;
-    const currency = 'USD';
+    let optResult: OptimizationResultDTO | null = null;
 
-    const stratA = {
-      strategyId: req.strategyIds?.[0] || 'STRATEGY_MAX_MODELED_EAL_REDUCTION',
-      strategyName: 'Maximum Modeled EAL Reduction',
-      totalCost: 45000.0,
-      totalRiskReduction: 45.0,
-      totalEalReduction: 125000.0,
-      ealStatus: 'CALCULATED' as const,
-      rosiPct: 177.78,
-      actionCount: 3,
-      description: 'Aggressively maximizes total continuous risk reduction and monetary EAL savings within budget.',
-    };
+    // 1. Try resolving by explicit optimizationResultId
+    if (req.optimizationResultId) {
+      optResult = OptimizationService.getResult(req.optimizationResultId);
+    }
 
-    const stratB = {
-      strategyId: req.strategyIds?.[1] || 'STRATEGY_MAX_ROSI',
-      strategyName: 'Balanced Capital Efficiency (Max ROSI)',
-      totalCost: 20000.0,
-      totalRiskReduction: 30.0,
-      totalEalReduction: 90000.0,
-      ealStatus: 'CALCULATED' as const,
-      rosiPct: 350.0,
-      actionCount: 2,
-      description: 'Prioritizes remediation actions delivering the highest Return on Security Investment ratio per dollar spent.',
-    };
+    // 2. Fallback: if caller passed candidateActions and budgetLimit, run optimization
+    if (!optResult && req.candidateActions && req.candidateActions.length > 0 && req.budgetLimit !== undefined) {
+      optResult = await optimizationService.solve({
+        budgetLimit: req.budgetLimit,
+        currency: req.currency || 'USD',
+        candidateActions: req.candidateActions,
+      });
+    }
+
+    // 3. Fallback: check latest cached optimization run
+    if (!optResult) {
+      const latest = OptimizationService.getLatestResult();
+      if (latest) {
+        optResult = latest.result;
+      }
+    }
+
+    if (!optResult || !optResult.strategies || optResult.strategies.length < 2) {
+      throw new AssistantServiceError(
+        `Authoritative optimization results not found for strategy comparison. ` +
+        `Client must execute an optimization solve or provide a valid optimizationResultId.`,
+        404
+      );
+    }
+
+    const budgetLimit = optResult.budgetLimit;
+    const currency = optResult.currency;
+
+    // Select strategies by IDs or pick the first two available strategies
+    const stratAData = req.strategyIds?.[0]
+      ? optResult.strategies.find((s) => s.strategyId === req.strategyIds![0]) || optResult.strategies[0]
+      : optResult.strategies[0];
+
+    const stratBData = req.strategyIds?.[1]
+      ? optResult.strategies.find((s) => s.strategyId === req.strategyIds![1]) || optResult.strategies[1]
+      : optResult.strategies[1];
+
+    const mapToItem = (s: any): StrategyItemDTO => ({
+      strategyId: s.strategyId,
+      strategyName: s.strategyName,
+      totalCost: s.totalCost,
+      totalRiskReduction: s.totalRiskReduction,
+      totalEalReduction: s.totalEalReduction,
+      ealStatus: s.totalEalReduction !== null && s.totalEalReduction !== undefined ? 'CALCULATED' : 'NOT_AVAILABLE',
+      rosiPct: s.rosiPct !== undefined ? s.rosiPct : null,
+      actionCount: s.actionCount || (s.selectedActions ? s.selectedActions.length : 0),
+      description: s.description || '',
+    });
 
     return {
-      optimizationResultId: req.optimizationResultId || 'opt-res-1',
-      strategyA: stratA,
-      strategyB: stratB,
+      optimizationResultId: optResult.optimizationResultId || req.optimizationResultId || 'opt-res-authoritative',
+      strategyA: mapToItem(stratAData),
+      strategyB: mapToItem(stratBData),
       budgetLimit,
       currency,
     };

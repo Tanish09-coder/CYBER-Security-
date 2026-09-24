@@ -27,6 +27,7 @@ financialContextRouter.post('/assets/:assetId/dependencies', controller.createAs
 financialContextRouter.get('/assets/:assetId/dependencies', controller.getAssetDependencies);
 
 // Compliance frameworks, coverage, evidence, and gaps (Phase 7A)
+financialContextRouter.get('/compliance', controller.listComplianceFrameworks);
 financialContextRouter.get('/compliance/frameworks', controller.listComplianceFrameworks);
 financialContextRouter.get('/compliance/frameworks/:code/coverage', controller.getFrameworkCoverage);
 financialContextRouter.post('/compliance/evidence', controller.createComplianceEvidence);

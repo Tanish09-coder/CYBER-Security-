@@ -62,13 +62,13 @@ export const createAssetSchema = z.object({
   operating_system: z.string().trim().max(128).optional(),
   environment: z.enum(ENVIRONMENTS).default('Production'),
   owner: z.string().trim().max(255).optional(),
-  is_internet_facing: z.boolean().default(false),
+  is_internet_facing: z.boolean().optional(),
   business_criticality: z
     .number()
     .int()
     .min(1)
     .max(5)
-    .default(3),
+    .optional(),
   data_classification: z.enum(DATA_CLASSIFICATIONS).default('Internal'),
   revenue_dependency_pct: z.number().min(0).max(100).optional(),
   operational_importance: z.number().min(0).optional(),
@@ -115,8 +115,8 @@ export const assetImportJsonSchema = z.object({
         operating_system: z.string().trim().max(128).optional(),
         environment: z.enum(ENVIRONMENTS).default('Production'),
         owner: z.string().trim().max(255).optional(),
-        is_internet_facing: z.boolean().default(false),
-        business_criticality: z.number().int().min(1).max(5).default(3),
+        is_internet_facing: z.boolean().optional(),
+        business_criticality: z.number().int().min(1).max(5).optional(),
         data_classification: z.enum(DATA_CLASSIFICATIONS).default('Internal'),
         business_unit_id: uuidSchema.optional(),
         asset_identifier: z.string().trim().max(128).optional(),

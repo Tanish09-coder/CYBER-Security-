@@ -49,7 +49,7 @@ export class FinancialRepository {
         created_at,
         updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, NOW(), NOW())
+      VALUES (COALESCE($1, (SELECT organization_id FROM assets WHERE id = $2)), $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, NOW(), NOW())
       ON CONFLICT (asset_id, cve_id) DO UPDATE SET
         organization_id = COALESCE(EXCLUDED.organization_id, financial_results.organization_id),
         vulnerability_id = COALESCE(EXCLUDED.vulnerability_id, financial_results.vulnerability_id),

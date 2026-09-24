@@ -219,7 +219,22 @@ export class FinancialService {
   }
 
   async evaluateCorrelatedAssetFinancialExposure(assetId: string) {
-    const assetSql = `SELECT id, name, business_criticality, is_internet_facing FROM assets WHERE id = $1 LIMIT 1`;
+    const assetSql = `
+      SELECT 
+        a.id, 
+        a.name, 
+        a.business_criticality, 
+        a.is_internet_facing,
+        a.organization_id,
+        o.currency as org_currency,
+        ofp.hourly_downtime_cost,
+        ofp.hourly_recovery_rate
+      FROM assets a
+      JOIN organizations o ON a.organization_id = o.id
+      LEFT JOIN organization_financial_parameters ofp ON o.id = ofp.organization_id
+      WHERE a.id = $1
+      LIMIT 1
+    `;
     const assetRes = await query(assetSql, [assetId]);
     if (assetRes.rows.length === 0) {
       throw new Error(`Asset not found: ${assetId}`);
@@ -238,13 +253,23 @@ export class FinancialService {
     `;
     const vulnsRes = await query(vulnsSql, [assetId]);
 
+    const orgCurrency = assetRow.org_currency || 'USD';
+    const hourlyDowntimeCost =
+      assetRow.hourly_downtime_cost !== null && assetRow.hourly_downtime_cost !== undefined
+        ? parseFloat(assetRow.hourly_downtime_cost)
+        : null;
+
     const evaluations: FinancialExposureInputDTO[] = vulnsRes.rows.map((v: any) => ({
       asset: {
         assetId: assetRow.id,
         assetName: assetRow.name,
         criticalityTier: assetRow.business_criticality,
         isInternetFacing: assetRow.is_internet_facing,
-        currency: 'USD',
+        currency: orgCurrency,
+        hourlyDowntimeCost,
+        recoveryCost: null, // Contract gap: Harsh contract does not provide total recoveryCost
+        estimatedOutageHours: null, // Contract gap: Harsh contract does not provide estimatedOutageHours
+        annualizedLossEventFrequency: null, // Contract gap: Harsh contract does not provide asset-level ALEF
       },
       vulnerability: {
         cveId: v.cve_id,
@@ -259,7 +284,7 @@ export class FinancialService {
         assetId,
         evaluatedCount: 0,
         totalModeledEal: 0.0,
-        currency: 'USD',
+        currency: orgCurrency,
         results: [],
       };
     }

@@ -15,6 +15,7 @@ import express from 'express';
 import { createAssistantRouter } from '../assistant.routes';
 import { riskRepository } from '../../risk/risk.repository';
 import { financialRepository } from '../../financial/financial.repository';
+import { OptimizationService } from '../../optimization/optimization.service';
 
 jest.mock('../../risk/risk.repository');
 jest.mock('../../financial/financial.repository');
@@ -27,6 +28,45 @@ let app: express.Application;
 beforeAll(() => {
   delete process.env.OPENAI_API_KEY;
   delete process.env.AI_EXPLANATION_PROVIDER;
+
+  OptimizationService.storeResult('opt-res-test', {
+    optimizationResultId: 'opt-res-test',
+    budgetLimit: 50000.0,
+    currency: 'USD',
+    totalCandidates: 2,
+    evaluatedAt: new Date().toISOString(),
+    modelVersion: '1.0.0',
+    strategies: [
+      {
+        strategyId: 'STRATEGY_MAX_MODELED_EAL_REDUCTION',
+        strategyName: 'Maximum Modeled EAL Reduction',
+        strategyType: 'MAX_REDUCTION',
+        description: 'Maximizes absolute risk and loss reduction.',
+        selectedActions: [],
+        totalCost: 45000.0,
+        remainingBudget: 5000.0,
+        totalRiskReduction: 45.0,
+        totalEalReduction: 125000.0,
+        netFinancialBenefit: 80000.0,
+        rosiPct: 177.78,
+        actionCount: 3,
+      },
+      {
+        strategyId: 'STRATEGY_MAX_ROSI',
+        strategyName: 'Balanced Capital Efficiency (Max ROSI)',
+        strategyType: 'BALANCED_ROSI',
+        description: 'Maximizes capital efficiency.',
+        selectedActions: [],
+        totalCost: 20000.0,
+        remainingBudget: 30000.0,
+        totalRiskReduction: 30.0,
+        totalEalReduction: 90000.0,
+        netFinancialBenefit: 70000.0,
+        rosiPct: 350.0,
+        actionCount: 2,
+      },
+    ],
+  });
 
   app = express();
   app.use(express.json());

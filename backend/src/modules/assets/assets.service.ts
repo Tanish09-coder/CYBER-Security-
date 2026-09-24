@@ -258,7 +258,7 @@ export class AssetService {
     // Control posture assigned (not empty/UNKNOWN): 0.20
     // Business Unit assigned: 0.20
     let completeness = 0;
-    if (asset.business_criticality >= 1 && asset.business_criticality <= 5) completeness += 0.20;
+    if (asset.business_criticality !== null && asset.business_criticality !== undefined && asset.business_criticality >= 1 && asset.business_criticality <= 5) completeness += 0.20;
     if (asset.is_internet_facing !== null && asset.is_internet_facing !== undefined) completeness += 0.20;
     if (asset.data_classification && asset.data_classification !== 'Internal') completeness += 0.20;
     if (controls.some(c => c.status !== 'UNKNOWN')) completeness += 0.20;
@@ -291,9 +291,13 @@ export class AssetService {
     });
 
     const internetFacingCount = assets.filter(a => a.is_internet_facing).length;
-    const criticalityDist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const criticalityDist: Record<number | string, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, UNKNOWN: 0 };
     assets.forEach(a => {
-      criticalityDist[a.business_criticality] = (criticalityDist[a.business_criticality] || 0) + 1;
+      if (a.business_criticality !== null && a.business_criticality !== undefined) {
+        criticalityDist[a.business_criticality] = (criticalityDist[a.business_criticality] || 0) + 1;
+      } else {
+        criticalityDist.UNKNOWN = (criticalityDist.UNKNOWN || 0) + 1;
+      }
     });
 
     return {

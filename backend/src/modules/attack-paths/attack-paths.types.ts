@@ -11,8 +11,8 @@ export interface GraphNodeDTO {
   assetId: string;
   name: string;
   ipAddress?: string | null;
-  criticalityTier: number;
-  isInternetFacing: boolean;
+  criticalityTier?: number | null;
+  isInternetFacing?: boolean | null;
   businessUnitId?: string | null;
 }
 

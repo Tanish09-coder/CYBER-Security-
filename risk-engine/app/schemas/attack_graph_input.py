@@ -22,8 +22,8 @@ class GraphNodeSchema(BaseModel):
     asset_id: str = Field(..., alias="assetId")
     name: str
     ip_address: Optional[str] = Field(None, alias="ipAddress")
-    criticality_tier: int = Field(..., ge=1, le=5, alias="criticalityTier")
-    is_internet_facing: bool = Field(default=False, alias="isInternetFacing")
+    criticality_tier: Optional[int] = Field(None, ge=1, le=5, alias="criticalityTier")
+    is_internet_facing: Optional[bool] = Field(None, alias="isInternetFacing")
     business_unit_id: Optional[str] = Field(None, alias="businessUnitId")
 
 

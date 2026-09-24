@@ -1,18 +1,23 @@
-import { OrganizationRepository } from '../modules/organizations/organizations.repository';
-import { AssetRepository } from '../modules/assets/assets.repository';
-import { ControlsRepository } from '../modules/controls/controls.repository';
-import { logger } from '../config/logger';
+// =============================================================================
+// CyberRiskOS — Test Fixture Seed: Enterprise Context
+// Allowed ONLY for test fixture setup. Not part of production / demo runtime.
+// =============================================================================
 
-async function seed() {
+import { OrganizationRepository } from '../../modules/organizations/organizations.repository';
+import { AssetRepository } from '../../modules/assets/assets.repository';
+import { ControlsRepository } from '../../modules/controls/controls.repository';
+import { logger } from '../../config/logger';
+
+export async function seedTestEnterpriseContext() {
   const orgRepo = new OrganizationRepository();
   const assetRepo = new AssetRepository();
   const controlsRepo = new ControlsRepository();
 
-  logger.info('Starting enterprise context seed...');
+  logger.info('[Test Fixtures] Starting enterprise context seed...');
 
   // 1. Create Organization 1
   const org1 = await orgRepo.createOrganization({
-    name: 'CyberCorp Global',
+    name: 'CyberCorp Global (Test Fixture)',
     industry: 'Finance',
     employee_count: 5000,
     annual_revenue: 1000000000,
@@ -20,7 +25,7 @@ async function seed() {
 
   // 2. Create Organization 2
   const org2 = await orgRepo.createOrganization({
-    name: 'Acme Retail',
+    name: 'Acme Retail (Test Fixture)',
     industry: 'Retail',
     employee_count: 1000,
     annual_revenue: 50000000,
@@ -95,11 +100,15 @@ async function seed() {
     await controlsRepo.upsertAssetControl(assetsOrg2[0].id, edr, { status: 'IMPLEMENTED', control_code: 'EDR' });
   }
 
-  logger.info('Seed complete!');
-  process.exit(0);
+  logger.info('[Test Fixtures] Seed complete!');
+  return { org1, org2, assetsOrg1, assetsOrg2 };
 }
 
-seed().catch(err => {
-  logger.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  seedTestEnterpriseContext()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      logger.error('Failed to seed test enterprise context', err);
+      process.exit(1);
+    });
+}

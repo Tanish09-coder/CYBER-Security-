@@ -61,6 +61,7 @@ export interface StrategyResultDTO {
 }
 
 export interface OptimizationResultDTO {
+  optimizationResultId?: string;
   budgetLimit: number;
   currency: string;
   strategies: StrategyResultDTO[];

@@ -214,7 +214,7 @@ export class RiskService {
   }> {
     // 1. Fetch asset details
     const assetSql = `
-      SELECT id, name, business_criticality, is_internet_facing
+      SELECT id, name, business_criticality, is_internet_facing, organization_id
       FROM assets
       WHERE id = $1
       LIMIT 1
@@ -263,8 +263,8 @@ export class RiskService {
       asset: {
         assetId: assetRow.id,
         assetName: assetRow.name,
-        criticalityTier: assetRow.business_criticality,
-        isInternetFacing: assetRow.is_internet_facing,
+        criticalityTier: assetRow.business_criticality != null ? assetRow.business_criticality : null,
+        isInternetFacing: assetRow.is_internet_facing != null ? Boolean(assetRow.is_internet_facing) : null,
         controls,
       },
       vulnerability: {

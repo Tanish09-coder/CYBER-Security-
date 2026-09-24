@@ -11,6 +11,7 @@ import {
   AttackPathEngineClient,
 } from './attack-paths.client';
 import {
+  EdgeType,
   GraphNodeDTO,
   GraphEdgeDTO,
   AttackGraphInputDTO,
@@ -138,8 +139,8 @@ export class AttackPathsService {
       assetId: r.id,
       name: r.name,
       ipAddress: r.ip_address || null,
-      criticalityTier: r.business_criticality,
-      isInternetFacing: Boolean(r.is_internet_facing),
+      criticalityTier: r.business_criticality !== null && r.business_criticality !== undefined ? parseInt(r.business_criticality, 10) : null,
+      isInternetFacing: r.is_internet_facing !== null && r.is_internet_facing !== undefined ? Boolean(r.is_internet_facing) : null,
       businessUnitId: r.business_unit_id || null,
     }));
 
@@ -149,33 +150,36 @@ export class AttackPathsService {
 
     // 2. Fetch authoritative edges from enterprise topology contracts (Harsh-owned).
     // Prohibit generating artificial network/dependency edges such as internet-facing -> every internal asset.
-    // Attack-path analysis consumes authoritative asset dependencies, network adjacency, and trust boundaries.
+    // Query actual asset_dependencies schema: source_asset_id, target_asset_id, dependency_type, propagation_weight.
+    // For organization filtering, join source and target assets to organizations.
     const edges: GraphEdgeDTO[] = [];
 
-    try {
-      const depSql = `
-        SELECT 
-          source_asset_id,
-          target_asset_id,
-          relationship_type,
-          structural_severity
-        FROM asset_dependencies
-        ${orgId ? 'WHERE organization_id = $1' : ''};
-      `;
-      const depRes = await query(depSql, params);
-      for (let i = 0; i < depRes.rows.length; i++) {
-        const row = depRes.rows[i];
-        edges.push({
-          edgeId: `edge-${i + 1}`,
-          sourceAssetId: row.source_asset_id,
-          targetAssetId: row.target_asset_id,
-          edgeType: row.relationship_type || 'TRUST_RELATIONSHIP',
-          riskWeight: row.structural_severity !== null ? parseFloat(row.structural_severity) : 50.0,
-          isKnownExploited: false,
-        });
-      }
-    } catch {
-      // Authoritative asset_dependencies table pending Harsh-owned enterprise topology integration
+    const depSql = `
+      SELECT 
+        ad.source_asset_id,
+        ad.target_asset_id,
+        ad.dependency_type,
+        ad.propagation_weight
+      FROM asset_dependencies ad
+      JOIN assets sa ON ad.source_asset_id = sa.id
+      JOIN assets ta ON ad.target_asset_id = ta.id
+      ${orgId ? 'WHERE sa.organization_id = $1 AND ta.organization_id = $1' : ''}
+      ORDER BY ad.created_at ASC;
+    `;
+    const depRes = await query(depSql, params);
+    for (let i = 0; i < depRes.rows.length; i++) {
+      const row = depRes.rows[i];
+      const propWeight = row.propagation_weight !== null ? parseFloat(row.propagation_weight) : 0.20;
+      // Map dependency_type to EdgeType (NETWORK_PATH -> NETWORK_EXPOSURE, other types -> TRUST_RELATIONSHIP)
+      const edgeType: EdgeType = row.dependency_type === 'NETWORK_PATH' ? 'NETWORK_EXPOSURE' : 'TRUST_RELATIONSHIP';
+      edges.push({
+        edgeId: `edge-${i + 1}`,
+        sourceAssetId: row.source_asset_id,
+        targetAssetId: row.target_asset_id,
+        edgeType,
+        riskWeight: Math.min(100.0, Math.max(0.0, propWeight * 100.0)),
+        isKnownExploited: false,
+      });
     }
 
     return { nodes, edges };

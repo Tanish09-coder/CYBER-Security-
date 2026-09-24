@@ -25,7 +25,7 @@ import { logger } from './config/logger';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS configuration supporting configurable origins in production
@@ -101,8 +101,9 @@ const controlsRouter = createControlsRouter();
 app.use('/api/controls', controlsRouter);
 app.use('/api/v1/controls', controlsRouter);
 
-// Enterprise Financial Context (Owner: HARSH - Phase 2)
+// Enterprise Financial Context & Compliance (Owner: HARSH - Phase 2 & 7A)
 app.use('/api', financialContextRouter);
+app.use('/api/v1', financialContextRouter);
 
 // Risk Quantification Engine (Owner: TANISH - Phase 2)
 const riskRouter = createRiskRouter();
@@ -153,7 +154,6 @@ const routeNotice = (moduleName: string) => (req: Request, res: Response) => {
 // Domain Route Groups scheduled for future phases
 app.use('/api/v1/auth', routeNotice('Authentication & RBAC'));
 app.use('/api/v1/telemetry', routeNotice('Security Telemetry Ingestion (CSV/JSON/REST)'));
-app.use('/api/v1/compliance', routeNotice('Compliance Mapping (NIST, ISO, CIS, RBI, SEBI)'));
 app.use('/api/v1/reports', routeNotice('Executive & Audit Reporting'));
 
 // Error handling middleware

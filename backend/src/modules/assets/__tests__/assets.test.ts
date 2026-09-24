@@ -41,15 +41,15 @@ describe('Assets API', () => {
         })
         .expect(201);
 
+      createdAssetId = res.body.id;
       expect(res.body).toHaveProperty('id');
       expect(res.body.name).toBe('Core Payment Gateway');
       expect(res.body.organizationId).toBe(testOrgId);
       expect(res.body.assetType).toBe('server');
       expect(res.body.environment).toBe('Production');
-      expect(res.body.businessCriticality).toBe(3);
-      expect(res.body.isInternetFacing).toBe(false);
+      expect(res.body.businessCriticality).toBeNull();
+      expect(res.body.isInternetFacing).toBeNull();
       expect(res.body.dataClassification).toBe('Internal');
-      createdAssetId = res.body.id;
     });
 
     it('should create an asset with complete specifications', async () => {

@@ -82,6 +82,15 @@ async function verifyMigrations() {
     'asset_vulnerabilities',
     'security_controls',
     'asset_controls',
+    'organization_financial_parameters',
+    'remediation_actions',
+    'asset_dependencies',
+    'compliance_frameworks',
+    'compliance_controls',
+    'control_compliance_mappings',
+    'compliance_evidence',
+    'risk_results',
+    'financial_results',
   ];
 
   console.log('\nVerifying table existence in fresh schema...');
