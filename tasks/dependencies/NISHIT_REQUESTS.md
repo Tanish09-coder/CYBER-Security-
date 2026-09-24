@@ -45,7 +45,6 @@ All requests directed to **Nishit** regarding frontend UI components, dashboard 
 - **STATUS**: OPEN
 - **DELIVERY COMMITMENT**: Planned under Task NISHIT-P2-01 in `tasks/NISHIT/TASKS.md`.
 
-
 ---
 
 ### REQUEST ID: NISHIT-004
@@ -60,3 +59,15 @@ All requests directed to **Nishit** regarding frontend UI components, dashboard 
 - **STATUS**: OPEN
 - **DELIVERY COMMITMENT**: Planned under Task NISHIT-P3-01 in `tasks/NISHIT/TASKS.md`.
 
+---
+
+### REQUEST ID: NISHIT-005
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: All
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing contracts for Executive Dashboard, Compliance UI, Attack Path, and AI Assistant.
+- **WHY REQUIRED**: Frontend P2-5 through P2-8 are scaffolded but completely lack backend DTO schemas. The endpoints exist (`/api/v1/reports`, `/api/v1/compliance`, `/api/v1/attack-paths`, `/api/v1/assistant`) and return 501s, but there are no verifiable schemas in `schemas/contracts.py`. Cannot proceed with API client integration.
+- **EXPECTED CONTRACT**:
+  - Need explicit Request/Response schema definitions for these modules.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for P2-5, P2-6, P2-7, P2-8 integrations.
+- **STATUS**: OPEN

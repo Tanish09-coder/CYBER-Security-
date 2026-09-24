@@ -68,8 +68,8 @@ export const Integrations: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-text-primary">Integration Center</h2>
-        <p className="text-text-secondary mt-1">
+        <h2 className="text-2xl font-bold text-text-primary tracking-tight">Integrations</h2>
+        <p className="text-text-secondary mt-1 text-sm">
           Monitor the freshness and operational status of authoritative cybersecurity data sources.
         </p>
       </div>

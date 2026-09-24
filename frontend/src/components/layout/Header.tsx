@@ -1,16 +1,16 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, RefreshCw } from 'lucide-react';
 
 const getTitleFromPath = (pathname: string): string => {
   const path = pathname.split('/')[1];
   if (!path) return 'Overview';
   
   const titles: Record<string, string> = {
-    'integrations': 'Telemetry & Feeds',
-    'vulnerabilities': 'Vulnerabilities',
+    'integrations': 'Integrations',
+    'vulnerabilities': 'Vulnerability Intelligence',
     'assets': 'Enterprise Assets',
-    'controls': 'Security Controls',
+    'controls': 'Security Control Posture',
     'threat-intel': 'Threat Intelligence',
   };
   
@@ -22,24 +22,34 @@ export const Header: React.FC = () => {
   const pageTitle = getTitleFromPath(location.pathname);
 
   return (
-    <header className="h-16 bg-white border-b border-app-border px-8 flex items-center justify-between flex-shrink-0">
+    <header className="h-16 bg-app-surface border-b border-app-border px-8 flex items-center justify-between flex-shrink-0 z-20 relative">
       <div className="flex items-center space-x-4">
-        <h2 className="text-base font-semibold text-text-primary capitalize">
+        <h2 className="text-lg font-bold text-text-primary capitalize tracking-tight">
           {pageTitle}
         </h2>
-        <span className="text-xs px-2.5 py-0.5 rounded-full bg-app-secondary text-text-secondary font-mono">
-          Live Evaluation
-        </span>
       </div>
 
-      <div className="flex items-center space-x-4">
-        {/* Currency Context indicator */}
-        <div className="text-right">
-          <span className="text-[11px] text-text-secondary block">Valuation Currency</span>
-          <span className="text-xs font-semibold text-text-primary">INR (₹ Lakhs & Crores)</span>
+      <div className="flex items-center space-x-6">
+        {/* System Status */}
+        <div className="flex items-center text-xs font-medium text-text-secondary">
+          <span className="flex h-2 w-2 relative mr-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-risk-success opacity-20"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-risk-success"></span>
+          </span>
+          SYSTEM OPERATIONAL
         </div>
-        <div className="h-6 w-px bg-app-border" />
-        <button className="p-2 text-text-secondary hover:text-text-primary rounded-md hover:bg-app-bg">
+
+        <div className="h-4 w-px bg-app-border" />
+
+        {/* Sync Status */}
+        <div className="flex items-center text-xs text-text-muted">
+          <RefreshCw className="w-3 h-3 mr-1.5 opacity-70" />
+          Last sync: 2 min ago
+        </div>
+        
+        <div className="h-4 w-px bg-app-border" />
+        
+        <button className="p-2 text-text-muted hover:text-brand-primary rounded-md hover:bg-app-surfaceSecondary transition-colors">
           <HelpCircle className="w-4 h-4" />
         </button>
       </div>

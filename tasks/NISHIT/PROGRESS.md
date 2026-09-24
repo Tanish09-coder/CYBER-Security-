@@ -1,10 +1,10 @@
 # NISHIT — Live Progress Tracker
 
 # Current Task
-Screen N1: Application Shell & Light Enterprise Analytics Design Tokens.
+Phase 2: Contract + Integration Audit and Partial UI Integration
 
 # Status
-NOT_STARTED
+PARTIALLY_INTEGRATED / BLOCKED
 
 # Work Completed
 - Completed design system implementation against PRD Section 32 (Light Enterprise Analytics Theme `#F7F8FA`, `#2563EB`, `#111827`).
@@ -29,16 +29,14 @@ NOT_STARTED
 - Frontend API contracts aligned with backend services.
 - Post-Merge Integration Pass across all 3 domains.
 - Ownership freeze and Phase 2–9 Task Roadmap established.
+- **Phase 2 Audit**: Discovered verified backend schemas for Risk Engine (P2-1 to P2-4) in `risk-engine/app/schemas/contracts.py`.
 
-### IN PROGRESS
-- **OWNERSHIP_FROZEN_FOR_PHASE_2**: All task boundaries, file maps, and dependency interfaces frozen. No active implementation during freeze phase.
+### PARTIALLY INTEGRATED
+- **Phase 2 Integration (P2-1 to P2-4)**: Integrated API clients, frontend DTOs (`types/risk.ts`), and real-data fetching logic. Components properly handle the 501 `Not Implemented` error state that the current backend structural route returns.
 
 ### BLOCKED
-- **BLOCKED ON TANISH & HARSH**: Screen N8 (Risk Overview) is gated on:
-  1. Harsh delivering `docs/RISK_ENTERPRISE_INPUTS.md` & `GET /api/assets/:id/risk-inputs`.
-  2. Tanish delivering `docs/RISK_ENGINE_CONTRACT.md` & `GET /api/risk/scores`.
+- **Phase 2 Scaffold (P2-5 to P2-8)**: Scaffolded UI structure. Verified that these screens genuinely lack backend contracts. Status updated to `BLOCKED`.
+- **NISHIT-003**: Need API Contracts from Tanish/Harsh for Executive Dashboard, Compliance, Attack Path, and AI Assistant.
 
 ### NEXT
-1. Await delivery and documentation of Phase 2 Risk Quantification API contracts in `docs/API_CONTRACTS.md`.
-2. Begin **Task NISHIT-P2-01**: Implement Screen N8 (Risk Overview UI) under `frontend/src/pages/RiskOverview.tsx` with color-coded risk badges, factor breakdown drawer, and filter toolbar.
-
+Await backend implementation of P2-1 through P2-4 (so 501 transitions to 200) and await contracts for P2-5 through P2-8.
