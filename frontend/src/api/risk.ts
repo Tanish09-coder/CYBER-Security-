@@ -1,19 +1,28 @@
 import { fetchApi } from './client';
 import {
-  RiskCalculationRequest,
   RiskCalculationResponse,
   WhatIfSimulationRequest,
   WhatIfSimulationResponse,
   OptimizerRequest,
-  OptimizerResponse
+  OptimizerResponse,
+  FinancialExposureResponse
 } from '../types/risk';
 
 export const riskApi = {
-  calculateRisk: (data: RiskCalculationRequest) => {
-    return fetchApi<RiskCalculationResponse>('/v1/risk/calculate', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
+  getRiskScores: (params?: { page?: number; limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.page) query.append('page', params.page.toString());
+    if (params?.limit) query.append('limit', params.limit.toString());
+    
+    return fetchApi<RiskCalculationResponse>(`/v1/risk/scores?${query.toString()}`);
+  },
+  
+  getFinancialExposure: (params?: { page?: number; limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.page) query.append('page', params.page.toString());
+    if (params?.limit) query.append('limit', params.limit.toString());
+    
+    return fetchApi<FinancialExposureResponse>(`/v1/financial/exposure?${query.toString()}`);
   },
   
   simulateWhatIf: (data: WhatIfSimulationRequest) => {
@@ -24,7 +33,7 @@ export const riskApi = {
   },
 
   optimizeBudget: (data: OptimizerRequest) => {
-    return fetchApi<OptimizerResponse>('/v1/optimizer/solve', {
+    return fetchApi<OptimizerResponse>('/v1/optimization/solve', {
       method: 'POST',
       body: JSON.stringify(data)
     });

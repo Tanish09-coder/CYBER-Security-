@@ -1,127 +1,177 @@
-export interface ControlState {
-  control_code: string;
-  status: string;
-  effectiveness_score: number;
-  mitigation_weight: number;
-}
-
-export interface VulnerabilityState {
-  cve_id: string;
-  cvss_score: number;
-  is_kev: boolean;
-  exploit_status?: string | null;
-  patch_available: boolean;
-}
-
-export interface FinancialParameters {
-  hourly_downtime_cost: number;
-  hourly_recovery_rate: number;
-  cost_per_sensitive_record: number;
-  regulatory_breach_penalty: number;
-  daily_transaction_volume: number;
-}
-
-export interface AssetProfile {
-  asset_id: string;
-  asset_name: string;
-  asset_type: string;
-  business_unit: string;
-  criticality_tier: number;
-  is_internet_facing: boolean;
-  data_classification: string;
-  revenue_dependency_pct: number;
-  operational_importance_score: number;
-  controls: ControlState[];
-  vulnerabilities: VulnerabilityState[];
-  upstream_dependencies: string[];
-}
-
-export interface RiskDriverExplanation {
-  driver_name: string;
-  weight_percentage: number;
-  impact_level: string;
+export interface RiskFactor {
+  name: string;
+  category: string;
+  value: string | number | boolean | null;
+  weight: number;
+  contribution: number | null;
+  rationale: string;
 }
 
 export interface AssetRiskResult {
-  asset_id: string;
-  asset_name: string;
-  incident_probability: number;
-  single_loss_expectancy: number;
-  modeled_annual_exposure: number;
-  risk_tier: string;
-  risk_drivers: RiskDriverExplanation[];
-}
-
-export interface RiskCalculationRequest {
-  organization_id: string;
-  financial_parameters: FinancialParameters;
-  assets: AssetProfile[];
+  assetId: string;
+  assetName?: string;
+  cveId: string;
+  baseCvss: number | null;
+  riskScore: number | null;
+  evaluationStatus?: 'CALCULATED' | 'NOT_CALCULABLE' | 'INCOMPLETE';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+  factors: RiskFactor[];
+  missingDataWarnings: string[];
+  dataCompletenessScore: number;
+  riskFlags: string[];
+  modelVersion: string;
+  provenanceHash: string;
+  evaluatedAt: string;
+  isCached?: boolean;
 }
 
 export interface RiskCalculationResponse {
-  organization_id: string;
-  total_modeled_annual_exposure: number;
-  currency: string;
-  evaluated_asset_count: number;
-  asset_results: AssetRiskResult[];
-  highest_exposure_asset_id: string;
+  items: AssetRiskResult[];
+  data: AssetRiskResult[];
+  total: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 // --- Simulation DTOs ---
 
-export interface SimulationIntervention {
-  action_type: string;
-  target_asset_id?: string | null;
-  target_control_code?: string | null;
-  target_cve_id?: string | null;
-  delay_days?: number | null;
+export interface ScenarioActionDTO {
+  actionType: 'PATCH_VULNERABILITY' | 'IMPLEMENT_CONTROL' | 'ISOLATE_ASSET' | 'DECOMMISSION_ASSET';
+  targetAssetId: string;
+  targetCveId?: string;
+  controlCode?: string;
+  description?: string;
+}
+
+export interface ActionImpactDTO {
+  actionType: string;
+  targetAssetId: string;
+  targetCveId?: string;
+  riskScoreReduction: number;
+  ealReduction: number | null;
+  currency: string;
+  summary: string;
 }
 
 export interface WhatIfSimulationRequest {
-  organization_id: string;
-  baseline_request: RiskCalculationRequest;
-  interventions: SimulationIntervention[];
+  scenarioName?: string;
+  actions: ScenarioActionDTO[];
+  assetId?: string; 
 }
 
 export interface WhatIfSimulationResponse {
-  organization_id: string;
-  baseline_exposure: number;
-  simulated_exposure: number;
-  modeled_risk_reduction: number;
-  modeled_reduction_percentage: number;
-  affected_assets: string[];
+  scenarioName: string;
+  baselineAvgRiskScore: number;
+  simulatedAvgRiskScore: number;
+  riskScoreDelta: number;
+  riskReductionPct: number;
+  baselineTotalEal: number | null;
+  simulatedTotalEal: number | null;
+  ealDelta: number | null;
+  ealReductionPct: number | null;
+  ealStatus?: 'CALCULATED' | 'NOT_AVAILABLE';
+  currency: string;
+  totalActionsApplied: number;
+  actionImpacts: ActionImpactDTO[];
+  modelVersion: string;
+  isSimulation: boolean;
+  simulatedAt: string;
 }
 
 // --- Optimization DTOs ---
 
-export interface SecurityInitiative {
-  initiative_id: string;
-  name: string;
+export interface RemediationCandidateActionDTO {
+  actionId: string;
+  actionType: string;
+  targetAssetId: string;
+  targetCveId?: string | null;
+  controlCode?: string | null;
   cost: number;
-  affected_asset_ids: string[];
-  target_control_code: string;
-  target_control_status: string;
+  estimatedRiskReduction: number;
+  estimatedEalReduction: number;
+  dependencies?: string[];
+  conflictsWith?: string[];
+  title: string;
+  description?: string | null;
 }
 
 export interface OptimizerRequest {
-  organization_id: string;
-  available_budget: number;
-  baseline_request: RiskCalculationRequest;
-  candidate_initiatives: SecurityInitiative[];
+  budgetLimit: number;
+  currency?: string;
+  objective?: 'MAX_MODELED_RISK_REDUCTION' | 'MAX_MODELED_EAL_REDUCTION' | 'MAX_ROSI';
+  candidateActions?: RemediationCandidateActionDTO[];
 }
 
-export interface InvestmentStrategyOption {
-  strategy_label: string;
-  total_cost: number;
-  modeled_exposure_reduction: number;
-  residual_exposure: number;
-  rosi_percentage: number;
-  selected_initiative_ids: string[];
+export interface StrategyResultDTO {
+  strategyId: string;
+  strategyName: string;
+  strategyType: string;
+  description: string;
+  selectedActions: RemediationCandidateActionDTO[];
+  totalCost: number;
+  remainingBudget: number;
+  totalRiskReduction: number;
+  totalEalReduction: number;
+  simulatedPortfolioRisk?: number | null;
+  simulatedPortfolioEal?: number | null;
+  netFinancialBenefit: number;
+  rosiPct?: number | null;
+  rosiRatio?: number | null;
+  actionCount: number;
 }
 
 export interface OptimizerResponse {
-  organization_id: string;
-  available_budget: number;
-  strategies: InvestmentStrategyOption[];
-  diminishing_returns_curve: Record<string, number>[];
+  budgetLimit: number;
+  currency: string;
+  strategies: StrategyResultDTO[];
+  totalCandidates: number;
+  evaluatedAt: string;
+  modelVersion: string;
+}
+
+// --- Financial Exposure DTOs ---
+
+export interface FinancialFactorExplanationDTO {
+  name: string;
+  category: string;
+  value: string | number | boolean | null;
+  amount: number;
+  rationale: string;
+}
+
+export interface FinancialExposureResultDTO {
+  assetId: string;
+  assetName: string;
+  cveId: string;
+  sle: number | null; 
+  sleStatus?: 'CALCULATED' | 'NOT_AVAILABLE';
+  alef: number | null; 
+  eal: number | null; 
+  ealStatus: 'CALCULATED' | 'NOT_AVAILABLE';
+  currency: string;
+  primaryLoss: number | null;
+  secondaryLoss: number | null;
+  estimatedOutageHours: number | null;
+  hourlyDowntimeRate: number | null;
+  recoveryCost: number | null;
+  factors: FinancialFactorExplanationDTO[];
+  missingDataWarnings: string[];
+  dataCompletenessScore: number;
+  modelVersion: string;
+  provenanceHash: string;
+  isEstimated: boolean;
+  evaluatedAt: string;
+  isCached?: boolean;
+}
+
+export interface FinancialExposureResponse {
+  items: FinancialExposureResultDTO[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
