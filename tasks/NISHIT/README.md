@@ -3,37 +3,42 @@
 ## Lead Profile
 - **Name**: NISHIT
 - **Role**: Frontend, Product Experience & Real-Data Visualization Lead
-- **Branch**: `feature/nishit-frontend`
+- **Phase 1 Branch**: `feature/nishit-frontend`
+- **Phase 2–9 Branch**: `feature/nishit-risk-product-ui`
 
 ---
 
-## Mandatory Work Session Start Declaration
+## Mandatory Work Session Start Declaration (Phase 2–9 Frozen Version)
 
 Before beginning any development session, copy and state this declaration explicitly:
 
 > "My name is Nishit.  
-> I am Person 3 and Frontend/Product Experience Lead.  
+> I am Person 3 and Frontend, Product Experience & Real-Data Visualization Lead.  
 > I will work only on tasks assigned to Nishit in tasks/NISHIT/.  
-> I will not modify Tanish's Cyber Intelligence modules or Harsh's enterprise-context modules.  
-> If backend changes are required, I will document the API requirement rather than modifying another member's backend implementation."
+> I own Screens N8 through N15, UI design tokens, API client integration, state handling, and visualization adapters.  
+> I will not modify Tanish's calculation formulas or Harsh's backend storage.  
+> If frontend requires a missing field, I will file a dependency request rather than inventing synthetic fields in the UI."
 
 ---
 
 ## Mission & Domain Scope
 
-Nishit owns the entire **frontend application, user experience, responsive desktop layout, design token implementation, and authentic real-data visualization**.
+Nishit owns the entire **frontend application, user experience, responsive desktop layout, design token implementation, and authentic real-data visualization** for all platform screens.
 
-### Primary Responsibilities:
+### Primary Responsibilities (Phase 2–9):
 1. **Frontend Architecture**: Modern React + TypeScript foundation, modular components, clean routing, and state management.
 2. **Enterprise Shell & Navigation**: Header, collapsible sidebar, breadcrumbs, search, user notifications.
 3. **API Integration Layer**: Axios/Fetch API client communicating with backend endpoints via contracts defined in `docs/API_CONTRACTS.md`.
-4. **Integration Center UI (Screen N2)**: Health, sync status, and freshness monitoring for NVD, CISA KEV, MITRE ATT&CK, and VCDB feeds.
-5. **Vulnerability Explorer (Screen N3)**: Real CVE tables, CVSS badges, CISA KEV exploitation indicators, pagination, and multi-criteria search.
-6. **Vulnerability Detail View (Screen N4)**: Full CVE deep dive, multi-source CVSS breakdown, affected CPEs, weaknesses (CWE), and dual cryptographic SHA-256 provenance badges.
-7. **Asset Explorer UI (Screen N5)**: Displaying real enterprise assets, criticality levels, and correlated potential vulnerability matches.
-8. **Security Controls UI (Screen N6)**: Interactive defensive posture inventory (MFA, EDR, PAM, Backups, Segmentation).
-9. **Threat Intelligence UI (Screen N7)**: ATT&CK matrix visualization and VCDB empirical trends.
-10. **State Management**: Robust loading skeletons, error boundaries, and empty integration states.
+4. **Foundation Screens N1–N7 (Delivered)**: Integrations, Vulnerabilities, VulnerabilityDetail, Assets, Controls, ThreatIntel.
+5. **Risk Overview UI (Screen N8)**: Paginated risk scores for `(asset, vulnerability)` pairs, risk levels, factor breakdown drawer, missing data warnings.
+6. **Financial Exposure UI (Screen N9)**: Modeled financial exposure cards, EAL breakdown charts, currency formatting, contributing cost components.
+7. **What-If Simulator UI (Screen N10)**: Interactive scenario builder, baseline vs simulated comparative views, delta metrics.
+8. **Investment Optimizer UI (Screen N11)**: Budget input, strategy cards (A, B, C), trade-off charts, ROSI indicators, neutral decision support.
+9. **Executive Dashboard UI (Screen N12)**: Executive posture summary, top risks, BU breakdown charts, data completeness & freshness badges.
+10. **Compliance UI (Screen N13)**: Framework selector, mapped controls table, evidence records, gap analysis, coverage gauges.
+11. **Attack Path Visualization (Screen N14)**: Topological node-edge graph, choke point highlights, critical asset destinations, path detail inspector.
+12. **AI Assistant UI (Screen N15)**: Contextual assistant drawer, prompt suggestions, visual badge distinguishing AI text from deterministic numbers.
+13. **State Management & Polish**: Skeleton loaders, informative empty states, error retry boundaries, responsive behavior, WCAG AA accessibility.
 
 ---
 
@@ -43,6 +48,7 @@ Nishit owns the entire **frontend application, user experience, responsive deskt
 
 - If an API has not been implemented yet or returns an empty array, render an informative **empty state** (e.g., *"No assets registered yet. Upload asset CSV to begin"*).
 - Never render hardcoded mock numbers (e.g., fake loss distributions, imaginary asset lists, fake CVE scores) in production components.
+- If a backend field is missing, file a request in `tasks/dependencies/`. Never silently synthesize it in the frontend.
 
 ---
 
@@ -78,12 +84,14 @@ The interface must convey trust, precision, institutional authority, and clarity
 
 - **Backend Application** (`backend/`): Owned by Tanish and Harsh.
 - **Database Schema & Migrations** (`database/`, `backend/src/db/migrations/`): Frontend must never access the database directly. All interaction must flow through documented REST APIs.
-- **Financial Risk Engines** (`risk-engine/`): Out of scope.
+- **Risk & Decision Engines** (`risk-engine/`): Quantitative calculations, ROSI, and scenario algorithms are owned by Tanish.
+- **Enterprise CRUD & Inputs**: Owned by Harsh.
 
 ---
 
 ## File Navigation
 
-- [TASKS.md](file:///c:/Users/A%20J/OneDrive/Desktop/Cyber/tasks/NISHIT/TASKS.md): Detailed screen roadmap (N1 through N7).
+- [TASKS.md](file:///c:/Users/A%20J/OneDrive/Desktop/Cyber/tasks/NISHIT/TASKS.md): Detailed screen roadmap (N1 through N15).
 - [OWNED_FILES.md](file:///c:/Users/A%20J/OneDrive/Desktop/Cyber/tasks/NISHIT/OWNED_FILES.md): Exhaustive list of all files owned by Nishit.
 - [PROGRESS.md](file:///c:/Users/A%20J/OneDrive/Desktop/Cyber/tasks/NISHIT/PROGRESS.md): Live task status, components created, and blockers.
+

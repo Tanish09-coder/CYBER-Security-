@@ -15,31 +15,34 @@ Instead, they log a structured request in this directory.
 
 ---
 
-## Standard Request Format
+## Standard Request Format (Phase 2–9 Protocol)
 
-To submit a request, append a new entry to the appropriate file using this schema:
+To submit a request, append a new entry to the appropriate file using this strict schema:
 
 ```markdown
-### REQUEST ID: [OWNER_PREFIX]-[NUMBER] (e.g. TANISH-001, HARSH-001, NISHIT-001)
-- **REQUESTED BY**: [Name]
-- **OWNER NEEDED**: [Tanish / Harsh / Nishit]
-- **DATE**: [YYYY-MM-DD]
-- **DESCRIPTION**: [Clear description of what is needed]
+### REQUEST ID: [OWNER_PREFIX]-[NUMBER] (e.g. TANISH-003, HARSH-003, NISHIT-003)
+- **REQUESTER**: [Tanish / Harsh / Nishit]
+- **OWNER**: [Tanish / Harsh / Nishit]
+- **PHASE**: [Phase 2 - Phase 9]
+- **REQUIRED FIELD/API**: [Exact field, endpoint, or DTO needed]
 - **WHY REQUIRED**: [Business and technical rationale]
 - **EXPECTED CONTRACT**:
   - Method / Schema / Function: [Details]
   - Input: [Payload / Parameters]
   - Output: [Expected Response / Return Value]
 - **BLOCKING / NON-BLOCKING**: [BLOCKING / NON-BLOCKING]
-- **STATUS**: [OPEN / IN_PROGRESS / DELIVERED / REJECTED]
+- **STATUS**: [OPEN / IN_PROGRESS / DELIVERED / CLOSED / REJECTED]
 - **DELIVERY COMMITMENT**: [Notes or PR reference from owner once delivered]
 ```
 
 ---
 
-## Lifecycle of a Request
+## Golden Rule of Cross-Domain Dependencies
 
-1. **OPEN**: Request created by another member.
-2. **IN_PROGRESS**: Target owner acknowledges the request, validates the contract, and begins implementation.
-3. **DELIVERED**: Target owner completes implementation, adds automated tests, updates `docs/API_CONTRACTS.md`, and marks status DELIVERED with the relevant commit / branch info.
-4. **CLOSED**: Requesting member verifies integration and closes the ticket.
+If Person A needs something from Person B:
+1. **DO NOT modify Person B's module directly**.
+2. **Create a dependency request** in `tasks/dependencies/<OWNER>_REQUESTS.md`.
+3. In tests, use temporary mock fixtures that never touch production code.
+4. **Never guess or invent missing backend fields in frontend code**.
+5. Wait for target owner to deliver and document the contract in `docs/API_CONTRACTS.md`.
+

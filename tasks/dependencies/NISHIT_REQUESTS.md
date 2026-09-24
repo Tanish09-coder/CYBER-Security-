@@ -14,8 +14,8 @@ All requests directed to **Nishit** regarding frontend UI components, dashboard 
   - Component reads `vulnerability.provenance` and `vulnerability.kevProvenance`.
   - Displays SHA-256 hashes with click-to-copy utility and ingestion timestamp.
 - **BLOCKING / NON-BLOCKING**: NON-BLOCKING (Scheduled for Screen N4)
-- **STATUS**: OPEN
-- **DELIVERY COMMITMENT**: Planned under Screen N4 in `tasks/NISHIT/TASKS.md`.
+- **STATUS**: DELIVERED
+- **DELIVERY COMMITMENT**: Delivered in `VulnerabilityDetail.tsx` with dual SHA-256 click-to-copy badges. Verified in post-merge pass.
 
 ---
 
@@ -28,5 +28,35 @@ All requests directed to **Nishit** regarding frontend UI components, dashboard 
 - **EXPECTED CONTRACT**:
   - UI labels, tooltips, and table headers must use: *"Potential Vulnerability Matches"* or *"CPE Vulnerability Correlation"*.
 - **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N5 review
+- **STATUS**: DELIVERED
+- **DELIVERY COMMITMENT**: Enforced across `Assets.tsx` with strict terminology. Verified in post-merge pass.
+
+---
+
+### REQUEST ID: NISHIT-003
+- **REQUESTER**: Tanish
+- **OWNER**: Nishit
+- **PHASE**: Phase 2 — Risk Quantification (Screen N8)
+- **REQUIRED FIELD/API**: Factor contribution drawer and model version badge (`Model v1.0.0`) on Risk Overview page
+- **WHY REQUIRED**: Regulatory compliance and executive explainability require transparent factor weights, empirical evidence, and semantic model versioning clearly visible in UI.
+- **EXPECTED CONTRACT**:
+  - Screen N8 includes a model version pill and an expandable factor drawer displaying CVSS, verified CISA KEV exploitation evidence, documented exposure context, and defensive control posture (without arbitrary multipliers or unverified percentage deductions).
+- **BLOCKING / NON-BLOCKING**: NON-BLOCKING for initial table render, BLOCKING for Phase 2 sign-off
 - **STATUS**: OPEN
-- **DELIVERY COMMITMENT**: Will adhere strictly to this terminology rule during Screen N5 implementation.
+- **DELIVERY COMMITMENT**: Planned under Task NISHIT-P2-01 in `tasks/NISHIT/TASKS.md`.
+
+
+---
+
+### REQUEST ID: NISHIT-004
+- **REQUESTER**: Harsh
+- **OWNER**: Nishit
+- **PHASE**: Phase 3 — Financial Exposure / EAL (Screen N9)
+- **REQUIRED FIELD/API**: Explicit visual label "MODELED / ESTIMATED" and unconfigured monetary input warning banner
+- **WHY REQUIRED**: Financial exposure figures must never be confused with guaranteed actual loss, and missing downtime cost configurations must be prominently surfaced.
+- **EXPECTED CONTRACT**:
+  - Screen N9 includes banner: "MODELED / ESTIMATED" and warning chip when `dataCompletenessScore < 100%`.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Phase 3 sign-off
+- **STATUS**: OPEN
+- **DELIVERY COMMITMENT**: Planned under Task NISHIT-P3-01 in `tasks/NISHIT/TASKS.md`.
+

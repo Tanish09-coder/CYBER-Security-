@@ -15,71 +15,88 @@ The following files are strictly classified as **Shared Files**:
 | :--- | :--- | :--- |
 | `PRD.md` | Master Product Requirements Document | Tanish |
 | `PROJECT_STRUCTURE.md` | Architectural Directory Blueprint | Tanish |
+| `MASTER_PROJECT_CONTEXT.md` | Core Cross-Domain System Context | Tanish |
 | `RISK_MODEL.md` | Quantitative Financial Risk Specs | Tanish |
 | `docker-compose.yml` | Container Orchestration Configuration | Tanish |
-| `database/schema.sql` | Baseline Database Schema Definition | Tanish / Harsh |
+| `database/schema.sql` | Baseline Database Schema (Deprecated Reference) | Tanish / Harsh |
 | `backend/src/server.ts` | Express Server Entrypoint & Route Mounting | Tanish (Lead Coordinator) |
 | `backend/src/types/index.ts` | Global Shared TypeScript Interfaces | Tanish / Harsh |
 | `backend/src/config/env.ts` | Zod Environment Schema & Runtime Config | Tanish |
 | `backend/src/config/logger.ts` | Shared Winston/Console Structured Logger | Tanish |
 | `backend/src/db/index.ts` | Database Connection Pool & Migration Runner | Tanish |
-| `backend/package.json` | Backend Dependencies & Scripts | Tanish |
+| `docs/API_CONTRACTS.md` | Authoritative Cross-Domain API Contract Registry | Tanish / Harsh / Nishit |
+| `backend/package.json` & `package-lock.json` | Backend Dependencies & Version Lock | Tanish / Harsh |
+| `frontend/package.json` & `package-lock.json` | Frontend Dependencies & Version Lock | Nishit |
 | `.env.example` | Root Environment Variable Template | Tanish |
 | `.gitignore` | Version Control Exclusions | Tanish |
 
 ---
 
-## 2. Six Mandatory Rules for Shared File Changes
+## 2. Five Mandatory Rules for Shared File Changes (Phase 2–9 Protocol)
 
-Whenever a member needs to change any shared file:
+Shared files are the highest conflict risk in parallel multi-agent development. The following rules are non-negotiable:
 
-1. **Document the Need First**: Record the required change in your `PROGRESS.md` or submit a request via `tasks/dependencies/`.
-2. **Make the Smallest Possible Modification**: Do not touch lines outside your immediate need. Additive changes are preferred over destructive modifications.
-3. **No Unrelated Formatting or Refactoring**: Never reformat, reorder, clean up imports, or apply linter auto-fixes to lines you did not write.
-4. **Preserve Surrounding Comments & Semantics**: Retain existing docstrings, warnings, and architectural notes.
-5. **No Local Secret Exposure**: Never write actual passwords, tokens, or runtime credentials into `.env.example` or any committed shared file. Real `.env` files are user-managed and must never be committed.
-6. **Notify Integration Owner**: Coordinate with Tanish (Architecture Coordinator) before merging shared file changes.
+1. **Strict Single-Editor Lock**:
+   Only **ONE** person changes a shared file for a specific dependency at a time. Never make concurrent edits to `server.ts`, `docker-compose.yml`, or `package-lock.json`.
+2. **Pre-Change Justification**:
+   Before changing a shared file, explicitly record **why** the edit is required in your `PROGRESS.md` or file a structured request in `tasks/dependencies/`.
+3. **Post-Change Audit Record**:
+   Immediately after changing a shared file, record in your `PROGRESS.md`:
+   - Exact file path modified.
+   - Specific reason / dependency fulfilled.
+   - Affected team members notified.
+4. **Zero Unrelated Edits / Cleanup**:
+   Never perform "drive-by" refactoring, re-formatting, import reordering, or linter cleanups on lines you did not write. Additive changes only.
+5. **Atomic, Minimal Commits**:
+   Keep shared-file commits small and isolated. Never bundle a `server.ts` route registration with 500 lines of module business logic.
 
 ---
 
 ## 3. Dedicated Rules for Specific Shared Files
 
 ### 3.1 `backend/src/server.ts`
-When registering new module routes (e.g., Harsh adding `/api/organizations` or `/api/assets`):
+When registering new module routes (e.g., Harsh adding `/api/financial-inputs` or Tanish adding `/api/risk`):
 - **Allowed**: Append your new router import and `app.use('/api/...', yourRouter);` in the designated route mounting section.
 - **Strictly Prohibited**:
-  - Reordering or renaming existing routes (e.g., `/api/integrations/nvd`, `/api/integrations/cisa-kev`, `/api/vulnerabilities`).
+  - Reordering or renaming existing routes (e.g., `/api/integrations/*`, `/api/vulnerabilities`, `/api/assets`, `/api/controls`).
   - Modifying middleware (CORS, JSON parser, request logger, error handler).
   - Refactoring server bootstrap, port binding, or shutdown handlers.
 
-### 3.2 `backend/src/config/env.ts` & `.env.example`
-When introducing new environment variables (e.g., asset upload directory or MITRE endpoint):
+### 3.2 `docs/API_CONTRACTS.md`
+- Acts as the single source of truth between Harsh's inputs, Tanish's engines, and Nishit's frontend.
+- When delivering an API endpoint:
+  - Document Method, Path, Query Params, Request Body DTO, Response DTO, Error formats.
+  - Update status to `LIVE (Phase X)`.
+  - Coordinate contract updates with Tanish (Architecture Lead).
+
+### 3.3 `backend/src/config/env.ts` & `.env.example`
+When introducing new environment variables (e.g., Python risk engine URL or OpenAI/Gemini API keys):
 - Update `.env.example` with clear comments, placeholder formats, and safe defaults.
 - Update `backend/src/config/env.ts` by adding validated Zod keys to `envSchema`.
 - **Never create, edit, commit, or overwrite any real `.env` file**.
 
-### 3.3 Database Migrations & `backend/src/db/index.ts`
-- **Never edit an existing migration file** once it has been committed or merged (e.g., `001_nvd_ingestion.sql`, `002_cisa_kev_ingestion.sql`).
-- All schema changes must be introduced via **new, sequentially numbered migration files**.
-- Every migration file must declare its owner and purpose at the top:
+### 3.4 Database Migrations & `backend/src/db/index.ts`
+- Migrations continue sequentially from `009_security_controls.sql`:
+  - `010_...`
+  - `011_...`
+  - `012_...`
+- Every migration must declare owner and purpose:
   ```sql
-  -- =============================================================================
-  -- Migration 003: MITRE ATT&CK Enterprise Matrix Tables
-  -- Owner: TANISH
-  -- Purpose: Ingestion and normalization of tactics, techniques, and mitigations
-  -- =============================================================================
-  ```
-  or:
-  ```sql
-  -- =============================================================================
-  -- Migration 004: Enterprise Organization & Business Unit Models
   -- Owner: HARSH
-  -- Purpose: Internal tenant and departmental hierarchy storage
-  -- =============================================================================
+  -- Purpose: enterprise financial input storage
   ```
-- `backend/src/db/index.ts` automatically runs all `migrations/*.sql` in alphanumeric order. Do not modify the runner logic unless resolving a database connectivity bug.
+  or
+  ```sql
+  -- Owner: TANISH
+  -- Purpose: risk result persistence
+  ```
+- **Never edit an already merged migration file**. All modifications require forward migrations.
+- `backend/src/db/index.ts` automatically runs all `migrations/*.sql` in alphanumeric order. Do not modify the runner logic.
 
-### 3.4 Root `package.json` & Backend `package.json`
-- Adding a dependency (e.g., `csv-parse` for Harsh's CSV ingestion or charting libraries for Nishit) must be done cleanly:
-  - Run `npm install <package>` only in the specific directory (`backend/` or `frontend/`).
-  - Do not introduce conflicting versions of already installed libraries (`zod`, `axios`, `express`, `pg`).
+### 3.5 Package Files & `package-lock.json`
+- Adding dependencies:
+  - Backend dependencies (`npm install` inside `backend/`).
+  - Frontend dependencies (`npm install` inside `frontend/`).
+- Do not run bare `npm install` at root unless coordinating root tools.
+- Never manually resolve `package-lock.json` merge conflicts with arbitrary text edits.
+

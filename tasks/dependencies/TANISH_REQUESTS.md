@@ -31,3 +31,34 @@ All requests directed to **Tanish** regarding NVD, CISA KEV, MITRE ATT&CK, VCDB,
 - **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N2
 - **STATUS**: DELIVERED
 - **DELIVERY COMMITMENT**: Both `GET /api/integrations/nvd/status` and `GET /api/integrations/cisa-kev/status` are live and operational. Unified status aggregator ready in `docs/API_CONTRACTS.md`.
+
+---
+
+### REQUEST ID: TANISH-003
+- **REQUESTER**: Nishit
+- **OWNER**: Tanish
+- **PHASE**: Phase 2 — Risk Quantification (Screen N8)
+- **REQUIRED FIELD/API**: `GET /api/risk/scores` and `GET /api/risk/assets/:assetId` with contributing factor breakdown array
+- **WHY REQUIRED**: Screen N8 (Risk Overview) requires authentic risk scores, risk levels, and explainability factors for `(asset, vulnerability)` pairs.
+- **EXPECTED CONTRACT**:
+  - `GET /api/risk/scores?page=1&limit=25&severity=HIGH`
+  - Response: `{ data: Array<{ assetId: string, assetName: string, cveId: string, baseCvss: number, riskScore: number, riskLevel: 'LOW'|'MEDIUM'|'HIGH'|'CRITICAL', factors: Array<{ name: string, weight: number, value: string|number, contribution: number }>, missingDataWarnings: string[], modelVersion: '1.0.0', provenanceHash: string }>, total: number, page: number, limit: number }`
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N8
+- **STATUS**: OPEN
+- **DELIVERY COMMITMENT**: Planned under Task TANISH-P2-03 in `tasks/TANISH/TASKS.md`.
+
+---
+
+### REQUEST ID: TANISH-004
+- **REQUESTER**: Nishit
+- **OWNER**: Tanish
+- **PHASE**: Phase 3 — Financial Exposure / EAL (Screen N9)
+- **REQUIRED FIELD/API**: `GET /api/financial/exposure` and `GET /api/financial/summary`
+- **WHY REQUIRED**: Screen N9 (Financial Exposure) requires modeled financial exposure and EAL breakdown by loss components (downtime, recovery, breach impact).
+- **EXPECTED CONTRACT**:
+  - `GET /api/financial/exposure`
+  - Response: `{ totalModeledExposure: number, estimatedAnnualizedLoss: number, currency: string, breakdown: { downtimeLoss: number, recoveryCost: number, businessInterruption: number }, dataCompletenessScore: number, isEstimated: true, modelVersion: '1.0.0' }`
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N9
+- **STATUS**: OPEN
+- **DELIVERY COMMITMENT**: Planned under Task TANISH-P3-02 in `tasks/TANISH/TASKS.md`.
+

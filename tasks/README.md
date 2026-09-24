@@ -9,11 +9,11 @@ The primary objective of this structure is **zero merge conflicts**, **zero acci
 
 ## Team Structure & Leads
 
-| Member | Primary Role | Domain Scope |
-| :--- | :--- | :--- |
-| **TANISH** | Cyber Intelligence & External Data Integration Lead | Official threat intelligence feeds (NVD, CISA KEV, MITRE ATT&CK, VCDB), raw provenance, crypto hashing, source freshness, external ingestion pipelines. *Also serves as Integration Owner & Architecture Coordinator.* |
-| **HARSH** | Enterprise Asset, Software, Control & Exposure Context Lead | Internal enterprise context: Organizations, business units, assets, software inventories, CPE version matching, asset dependencies, security controls (EDR, MFA, PAM, Backups, Segmentation). |
-| **NISHIT** | Frontend, Product Experience & Real-Data Visualization Lead | Enterprise web application, light analytics interface, threat explorer, asset & control visualization, real API consumption, loading/empty states. |
+| Member | Primary Role | Phase 1 Domain Scope | Phase 2–9 Frozen Domain Scope |
+| :--- | :--- | :--- | :--- |
+| **TANISH** | Risk Intelligence, Quantification & Decision Engine Lead | Official threat intel (NVD, CISA KEV, MITRE, VCDB), crypto provenance. Architecture Coordinator. | Risk calculation engine, Financial exposure & EAL, What-If simulation engine, Investment optimizer, Attack path graph, AI explanation backend. |
+| **HARSH** | Enterprise Context, Financial Inputs, Controls & Compliance Lead | Enterprise hierarchy, assets, software inventory, CPE matching, controls posture. | Monetary & impact inputs, remediation action catalog, budget constraints, compliance framework mappings & evidence, asset dependencies. |
+| **NISHIT** | Frontend, Product Experience & Visualization Lead | UI shell, theme, Screens N2–N7, real API consumption, loading/empty states. | Screens N8–N15 (Risk, Financial, Simulator, Optimizer, Executive, Compliance, Attack Paths, AI Assistant), decision visualizations, demo flow. |
 
 ---
 
@@ -22,6 +22,7 @@ The primary objective of this structure is **zero merge conflicts**, **zero acci
 ```text
 tasks/
 ├── README.md                 # This root collaboration guide
+├── MASTER_PROJECT_CONTEXT.md # Master project context & Phase 2–9 architectural rules
 ├── TEAM_OWNERSHIP.md         # Definitive file and folder ownership boundaries
 ├── SHARED_FILES.md           # Rules and change procedures for cross-domain files
 ├── INTEGRATION_RULES.md      # Protocol for cross-domain integration & PR reviews
@@ -66,18 +67,19 @@ Every team member must strictly adhere to these 10 rules during every coding ses
 
 ---
 
-## Session Startup Declarations
+## Session Startup Declarations (Phase 2–9 Frozen Version)
 
 Every AI assistant or developer session **must** begin by explicitly declaring their identity and scope:
 
 - **Tanish**:
-  > *"My name is Tanish. I am Person 1 and Cyber Intelligence Lead. I will work only on tasks assigned to Tanish in tasks/TANISH/. I will not modify Harsh's or Nishit's owned modules. If another module requires modification, I will document the dependency rather than modifying their work without approval."*
+  > *"My name is Tanish. I am Person 1 and Risk Intelligence, Quantification & Decision Engine Lead. I will work only on tasks assigned to Tanish in tasks/TANISH/. I own the risk calculation engine, financial models, What-If simulation, investment optimizer, attack path engine, and AI explanation backend. I will not modify Harsh's enterprise CRUD/monetary input storage or Nishit's React frontend. If another module requires modification, I will document the dependency in tasks/dependencies/HARSH_REQUESTS.md or tasks/dependencies/NISHIT_REQUESTS.md."*
 
 - **Harsh**:
-  > *"My name is Harsh. I am Person 2 and Enterprise Context Lead. I will work only on tasks assigned to Harsh in tasks/HARSH/. I will not modify Tanish's Cyber Intelligence modules or Nishit's frontend. If another module requires modification, I will document the dependency rather than modifying their work without approval."*
+  > *"My name is Harsh. I am Person 2 and Enterprise Context, Financial Inputs, Controls & Compliance Lead. I will work only on tasks assigned to Harsh in tasks/HARSH/. I own enterprise assets, business context, controls posture, user monetary inputs (downtime/recovery/action costs), budget limits, compliance mappings, and asset dependencies. I will not modify Tanish's risk/financial calculation formulas, optimizer algorithms, or Nishit's frontend. If another module requires modification, I will document the dependency in tasks/dependencies/TANISH_REQUESTS.md or tasks/dependencies/NISHIT_REQUESTS.md."*
 
 - **Nishit**:
-  > *"My name is Nishit. I am Person 3 and Frontend/Product Experience Lead. I will work only on tasks assigned to Nishit in tasks/NISHIT/. I will not modify Tanish's Cyber Intelligence modules or Harsh's enterprise-context modules. If backend changes are required, I will document the API requirement rather than modifying another member's backend implementation."*
+  > *"My name is Nishit. I am Person 3 and Frontend, Product Experience & Real-Data Visualization Lead. I will work only on tasks assigned to Nishit in tasks/NISHIT/. I own Screens N8 through N15, UI design tokens, API client integration, state handling, and visualization adapters. I will not modify Tanish's calculation formulas or Harsh's backend storage. If frontend requires a missing field, I will file a dependency request rather than inventing synthetic fields in the UI."*
+
 
 ---
 

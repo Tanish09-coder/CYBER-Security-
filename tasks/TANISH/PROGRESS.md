@@ -86,6 +86,28 @@ COMPLETED
 - Delivered `TANISH-002` (CISA KEV catalog for Harsh & Nishit).
 - Delivered `TANISH-003` (MITRE ATT&CK STIX 2.1 Enterprise Matrix for Nishit's threat visualizers).
 - Delivered `TANISH-004` (VCDB / VERIS historical cyber incidents & 4A breach dimensions for Nishit's Screen N4 & integration center).
+- Delivered Post-Merge Integration Verification Pass (25/25 live API endpoints, 186/186 backend tests passing).
 
-# Next Steps
-Per instructions, Cyber Intelligence Lead (Tanish) completed all external feed integrations (NVD, CISA KEV, MITRE ATT&CK, VCDB / VERIS). Stopping after VCDB live verification without initiating the Risk Engine.
+---
+
+## Phase 2 Status & Progress Tracker
+
+### COMPLETED
+- Phase 1 External Threat Intelligence Foundation (`nvd`, `cisa-kev`, `mitre-attack`, `vcdb`).
+- Unified Cross-Source Threat Intelligence APIs (`/api/threat-intel/*`, `/api/vulnerabilities/*`).
+- Database Migrations `001_nvd_ingestion.sql`, `002_cisa_kev_ingestion.sql`, `003_mitre_attack_ingestion.sql`, `004_vcdb_incidents.sql`.
+- Post-Merge Integration Pass across all 3 domains.
+- Ownership freeze and Phase 2–9 Task Roadmap established.
+
+### IN PROGRESS
+- **OWNERSHIP_FROZEN_FOR_PHASE_2**: All task boundaries, file maps, and dependency interfaces frozen. No active implementation during freeze phase.
+
+### BLOCKED
+- **BLOCKED ON HARSH**: Phase 2 implementation is gated on Harsh delivering `docs/RISK_ENTERPRISE_INPUTS.md` and the enterprise input schema (asset criticality tiers, internet exposure flags, and control posture completeness status).
+
+### NEXT
+1. Receive and review `docs/RISK_ENTERPRISE_INPUTS.md` from Harsh.
+2. Begin **Task TANISH-P2-01**: Author `docs/RISK_ENGINE_CONTRACT.md` defining `(asset_id, vulnerability_id)` atomic evaluation unit, evaluating candidate factors (ransomware evidence, internet exposure, control states) across 5 defensibility criteria without arbitrary multipliers or percentage reductions, and specifying RiskInput / RiskResult DTOs.
+3. Begin **Task TANISH-P2-02**: Implement deterministic Risk Model v1 in Python `risk-engine/` service.
+
+
