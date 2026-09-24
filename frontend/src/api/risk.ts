@@ -17,14 +17,14 @@ export const riskApi = {
   },
   
   simulateWhatIf: (data: WhatIfSimulationRequest) => {
-    return fetchApi<WhatIfSimulationResponse>('/v1/simulate/whatif', {
+    return fetchApi<WhatIfSimulationResponse>('/v1/scenarios/simulate', {
       method: 'POST',
       body: JSON.stringify(data)
     });
   },
 
   optimizeBudget: (data: OptimizerRequest) => {
-    return fetchApi<OptimizerResponse>('/v1/optimize/budget', {
+    return fetchApi<OptimizerResponse>('/v1/optimizer/solve', {
       method: 'POST',
       body: JSON.stringify(data)
     });

@@ -71,3 +71,107 @@ All requests directed to **Nishit** regarding frontend UI components, dashboard 
   - Need explicit Request/Response schema definitions for these modules.
 - **BLOCKING / NON-BLOCKING**: BLOCKING for P2-5, P2-6, P2-7, P2-8 integrations.
 - **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-006
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Tanish
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing `(asset, vulnerability)` pair granularity in Risk Calculation Response for Screen N8.
+- **WHY REQUIRED**: The Screen N8 spec (Task NISHIT-P2-01) requires displaying "paginated risk scores for (asset, vulnerability) pairs" including "CVE ID, Base CVSS, Risk Score badge, Risk Level pill", but the current `AssetRiskResult` schema only provides aggregated asset-level risk (`incident_probability`, `single_loss_expectancy`, `modeled_annual_exposure`).
+- **EXPECTED CONTRACT**:
+  - Need a detailed list of scored vulnerabilities per asset in `AssetRiskResult`, or a separate paginated drill-down endpoint `GET /api/risk/assets/:assetId/vulnerabilities`.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Risk Overview (Screen N8) vulnerability table implementation.
+- **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-007
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Tanish
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing enterprise risk score delta in `WhatIfSimulationResponse`.
+- **WHY REQUIRED**: The Screen N10 (What-If Simulator) specification (Task NISHIT-P4-01) requires a comparative side-by-side view showing the "delta in enterprise risk score". However, the current `WhatIfSimulationResponse` schema only provides financial exposure fields (`baseline_exposure`, `simulated_exposure`, `modeled_risk_reduction`).
+- **EXPECTED CONTRACT**:
+  - Add `baseline_risk_score`, `simulated_risk_score`, and `risk_score_delta` to `WhatIfSimulationResponse` in `contracts.py`.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for full N10 What-If Simulator side-by-side comparison implementation.
+- **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-008
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Tanish
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing dedicated backend contract and endpoint for Compliance UI (Screen N13).
+- **WHY REQUIRED**: To populate N13, a backend endpoint (`/api/v1/compliance`) and response schema are needed to serve aggregated compliance mappings, framework status, and gap analysis.
+- **EXPECTED CONTRACT**:
+  - DTOs defining compliance status, gaps, and mapping to supported frameworks (NIST, ISO, CIS, RBI, SEBI).
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N13.
+- **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-009
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Harsh
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing enterprise control-to-framework mappings and evidence context for Compliance UI.
+- **WHY REQUIRED**: Tanish's compliance endpoint requires enterprise inputs mapping raw technical controls to specific regulatory frameworks (NIST, ISO, CIS, RBI, SEBI).
+- **EXPECTED CONTRACT**:
+  - Provision of compliance mapping inputs, requirement definitions, and audit evidence requirements to the backend.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N13.
+- **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-010
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Tanish
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing dedicated backend contract and endpoint for Attack Path UI (Screen N14).
+- **WHY REQUIRED**: To populate N14, a backend endpoint (`/api/v1/attack-paths`) and response schema are needed to serve the generated attack graph nodes, edges, traversal paths, and calculated path scores.
+- **EXPECTED CONTRACT**:
+  - DTOs defining graph nodes (assets, vulnerabilities, controls), relationships/edges, and ordered attack paths with severity, likelihood, and impact.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N14.
+- **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-011
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Harsh
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing enterprise dependency and structural context for Attack Path UI.
+- **WHY REQUIRED**: Tanish's attack graph requires enterprise inputs such as network topology, asset dependencies, control placement, and business relationships to generate valid attack paths.
+- **EXPECTED CONTRACT**:
+  - Provision of network topology data, dependency definitions, and enterprise context to the backend graph engine.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N14.
+- **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-012
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Tanish
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing dedicated backend contract and endpoint for AI Assistant UI (Screen N15).
+- **WHY REQUIRED**: To populate N15, a backend endpoint (`/api/v1/assistant`), AI orchestration logic, LLM integration, and a verified response schema are needed.
+- **EXPECTED CONTRACT**:
+  - Request/Response DTOs defining chat requests (prompt, context selections) and responses (messages, citations, sources, status).
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N15.
+- **STATUS**: OPEN
+
+---
+
+### REQUEST ID: NISHIT-013
+- **REQUESTED BY**: Nishit
+- **OWNER NEEDED**: Harsh
+- **DATE**: 2026-09-25
+- **DESCRIPTION**: Missing enterprise context and grounding data for AI Assistant.
+- **WHY REQUIRED**: The AI backend requires enterprise context (assets, controls, business logic) to provide grounded and organization-specific answers.
+- **EXPECTED CONTRACT**:
+  - Provision of enterprise context and constraints to the AI orchestration layer.
+- **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N15.
+- **STATUS**: OPEN
