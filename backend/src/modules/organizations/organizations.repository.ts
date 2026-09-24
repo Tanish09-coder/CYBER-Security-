@@ -222,4 +222,108 @@ export class OrganizationRepository {
     }
     return deleted;
   }
+
+  // ---------------------------------------------------------------------------
+  // Enterprise Dimension Aggregations (Phase 6)
+  // ---------------------------------------------------------------------------
+
+  async getBusinessUnitSummaries(organizationId?: string): Promise<Array<{
+    id: string;
+    organizationId: string;
+    name: string;
+    criticalityTier: number;
+    budget: number | null;
+    assetCount: number;
+    internetFacingAssetCount: number;
+    criticalAssetCount: number;
+  }>> {
+    let sql = `
+      SELECT bu.id, bu.organization_id, bu.name, bu.criticality_tier, bu.budget,
+             COUNT(a.id) as asset_count,
+             COUNT(CASE WHEN a.is_internet_facing = true THEN 1 END) as internet_facing_count,
+             COUNT(CASE WHEN a.business_criticality <= 2 THEN 1 END) as critical_asset_count
+      FROM business_units bu
+      LEFT JOIN assets a ON bu.id = a.business_unit_id
+    `;
+    const params: any[] = [];
+    if (organizationId) {
+      sql += ` WHERE bu.organization_id = $1`;
+      params.push(organizationId);
+    }
+    sql += ` GROUP BY bu.id, bu.organization_id, bu.name, bu.criticality_tier, bu.budget ORDER BY bu.name ASC`;
+
+    const res = await query<any>(sql, params);
+
+    return res.rows.map(row => ({
+      id: row.id,
+      organizationId: row.organization_id,
+      name: row.name,
+      criticalityTier: row.criticality_tier,
+      budget: row.budget !== null ? parseFloat(row.budget) : null,
+      assetCount: parseInt(row.asset_count, 10),
+      internetFacingAssetCount: parseInt(row.internet_facing_count, 10),
+      criticalAssetCount: parseInt(row.critical_asset_count, 10),
+    }));
+  }
+
+  async getOrganizationDimensions(organizationId: string): Promise<{
+    organizationId: string;
+    byBusinessUnit: Array<{ name: string; assetCount: number }>;
+    byCriticalityTier: Record<number, number>;
+    byDataClassification: Record<string, number>;
+    byInternetFacing: { internetFacing: number; internal: number };
+  }> {
+    const buSummaries = await this.getBusinessUnitSummaries(organizationId);
+
+    const criticalityRes = await query<any>(
+      `SELECT business_criticality, COUNT(*) as count
+       FROM assets WHERE organization_id = $1
+       GROUP BY business_criticality`,
+      [organizationId]
+    );
+
+    const classificationRes = await query<any>(
+      `SELECT data_classification, COUNT(*) as count
+       FROM assets WHERE organization_id = $1
+       GROUP BY data_classification`,
+      [organizationId]
+    );
+
+    const exposureRes = await query<any>(
+      `SELECT is_internet_facing, COUNT(*) as count
+       FROM assets WHERE organization_id = $1
+       GROUP BY is_internet_facing`,
+      [organizationId]
+    );
+
+    const byCriticalityTier: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    for (const r of criticalityRes.rows) {
+      const tier = parseInt(r.business_criticality, 10);
+      if (tier >= 1 && tier <= 5) {
+        byCriticalityTier[tier] = parseInt(r.count, 10);
+      }
+    }
+
+    const byDataClassification: Record<string, number> = {};
+    for (const r of classificationRes.rows) {
+      if (r.data_classification) {
+        byDataClassification[r.data_classification] = parseInt(r.count, 10);
+      }
+    }
+
+    let internetFacing = 0;
+    let internal = 0;
+    for (const r of exposureRes.rows) {
+      if (r.is_internet_facing === true) internetFacing = parseInt(r.count, 10);
+      else if (r.is_internet_facing === false) internal = parseInt(r.count, 10);
+    }
+
+    return {
+      organizationId,
+      byBusinessUnit: buSummaries.map(bu => ({ name: bu.name, assetCount: bu.assetCount })),
+      byCriticalityTier,
+      byDataClassification,
+      byInternetFacing: { internetFacing, internal },
+    };
+  }
 }

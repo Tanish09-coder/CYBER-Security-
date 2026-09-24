@@ -19,6 +19,7 @@ import { createOptimizationRouter } from './modules/optimization/optimization.ro
 import { createExecutiveRouter } from './modules/executive/executive.routes';
 import { createAttackPathsRouter } from './modules/attack-paths/attack-paths.routes';
 import { createAssistantRouter } from './modules/assistant/assistant.routes';
+import { financialContextRouter } from './modules/financial-context/financial-context.routes';
 import { runMigrations } from './db';
 import { logger } from './config/logger';
 
@@ -99,6 +100,9 @@ app.use('/api/v1/cpe-matching', cpeRouter);
 const controlsRouter = createControlsRouter();
 app.use('/api/controls', controlsRouter);
 app.use('/api/v1/controls', controlsRouter);
+
+// Enterprise Financial Context (Owner: HARSH - Phase 2)
+app.use('/api', financialContextRouter);
 
 // Risk Quantification Engine (Owner: TANISH - Phase 2)
 const riskRouter = createRiskRouter();
