@@ -59,6 +59,6 @@ All requests directed to **Tanish** regarding NVD, CISA KEV, MITRE ATT&CK, VCDB,
   - `GET /api/financial/exposure`
   - Response: `{ totalModeledExposure: number, estimatedAnnualizedLoss: number, currency: string, breakdown: { downtimeLoss: number, recoveryCost: number, businessInterruption: number }, dataCompletenessScore: number, isEstimated: true, modelVersion: '1.0.0' }`
 - **BLOCKING / NON-BLOCKING**: BLOCKING for Screen N9
-- **STATUS**: OPEN
-- **DELIVERY COMMITMENT**: Planned under Task TANISH-P3-02 in `tasks/TANISH/TASKS.md`.
+- **STATUS**: DELIVERED
+- **DELIVERY COMMITMENT**: Delivered in Migration `015_financial_results.sql`, `financial.routes.ts`, `financial.controller.ts`, and `financial.service.ts`. Endpoints `GET /api/financial/exposure`, `GET /api/financial/summary`, and `GET /api/financial/assets/:id` live and operational. Documented in `docs/API_CONTRACTS.md` (Section 5).
 

@@ -1599,6 +1599,93 @@ Every endpoint entry must declare:
   ```
 - **Status**: **LIVE & VERIFIED**
 
+---
 
+## 11. AI EXPLANATION ASSISTANT (PHASE 8)
 
+### 11.1 Explain Asset Risk Calculation
+- **Method**: `POST`
+- **Canonical Path**: `/api/assistant/explain-risk` (and `/api/v1/assistant/explain-risk`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N8 Risk Detail Modal / AI Drawer)
+- **Purpose**: Authoritatively explains why an atomic `(asset_id, vulnerability_id)` pair has a specific risk score, citing exact contributing factors from calculation ground truth without hallucination.
+- **Request Body**:
+  ```json
+  {
+    "riskResultId": "uuid-of-persisted-risk-result"
+  }
+  ```
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "explanation": "Asset 'Core Banking Server' is evaluated at risk score 82.5 (HIGH)...",
+      "groundingStatus": "VALIDATED",
+      "explanationMode": "AI_GENERATED",
+      "modelVersion": "1.0.0",
+      "citations": [
+        { "factorName": "Technical Severity (CVSS)", "value": 9.8, "weight": 0.4 },
+        { "factorName": "Asset Criticality Tier", "value": 1, "weight": 0.3 }
+      ],
+      "generatedAt": "2026-09-24T22:00:00.000Z"
+    }
+  }
+  ```
+- **Status**: **LIVE & VERIFIED**
 
+### 11.2 Explain Financial Exposure & EAL
+- **Method**: `POST`
+- **Canonical Path**: `/api/assistant/explain-financial` (and `/api/v1/assistant/explain-financial`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N9 Financial Overview)
+- **Purpose**: Explains modeled Single Loss Expectancy (SLE), Annualized Loss Event Frequency (ALEF), and Estimated Annualized Loss (EAL). Explicitly declares `NOT_AVAILABLE` if authoritative business downtime inputs are missing.
+- **Request Body**:
+  ```json
+  {
+    "financialResultId": "uuid-of-persisted-financial-result"
+  }
+  ```
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "explanation": "Modeled Annualized Loss of $125,000 is derived from an ALEF of 0.25 and an SLE of $500,000...",
+      "ealStatus": "CALCULATED",
+      "groundingStatus": "VALIDATED",
+      "explanationMode": "AI_GENERATED",
+      "modelVersion": "1.0.0",
+      "generatedAt": "2026-09-24T22:00:00.000Z"
+    }
+  }
+  ```
+- **Status**: **LIVE & VERIFIED**
+
+### 11.3 Compare Optimization Strategies
+- **Method**: `POST`
+- **Canonical Path**: `/api/assistant/compare-strategies` (and `/api/v1/assistant/compare-strategies`)
+- **Owner**: Tanish
+- **Consumer**: Nishit (Screen N11 Investment Optimizer Strategy Comparison)
+- **Purpose**: Objectively compares two optimizer strategies (costs, risk reduction, ROSI) without declaring an arbitrary winner or fabricating metrics.
+- **Request Body**:
+  ```json
+  {
+    "optimizationResultId": "uuid-of-optimizer-run",
+    "strategyIds": ["STRATEGY_A_MAX_REDUCTION", "STRATEGY_B_BALANCED_ROSI"]
+  }
+  ```
+- **Response (HTTP 200)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "comparisonText": "Strategy A delivers maximum risk reduction (Δ25.0) at cost of $50,000, whereas Strategy B achieves higher capital efficiency with a ROSI of 350%...",
+      "strategyComparisons": [ ... ],
+      "groundingStatus": "VALIDATED",
+      "explanationMode": "AI_GENERATED",
+      "generatedAt": "2026-09-24T22:00:00.000Z"
+    }
+  }
+  ```
+- **Status**: **LIVE & VERIFIED**
