@@ -1,5 +1,5 @@
 // =============================================================================
-// CyberRiskOS — API-based DEMO Workspace Bootstrapper
+// CyberRiskOS — Indian Enterprise API-based DEMO Workspace Bootstrapper
 // Targets the running server on http://localhost:5000
 // =============================================================================
 
@@ -21,7 +21,7 @@ async function api(path: string, options: any = {}): Promise<any> {
 
 export async function runApiSeed() {
   console.log('=============================================================================');
-  console.log(`CyberRiskOS — Bootstrapping DEMO Workspace via API (${BASE_URL})`);
+  console.log(`CyberRiskOS — Bootstrapping Indian Enterprise DEMO Workspace via API (${BASE_URL})`);
   console.log('=============================================================================');
 
   // 0. Sync Authoritative Cyber Threat Intelligence (NVD CVEs, CISA KEV, MITRE ATT&CK, VCDB)
@@ -54,40 +54,44 @@ export async function runApiSeed() {
     console.warn(`   ! CISA KEV sync note: ${e.message}`);
   }
 
-  // 1. Create Organization
-  console.log('\n--- 1. Registering DEMO Organization ---');
+  // 1. Create Indian Enterprise Organization
+  console.log('\n--- 1. Registering Indian Enterprise Organization ---');
   let demoOrg: any;
   const existingOrgs: any = await api('/api/organizations');
   const orgList = existingOrgs.data || existingOrgs || [];
-  demoOrg = orgList.find((o: any) => o.name && o.name.includes('(Demo)'));
+  demoOrg = orgList.find((o: any) => o.name && (o.name.includes('(Demo)') || o.name.includes('Bharat') || o.name.includes('HDFC')));
 
   if (!demoOrg) {
     const created = await api('/api/organizations', {
       method: 'POST',
       body: JSON.stringify({
-        name: 'Apex Financial Enterprises (Demo)',
-        industry: 'Financial Services',
-        employee_count: 12500,
-        annual_revenue: 2500000000,
-        currency: 'USD',
-        metadata: { is_demo: true, demo_tag: 'Official Judge Demonstration Workspace' },
+        name: 'Bharat Digital Financial Services (Demo)',
+        industry: 'Banking & Financial Services (BFSI)',
+        employee_count: 24500,
+        annual_revenue: 18500000000, // ₹18,500 Crore INR
+        currency: 'INR',
+        metadata: { is_demo: true, demo_tag: 'Official Indian Enterprise Workspace (RBI & SEBI Mapped)' },
       }),
     });
     demoOrg = created.data || created;
     console.log(`✓ Created Organization: ${demoOrg.name} (${demoOrg.id})`);
   } else {
-    console.log(`✓ Using existing Organization: ${demoOrg.name} (${demoOrg.id})`);
+    await api(`/api/organizations/${demoOrg.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ currency: 'INR', name: 'Bharat Digital Financial Services (Demo)' }),
+    });
+    console.log(`✓ Updated Organization to INR: ${demoOrg.name} (${demoOrg.id})`);
   }
 
   // 2. Create Business Units
-  console.log('\n--- 2. Registering Business Units ---');
+  console.log('\n--- 2. Registering Indian Enterprise Business Units ---');
   let existingBUs: any[] = [];
   try {
     const buRes = await api(`/api/business-units?organization_id=${demoOrg.id}`);
     existingBUs = buRes.data || buRes || [];
   } catch {}
 
-  const getOrCreateBU = async (name: string, tier: number, desc: string) => {
+  const getOrCreateBU = async (name: string, tier: number, desc: string, budget: number) => {
     const found = existingBUs.find((b: any) => b.name === name);
     if (found) return found;
     try {
@@ -97,62 +101,62 @@ export async function runApiSeed() {
           organization_id: demoOrg.id,
           name,
           criticality_tier: tier,
+          budget,
           description: desc,
         }),
       });
       return res.data || res;
     } catch {
-      // Re-fetch if created in race
       const refetch = await api(`/api/business-units?organization_id=${demoOrg.id}`);
       const list = refetch.data || refetch || [];
       return list.find((b: any) => b.name === name) || {};
     }
   };
 
-  const buPayment = await getOrCreateBU('Payment Processing Systems (Demo)', 5, 'High-volume transaction gateway and credit settlement processing pipeline.');
-  const buCoreBank = await getOrCreateBU('Core Banking & Ledger (Demo)', 5, 'Primary customer balance ledger and double-entry transaction database.');
-  const buWebGateway = await getOrCreateBU('Customer Web & Mobile Gateway (Demo)', 4, 'Public internet customer portal, mobile API gateway, and edge proxies.');
-  const buCorporate = await getOrCreateBU('Corporate IT & Operations (Demo)', 3, 'Internal Active Directory, employee collaboration tools, and intranet.');
+  const buUPI = await getOrCreateBU('UPI & IMPS Payment Switch (Demo)', 5, 'Real-time UPI transaction routing gateway and NPCI IMPS settlement engine.', 45000000);
+  const buCoreBank = await getOrCreateBU('CBS Core Banking & Ledger (Demo)', 5, 'Primary customer account ledger, Fixed Deposit engine, and RTGS/NEFT database.', 65000000);
+  const buPortal = await getOrCreateBU('NetBanking & Mobile App Gateway (Demo)', 4, 'Customer Internet Banking portal, Mobile Banking API gateway, and WAF proxies.', 30000000);
+  const buCorporate = await getOrCreateBU('Corporate Operations & HR (Demo)', 3, 'Internal Active Directory, SAP ERP, employee collaboration, and Intranet.', 15000000);
 
-  console.log('✓ Business Units created.');
+  console.log('✓ Business Units created with INR budgets.');
 
-  // 3. Register Assets
-  console.log('\n--- 3. Registering Enterprise Assets ---');
+  // 3. Register Assets with Indian Datacenter Hostnames
+  console.log('\n--- 3. Registering Indian Datacenter Infrastructure Assets ---');
   const assetsInput = [
     {
-      name: 'prod-pay-gw-01.apex.internal (Demo)',
+      name: 'mumbai-upi-switch-01.bharatbank.internal (Demo)',
       asset_type: 'server',
-      hostname: 'prod-pay-gw-01.apex.internal',
-      operating_system: 'Red Hat Enterprise Linux 8.6',
+      hostname: 'mumbai-upi-switch-01.bharatbank.internal',
+      operating_system: 'Red Hat Enterprise Linux 8.8',
       environment: 'Production',
       is_internet_facing: true,
       business_criticality: 5,
       data_classification: 'Restricted',
-      asset_value: 12500000,
-      business_unit_id: buPayment.id,
+      asset_value: 85000000,
+      business_unit_id: buUPI.id,
       software: [
         { vendor: 'apache', product: 'http_server', version: '2.4.49' },
         { vendor: 'openssl', product: 'openssl', version: '3.0.6' },
       ],
       controls: [
         { control_code: 'ENCRYPTION', status: 'IMPLEMENTED', effectiveness_score: 1.0 },
-        { control_code: 'EDR', status: 'IMPLEMENTED', effectiveness_score: 0.85 },
-        { control_code: 'MFA', status: 'IMPLEMENTED', effectiveness_score: 0.90 },
-        { control_code: 'SEGMENTATION', status: 'IMPLEMENTED', effectiveness_score: 0.80 },
+        { control_code: 'EDR', status: 'IMPLEMENTED', effectiveness_score: 0.90 },
+        { control_code: 'MFA', status: 'IMPLEMENTED', effectiveness_score: 0.95 },
+        { control_code: 'SEGMENTATION', status: 'IMPLEMENTED', effectiveness_score: 0.85 },
         { control_code: 'BACKUP', status: 'IMPLEMENTED', effectiveness_score: 0.95 },
-        { control_code: 'MONITORING', status: 'PARTIAL', effectiveness_score: 0.40 },
+        { control_code: 'MONITORING', status: 'PARTIAL', effectiveness_score: 0.45 },
       ],
     },
     {
-      name: 'core-db-cluster-01.apex.internal (Demo)',
+      name: 'bengaluru-cbs-db-cluster.bharatbank.internal (Demo)',
       asset_type: 'database',
-      hostname: 'core-db-cluster-01.apex.internal',
-      operating_system: 'Ubuntu 22.04 LTS',
-      environment: 'Production',
+      hostname: 'bengaluru-cbs-db-cluster.bharatbank.internal',
+      operating_system: 'Ubuntu 22.04 LTS Server',
+      environment: 'DR',
       is_internet_facing: false,
       business_criticality: 5,
       data_classification: 'Restricted',
-      asset_value: 25000000,
+      asset_value: 150000000,
       business_unit_id: buCoreBank.id,
       software: [
         { vendor: 'postgresql', product: 'postgresql', version: '15.2' },
@@ -160,24 +164,24 @@ export async function runApiSeed() {
       ],
       controls: [
         { control_code: 'ENCRYPTION', status: 'IMPLEMENTED', effectiveness_score: 1.0 },
-        { control_code: 'EDR', status: 'IMPLEMENTED', effectiveness_score: 0.90 },
-        { control_code: 'MFA', status: 'IMPLEMENTED', effectiveness_score: 0.95 },
+        { control_code: 'EDR', status: 'IMPLEMENTED', effectiveness_score: 0.95 },
+        { control_code: 'MFA', status: 'IMPLEMENTED', effectiveness_score: 1.0 },
         { control_code: 'SEGMENTATION', status: 'IMPLEMENTED', effectiveness_score: 0.90 },
         { control_code: 'BACKUP', status: 'IMPLEMENTED', effectiveness_score: 1.0 },
-        { control_code: 'MONITORING', status: 'IMPLEMENTED', effectiveness_score: 0.85 },
+        { control_code: 'MONITORING', status: 'IMPLEMENTED', effectiveness_score: 0.90 },
       ],
     },
     {
-      name: 'edge-nginx-proxy.apex.internal (Demo)',
+      name: 'delhi-netbanking-proxy.bharatbank.internal (Demo)',
       asset_type: 'server',
-      hostname: 'edge-nginx-proxy.apex.internal',
+      hostname: 'delhi-netbanking-proxy.bharatbank.internal',
       operating_system: 'Alpine Linux 3.18',
       environment: 'Production',
       is_internet_facing: true,
       business_criticality: 4,
       data_classification: 'Confidential',
-      asset_value: 5000000,
-      business_unit_id: buWebGateway.id,
+      asset_value: 35000000,
+      business_unit_id: buPortal.id,
       software: [
         { vendor: 'haxx', product: 'libcurl', version: '7.79.1' },
         { vendor: 'nginx', product: 'nginx', version: '1.24.0' },
@@ -185,45 +189,45 @@ export async function runApiSeed() {
       controls: [
         { control_code: 'ENCRYPTION', status: 'IMPLEMENTED', effectiveness_score: 1.0 },
         { control_code: 'EDR', status: 'PARTIAL', effectiveness_score: 0.50 },
-        { control_code: 'MFA', status: 'IMPLEMENTED', effectiveness_score: 0.80 },
+        { control_code: 'MFA', status: 'IMPLEMENTED', effectiveness_score: 0.85 },
         { control_code: 'SEGMENTATION', status: 'PARTIAL', effectiveness_score: 0.50 },
         { control_code: 'BACKUP', status: 'NOT_IMPLEMENTED', effectiveness_score: 0.0 },
-        { control_code: 'MONITORING', status: 'PARTIAL', effectiveness_score: 0.35 },
+        { control_code: 'MONITORING', status: 'PARTIAL', effectiveness_score: 0.40 },
       ],
     },
     {
-      name: 'corp-hq-dc01.apex.internal (Demo)',
+      name: 'hyderabad-hq-dc01.bharatbank.internal (Demo)',
       asset_type: 'server',
-      hostname: 'corp-hq-dc01.apex.internal',
-      operating_system: 'Microsoft Windows Server 2022',
+      hostname: 'hyderabad-hq-dc01.bharatbank.internal',
+      operating_system: 'Microsoft Windows Server 2022 Datacenter',
       environment: 'Production',
       is_internet_facing: false,
       business_criticality: 4,
       data_classification: 'Internal',
-      asset_value: 8000000,
+      asset_value: 50000000,
       business_unit_id: buCorporate.id,
       software: [
         { vendor: 'microsoft', product: 'windows_server_2022', version: '10.0.20348.1' },
       ],
       controls: [
-        { control_code: 'ENCRYPTION', status: 'IMPLEMENTED', effectiveness_score: 0.80 },
+        { control_code: 'ENCRYPTION', status: 'IMPLEMENTED', effectiveness_score: 0.85 },
         { control_code: 'EDR', status: 'IMPLEMENTED', effectiveness_score: 0.95 },
         { control_code: 'MFA', status: 'IMPLEMENTED', effectiveness_score: 1.0 },
         { control_code: 'SEGMENTATION', status: 'IMPLEMENTED', effectiveness_score: 0.85 },
         { control_code: 'BACKUP', status: 'IMPLEMENTED', effectiveness_score: 0.90 },
-        { control_code: 'MONITORING', status: 'IMPLEMENTED', effectiveness_score: 0.80 },
+        { control_code: 'MONITORING', status: 'IMPLEMENTED', effectiveness_score: 0.85 },
       ],
     },
     {
-      name: 'confluence-wiki-01.apex.internal (Demo)',
+      name: 'chennai-internal-wiki.bharatbank.internal (Demo)',
       asset_type: 'server',
-      hostname: 'confluence-wiki-01.apex.internal',
+      hostname: 'chennai-internal-wiki.bharatbank.internal',
       operating_system: 'Ubuntu 20.04 LTS',
       environment: 'Staging',
       is_internet_facing: true,
       business_criticality: 3,
       data_classification: 'Internal',
-      asset_value: 2000000,
+      asset_value: 12000000,
       business_unit_id: buCorporate.id,
       software: [
         { vendor: 'atlassian', product: 'confluence_data_center', version: '8.5.0' },
@@ -260,11 +264,11 @@ export async function runApiSeed() {
           business_criticality: item.business_criticality,
           data_classification: item.data_classification,
           asset_value: item.asset_value,
-          metadata: { is_demo: true },
+          metadata: { is_demo: true, location: item.hostname },
         }),
       });
       asset = res.data || res;
-      console.log(`   + Created Asset: ${asset.name} (${asset.id})`);
+      console.log(`   + Created Indian Asset: ${asset.name} (${asset.id})`);
 
       // Software
       for (const sw of item.software) {
@@ -281,7 +285,7 @@ export async function runApiSeed() {
           method: 'POST',
           body: JSON.stringify({ controls: item.controls }),
         });
-        console.log(`     - Configured ${item.controls.length} controls.`);
+        console.log(`     - Configured ${item.controls.length} security controls.`);
       }
     } else {
       console.log(`   + Found existing Asset: ${asset.name} (${asset.id})`);
@@ -289,64 +293,62 @@ export async function runApiSeed() {
     createdAssets.push(asset);
   }
 
-  // 4. Financial Parameters
-  console.log('\n--- 4. Registering Financial Parameters ---');
+  // 4. Financial Parameters in INR (₹)
+  console.log('\n--- 4. Registering Indian Financial Loss Parameters (₹ INR) ---');
   await api(`/api/organizations/${demoOrg.id}/financial-parameters`, {
     method: 'POST',
     body: JSON.stringify({
-      hourly_downtime_cost: 150000,
-      pii_record_count: 2500000,
-      cost_per_record: 165,
-      system_hardware_replacement_cost: 5000000,
+      hourly_downtime_cost: 1250000, // ₹12.5 Lakhs / hr
+      pii_record_count: 5000000, // 50 Lakh Customer Records
+      cost_per_record: 14000, // ₹14,000 / record
+      regulatory_breach_penalty: 250000000, // ₹25 Crore Regulatory Penalty (RBI/SEBI)
+      system_hardware_replacement_cost: 35000000, // ₹3.5 Crore Hardware Replacement
     }),
   });
-  console.log('✓ Financial parameters registered ($150k/hr downtime, 2.5M records @ $165).');
+  console.log('✓ Indian Financial parameters registered (₹12.5 Lakh/hr downtime, 50 Lakh records @ ₹14,000/record, ₹25 Cr penalty).');
 
-  // 5. Register Private Security Lab & AJLAPTOP
-  console.log('\n--- 5. Registering Private Security Lab (Development Workspace) ---');
-  let labOrg = orgList.find((o: any) => o.name === 'CyberRiskOS Security Lab');
-  if (!labOrg) {
-    const createdLab = await api('/api/organizations', {
-      method: 'POST',
-      body: JSON.stringify({
-        name: 'CyberRiskOS Security Lab',
-        industry: 'Cybersecurity Research',
-        employee_count: 1,
-        currency: 'INR',
-        metadata: { workspace_type: 'DEVELOPMENT', is_demo: false },
-      }),
-    });
-    labOrg = createdLab.data || createdLab;
-    console.log(`✓ Created Lab Org: ${labOrg.name} (${labOrg.id})`);
-  }
+  // 5. Remediation Actions Catalog in INR (₹)
+  console.log('\n--- 5. Registering Candidate Remediation Actions (₹ INR) ---');
+  const remediationActionsInput = [
+    {
+      organizationId: demoOrg.id,
+      title: 'Upgrade EDR Sensor to Active Blocking Mode on Mumbai UPI Gateway',
+      actionType: 'ENABLE_CONTROL',
+      remediationCost: 1500000, // ₹15 Lakhs
+      estimatedEffortHours: 40,
+      targetControlCode: 'EDR',
+      status: 'PLANNED',
+    },
+    {
+      organizationId: demoOrg.id,
+      title: 'Patch Critical Apache Log4j (CVE-2021-44228) on Bengaluru Core Banking DB',
+      actionType: 'PATCH_CVE',
+      remediationCost: 2500000, // ₹25 Lakhs
+      estimatedEffortHours: 80,
+      targetCveId: 'CVE-2021-44228',
+      status: 'APPROVED',
+    },
+    {
+      organizationId: demoOrg.id,
+      title: 'Micro-segment Network Path between Delhi Edge Proxy and Hyderabad DC',
+      actionType: 'SEGMENT_NETWORK',
+      remediationCost: 3500000, // ₹35 Lakhs
+      estimatedEffortHours: 120,
+      targetControlCode: 'SEGMENTATION',
+      status: 'PLANNED',
+    },
+  ];
 
-  const allAssetsRes = await api('/api/assets');
-  const allAssetsList = allAssetsRes.data || allAssetsRes || [];
-  let ajlaptop = allAssetsList.find((a: any) => a.name === 'AJLAPTOP');
-
-  if (!ajlaptop) {
-    const createdAj = await api('/api/assets', {
-      method: 'POST',
-      body: JSON.stringify({
-        organization_id: labOrg.id,
-        name: 'AJLAPTOP',
-        asset_type: 'workstation',
-        hostname: 'AJLAPTOP',
-        operating_system: 'Microsoft Windows 11 Home Single Language',
-        environment: 'Development',
-        is_internet_facing: false,
-        business_criticality: 3,
-        data_classification: 'Internal',
-        metadata: { is_demo: false },
-      }),
-    });
-    ajlaptop = createdAj.data || createdAj;
-    console.log(`✓ Created Private Asset: AJLAPTOP (${ajlaptop.id})`);
-
-    // Add software for AJLAPTOP
-    await api(`/api/assets/${ajlaptop.id}/software`, { method: 'POST', body: JSON.stringify({ vendor: 'haxx', product: 'libcurl', version: '7.79.1' }) });
-    await api(`/api/assets/${ajlaptop.id}/software`, { method: 'POST', body: JSON.stringify({ vendor: 'git', product: 'git', version: '2.55.0' }) });
-    await api(`/api/assets/${ajlaptop.id}/software`, { method: 'POST', body: JSON.stringify({ vendor: 'nodejs', product: 'node', version: '24.18.1' }) });
+  for (const act of remediationActionsInput) {
+    try {
+      await api('/api/remediation-actions', {
+        method: 'POST',
+        body: JSON.stringify(act),
+      });
+      console.log(`   + Registered Remediation Action: ${act.title}`);
+    } catch (e: any) {
+      console.warn(`   ! Remediation action note: ${e.message}`);
+    }
   }
 
   // 6. Run CPE Matching & Correlations
@@ -356,31 +358,31 @@ export async function runApiSeed() {
 
   // 7. Run Risk Engine Evaluations
   console.log('\n--- 7. Computing Risk Engine Scores ---');
-  for (const asset of [...createdAssets, ajlaptop]) {
+  for (const asset of createdAssets) {
     try {
       const riskRes = await api(`/api/risk/assets/${asset.id}/evaluate`, { method: 'POST' });
-      console.log(`   + Evaluated Risk for ${asset.name}:`, (riskRes.data || riskRes.items || riskRes || []).length, 'scores computed');
+      console.log(`   + Evaluated Risk for ${asset.name}`);
     } catch (e: any) {
       console.warn(`   ! Risk evaluation note for ${asset.name}: ${e.message}`);
     }
   }
 
-  // 8. Run Financial Exposure Engine
-  console.log('\n--- 8. Computing Financial Exposure Metrics ---');
+  // 8. Run Financial Exposure Engine (₹ INR)
+  console.log('\n--- 8. Computing Financial Exposure Metrics in INR (₹) ---');
   for (const asset of createdAssets) {
     try {
       const finRes = await api(`/api/financial/assets/${asset.id}/evaluate`, {
         method: 'POST',
         body: JSON.stringify({ organizationId: demoOrg.id }),
       });
-      console.log(`   + Evaluated Financial Exposure for ${asset.name}:`, finRes.data ? `EAL=$${Math.round(finRes.data.financialMetrics?.ale || 0).toLocaleString()}` : 'OK');
+      console.log(`   + Evaluated Financial Exposure for ${asset.name}: OK`);
     } catch (e: any) {
       console.warn(`   ! Financial exposure note for ${asset.name}: ${e.message}`);
     }
   }
 
   console.log('\n=============================================================================');
-  console.log('✓ DEMO Workspace Seeded & Operational via API!');
+  console.log('✓ INDIAN ENTERPRISE DEMO WORKSPACE SEEDED & OPERATIONAL (INR ₹)!');
   console.log('=============================================================================');
 }
 
