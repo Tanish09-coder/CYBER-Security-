@@ -59,23 +59,6 @@ export const Sidebar: React.FC = () => {
 
         {/* Navigation Links */}
         <nav className="p-3 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)] scrollbar-hide mt-2">
-          
-          {/* FLAGSHIP DEMO EXPERIENCE */}
-          <div>
-            <NavLink
-              to="/demo"
-              className={({ isActive }) =>
-                `w-full flex items-center px-3 py-2.5 text-xs font-bold rounded-lg transition-all ${
-                  isActive
-                    ? 'bg-brand-primary text-white shadow-md ring-2 ring-brand-primary/50'
-                    : 'bg-gradient-to-r from-slate-900 to-brand-primary/30 border border-brand-primary/40 text-brand-primary hover:bg-brand-primary/20'
-                }`
-              }
-            >
-              <Sparkles className="w-4 h-4 mr-2.5 animate-pulse text-amber-400" />
-              <span>START DEMO EXPERIENCE</span>
-            </NavLink>
-          </div>
 
           {/* OVERVIEW */}
           <div>

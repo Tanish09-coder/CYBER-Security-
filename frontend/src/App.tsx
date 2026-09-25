@@ -35,12 +35,10 @@ export const App: React.FC = () => {
           <Sidebar />
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <Header />
-            {/* Guided Demo Journey Navigation Bar */}
-            <DemoJourney />
-            
+            {/* Main Page Container */}
             <PageContainer>
               <Routes>
-                <Route path="/" element={<Navigate to="/demo" replace />} />
+                <Route path="/" element={<Navigate to="/integrations" replace />} />
                 <Route path="/demo" element={<JudgeDemoExperience />} />
                 <Route path="/integrations" element={<Integrations />} />
                 <Route path="/vulnerabilities" element={<Vulnerabilities />} />
