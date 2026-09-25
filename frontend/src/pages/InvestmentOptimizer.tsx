@@ -9,10 +9,10 @@ import { Skeleton } from '../components/common/Skeleton';
 
 export const InvestmentOptimizer: React.FC = () => {
   const { activeOrg } = useWorkspace();
-  const authoritativeCurrency = activeOrg?.currency || 'USD';
+  const authoritativeCurrency = activeOrg?.currency || 'INR';
 
   const [initiatives, setInitiatives] = useState<RemediationCandidateActionDTO[]>([]);
-  const [budget, setBudget] = useState<number>(50000);
+  const [budget, setBudget] = useState<number>(5000000);
   const [objective, setObjective] = useState<'MAX_MODELED_RISK_REDUCTION' | 'MAX_MODELED_EAL_REDUCTION' | 'MAX_ROSI'>('MAX_ROSI');
   const [selectedInitiatives, setSelectedInitiatives] = useState<Set<string>>(new Set());
 
@@ -21,47 +21,37 @@ export const InvestmentOptimizer: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Pre-populated realistic candidate actions if API candidates list is loading or empty
+  // Pre-populated realistic candidate actions in INR (₹)
   const FALLBACK_CANDIDATE_ACTIONS: RemediationCandidateActionDTO[] = [
     {
-      actionId: 'act-patch-log4j-01',
-      title: 'Patch Apache Log4j Vulnerability (CVE-2021-44228)',
-      actionType: 'PATCH_VULNERABILITY',
-      targetAssetId: 'core-db-cluster-01',
-      targetCveId: 'CVE-2021-44228',
-      cost: 15000,
-      estimatedRiskReduction: 35.0,
-      estimatedEalReduction: 180000,
-    },
-    {
-      actionId: 'act-patch-confluence-01',
-      title: 'Upgrade Atlassian Confluence Server (CVE-2023-22515)',
-      actionType: 'PATCH_VULNERABILITY',
-      targetAssetId: 'confluence-wiki-01',
-      targetCveId: 'CVE-2023-22515',
-      cost: 10000,
-      estimatedRiskReduction: 25.0,
-      estimatedEalReduction: 120000,
-    },
-    {
-      actionId: 'act-implement-mfa-01',
-      title: 'Enforce Multi-Factor Authentication (MFA) on Web Gateway',
+      actionId: 'act-edr-mumbai-upi-01',
+      title: 'Upgrade EDR Sensor to Active Blocking Mode on Mumbai UPI Gateway',
       actionType: 'IMPLEMENT_CONTROL',
-      targetAssetId: 'edge-nginx-proxy',
-      controlCode: 'MFA',
-      cost: 25000,
-      estimatedRiskReduction: 20.0,
-      estimatedEalReduction: 95000,
+      targetAssetId: 'mumbai-upi-switch-01.bharatbank.internal',
+      controlCode: 'EDR_ACTIVE',
+      cost: 1500000, // ₹15 Lakhs
+      estimatedRiskReduction: 38.5,
+      estimatedEalReduction: 1250000,
     },
     {
-      actionId: 'act-segment-payment-01',
-      title: 'Implement Network Micro-Segmentation on Payment Gateway',
+      actionId: 'act-patch-log4j-cbs-01',
+      title: 'Patch Critical Apache Log4j (CVE-2021-44228) on Bengaluru Core Banking DB',
+      actionType: 'PATCH_VULNERABILITY',
+      targetAssetId: 'bengaluru-cbs-db-cluster.bharatbank.internal',
+      targetCveId: 'CVE-2021-44228',
+      cost: 2500000, // ₹25 Lakhs
+      estimatedRiskReduction: 42.0,
+      estimatedEalReduction: 1850000,
+    },
+    {
+      actionId: 'act-segment-delhi-hq-01',
+      title: 'Micro-segment Network Path between Delhi Edge Proxy and Hyderabad DC',
       actionType: 'ISOLATE_ASSET',
-      targetAssetId: 'prod-pay-gw-01',
+      targetAssetId: 'delhi-netbanking-proxy.bharatbank.internal',
       controlCode: 'SEGMENTATION',
-      cost: 40000,
-      estimatedRiskReduction: 30.0,
-      estimatedEalReduction: 150000,
+      cost: 3500000, // ₹35 Lakhs
+      estimatedRiskReduction: 28.0,
+      estimatedEalReduction: 980000,
     },
   ];
 
@@ -129,15 +119,22 @@ export const InvestmentOptimizer: React.FC = () => {
     }
   };
 
+  const presets = [
+    { label: '₹10L', amount: 1000000 },
+    { label: '₹25L', amount: 2500000 },
+    { label: '₹50L', amount: 5000000 },
+    { label: '₹1Cr', amount: 10000000 },
+  ];
+
   return (
     <div className="space-y-6">
       {/* 1. Standard Header */}
       <StandardPageHeader
-        title="Cybersecurity Investment Optimizer"
-        purpose="Set a cybersecurity budget and compare feasible remediation strategies."
+        title="Cybersecurity Investment Optimizer (INR ₹)"
+        purpose="Set an Indian enterprise cybersecurity budget and evaluate optimal remediation strategies."
         steps={[
-          '1. Set a cybersecurity budget (or select a preset like $10K, $25K, $50K, $100K)',
-          '2. Review remediation candidate cards, synthetic remediation costs, and risk reduction potentials',
+          '1. Set an Indian cybersecurity budget (or select a preset like ₹10 Lakhs, ₹25 Lakhs, ₹50 Lakhs, ₹1 Crore)',
+          '2. Review candidate remediation projects (EDR upgrade on Mumbai UPI Gateway, Log4j patch on Core Banking DB)',
           '3. Run optimizer to compare Strategy A, B, and C across Return on Security Investment (ROSI)'
         ]}
         dataOriginBadge="MODELED / ESTIMATED"
@@ -147,44 +144,44 @@ export const InvestmentOptimizer: React.FC = () => {
       <div className="bg-purple-50 border border-purple-200 p-3.5 rounded-lg text-xs text-purple-950 flex items-center space-x-2 shadow-2xs">
         <Info className="w-4 h-4 text-purple-600 flex-shrink-0" />
         <span>
-          <strong>Decision Support Framework:</strong> Modeled benefits and Return on Security Investment (ROSI) figures represent estimated expected financial trade-offs and do not guarantee fixed actual financial returns.
+          <strong>Decision Support Framework:</strong> Modeled benefits and Return on Security Investment (ROSI) figures represent estimated expected financial trade-offs in Indian Rupees (₹) and do not guarantee fixed actual financial returns.
         </span>
       </div>
 
       {/* 2. Controls & Presets */}
       <div className="bg-app-surface border border-app-border rounded-lg p-6 shadow-2xs space-y-5">
         <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center">
-          <TrendingUp className="w-4 h-4 mr-1.5 text-brand-primary" /> Optimization Constraints & Presets
+          <TrendingUp className="w-4 h-4 mr-1.5 text-brand-primary" /> Optimization Constraints & Presets (INR ₹)
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold text-text-muted uppercase mb-1">
-              Available Budget ({authoritativeCurrency})
+              Available Budget (INR ₹)
             </label>
             <input
               type="number"
               value={budget}
               onChange={(e) => setBudget(Number(e.target.value))}
-              min={1000}
-              step={5000}
+              min={100000}
+              step={500000}
               className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-bold text-text-primary focus:outline-none focus:border-brand-primary"
             />
 
-            {/* Budget Presets */}
+            {/* Budget Presets in INR */}
             <div className="flex items-center space-x-1.5 mt-2">
               <span className="text-[10px] text-text-muted font-bold mr-1">Presets:</span>
-              {[10000, 25000, 50000, 100000].map(p => (
+              {presets.map(p => (
                 <button
-                  key={p}
-                  onClick={() => handlePresetBudget(p)}
+                  key={p.amount}
+                  onClick={() => handlePresetBudget(p.amount)}
                   className={`px-2 py-0.5 text-[10px] font-bold rounded border transition-colors ${
-                    budget === p
+                    budget === p.amount
                       ? 'bg-brand-primary text-white border-brand-primary'
                       : 'bg-app-surfaceSecondary text-text-secondary border-app-border hover:bg-slate-200'
                   }`}
                 >
-                  ${p / 1000}K
+                  {p.label}
                 </button>
               ))}
             </div>
@@ -198,7 +195,7 @@ export const InvestmentOptimizer: React.FC = () => {
               className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-semibold text-text-primary bg-white focus:outline-none focus:border-brand-primary"
             >
               <option value="MAX_ROSI">Maximize Return on Security Investment (ROSI)</option>
-              <option value="MAX_MODELED_EAL_REDUCTION">Maximize Financial Exposure (EAL) Reduction</option>
+              <option value="MAX_MODELED_EAL_REDUCTION">Maximize Financial Exposure (EAL) Reduction (₹)</option>
               <option value="MAX_MODELED_RISK_REDUCTION">Maximize Enterprise Risk Score Reduction</option>
             </select>
           </div>
@@ -222,7 +219,7 @@ export const InvestmentOptimizer: React.FC = () => {
               Remediation Action Candidates ({initiatives.length})
             </h4>
             <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-300 uppercase">
-              SYNTHETIC DEMO REMEDIATION COST
+              INDIAN DEMO REMEDIATION COST (₹ INR)
             </span>
           </div>
 
@@ -282,7 +279,7 @@ export const InvestmentOptimizer: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-text-primary flex items-center">
               <ShieldAlert className="w-4 h-4 mr-2 text-brand-primary" />
-              Feasible Remediation Strategy Comparison
+              Feasible Remediation Strategy Comparison (INR ₹)
             </h3>
             <span className="px-2.5 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-bold rounded uppercase border border-purple-300">
               MODELED / ESTIMATED
@@ -341,7 +338,7 @@ export const InvestmentOptimizer: React.FC = () => {
 
       {/* 4. Standard Footer */}
       <StandardPageFooter
-        resultMeaning="Investment optimization uses mathematical programming to maximize risk reduction or ROSI within budget constraints."
+        resultMeaning="Investment optimization uses mathematical programming to maximize risk reduction or ROSI in Indian Rupees (₹) within budget constraints."
         nextStepTitle="Review Executive Dashboard"
         nextStepPath="/executive-dashboard"
         nextStepDescription="View board-ready enterprise risk metrics and strategic posture summaries."
