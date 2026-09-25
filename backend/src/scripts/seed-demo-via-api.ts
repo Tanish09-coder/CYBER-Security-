@@ -24,6 +24,36 @@ export async function runApiSeed() {
   console.log(`CyberRiskOS — Bootstrapping DEMO Workspace via API (${BASE_URL})`);
   console.log('=============================================================================');
 
+  // 0. Sync Authoritative Cyber Threat Intelligence (NVD CVEs, CISA KEV, MITRE ATT&CK, VCDB)
+  console.log('\n--- 0. Syncing Real Public Cyber Intelligence ---');
+  const cvesToSync = [
+    'CVE-2021-44228',
+    'CVE-2023-38545',
+    'CVE-2021-41773',
+    'CVE-2023-22515',
+    'CVE-2023-2454',
+    'CVE-2022-3602',
+    'CVE-2023-4863',
+    'CVE-2023-34362',
+    'CVE-2023-20198',
+  ];
+
+  for (const cveId of cvesToSync) {
+    try {
+      await api(`/api/integrations/nvd/cve/${cveId}`, { method: 'POST' });
+      console.log(`   + Synced NVD CVE: ${cveId}`);
+    } catch (e: any) {
+      console.warn(`   ! NVD sync note for ${cveId}: ${e.message}`);
+    }
+  }
+
+  try {
+    const kevRes = await api('/api/integrations/cisa-kev/sync', { method: 'POST' });
+    console.log('   + CISA KEV catalog sync complete:', kevRes.syncResult?.recordsInserted || 'OK');
+  } catch (e: any) {
+    console.warn(`   ! CISA KEV sync note: ${e.message}`);
+  }
+
   // 1. Create Organization
   console.log('\n--- 1. Registering DEMO Organization ---');
   let demoOrg: any;
