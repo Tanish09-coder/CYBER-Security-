@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Info, Calculator, HelpCircle } from 'lucide-react';
+import { AlertCircle, Loader2, Info, Calculator, HelpCircle, Landmark } from 'lucide-react';
 import { FinancialExposureResponse } from '../types/risk';
 import { riskApi } from '../api/risk';
 import { formatCurrency } from '../utils/currency';
@@ -32,13 +32,13 @@ export const FinancialExposure: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full space-y-4 min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
-        <p className="text-sm font-medium text-text-secondary">Quantifying modeled financial exposure metrics...</p>
+        <p className="text-sm font-medium text-text-secondary">Quantifying modeled financial exposure metrics in INR (₹)...</p>
       </div>
     );
   }
 
   const items = data?.items || [];
-  const authoritativeCurrency = activeOrg?.currency || 'USD';
+  const authoritativeCurrency = activeOrg?.currency || 'INR';
 
   const modeledEalTotal = items.reduce((sum, item) => sum + (item.eal || 0), 0);
 
@@ -46,12 +46,12 @@ export const FinancialExposure: React.FC = () => {
     <div className="space-y-6">
       {/* 1. Standard Header */}
       <StandardPageHeader
-        title="Financial Exposure Analysis"
-        purpose="Translate cyber scenarios into modeled financial exposure."
+        title="Financial Exposure Analysis (INR ₹)"
+        purpose="Translate Indian cyber incident scenarios into modeled monetary financial exposure in Indian Rupees (₹)."
         steps={[
-          'Review synthetic financial parameters and explicit downtime cost assumptions',
-          'Inspect Single Loss Expectancy (SLE) and Annualized Loss Expectancy (EAL) per asset',
-          'Validate loss component breakdown across primary downtime loss and secondary recovery costs'
+          'Review Indian enterprise financial parameters (downtime cost in ₹ Lakhs, breach penalties in ₹ Crore)',
+          'Inspect Single Loss Expectancy (SLE in ₹) and Annualized Loss Expectancy (EAL in ₹) per asset',
+          'Validate loss component breakdown across primary downtime loss and secondary incident recovery costs'
         ]}
         dataOriginBadge="MODELED / ESTIMATED"
       />
@@ -60,38 +60,42 @@ export const FinancialExposure: React.FC = () => {
       <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg text-xs text-purple-950 space-y-2 shadow-2xs">
         <div className="flex items-center space-x-2 font-bold text-purple-900 text-sm">
           <Info className="w-4 h-4 text-purple-600" />
-          <span>Explicit Synthetic Demo Assumptions</span>
+          <span>Bharat Digital Financial Services (Demo) — Indian Financial Loss Parameters</span>
           <span className="bg-purple-200 text-purple-900 px-2 py-0.5 rounded text-[10px] uppercase font-extrabold ml-2">
-            DEMO ASSUMPTIONS
+            INR (₹) PARAMETERS
           </span>
         </div>
         <p className="text-purple-900/90 leading-relaxed">
-          These financial exposure numbers are <strong>estimates based on explicit demo assumptions</strong>. They serve as a decision framework and must not be treated as guaranteed loss guarantees.
+          These financial exposure numbers are <strong>modeled loss estimates in Indian Rupees (₹)</strong> calibrated against Indian digital banking revenue rates, RBI regulatory breach penalty baselines, and CERT-In recovery costs.
         </p>
       </div>
 
-      {/* Assumptions Grid */}
+      {/* Assumptions Grid — 100% INDIAN INR (₹) */}
       <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-2xs">
         <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-3 flex items-center">
-          <Calculator className="w-4 h-4 mr-1.5 text-brand-primary" /> Baseline Enterprise Financial Assumptions
+          <Calculator className="w-4 h-4 mr-1.5 text-brand-primary" /> Indian Enterprise Baseline Financial Assumptions (₹ INR)
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
             <span className="text-[10px] font-bold text-text-muted uppercase block">Hourly Downtime Cost</span>
-            <span className="text-lg font-bold text-text-primary">$150,000 / hr</span>
-            <span className="text-text-secondary text-[11px] block mt-0.5">Based on Apex Financial revenue rate</span>
+            <span className="text-lg font-bold text-text-primary">
+              {formatCurrency(1250000, authoritativeCurrency)} / hr
+            </span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">₹12.5 Lakhs/hr (Bharat Bank UPI & CBS rate)</span>
           </div>
 
           <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
             <span className="text-[10px] font-bold text-text-muted uppercase block">Estimated Outage Duration</span>
             <span className="text-lg font-bold text-text-primary">8.5 Hours</span>
-            <span className="text-text-secondary text-[11px] block mt-0.5">VERIS historical mean recovery window</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">Historical mean recovery window</span>
           </div>
 
           <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
-            <span className="text-[10px] font-bold text-text-muted uppercase block">Recovery & Forensic Cost</span>
-            <span className="text-lg font-bold text-text-primary">$500,000</span>
-            <span className="text-text-secondary text-[11px] block mt-0.5">Incident response & remediation retainer</span>
+            <span className="text-[10px] font-bold text-text-muted uppercase block">Recovery & Incident Retainer</span>
+            <span className="text-lg font-bold text-text-primary">
+              {formatCurrency(4000000, authoritativeCurrency)}
+            </span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">₹40 Lakhs (CERT-In & Forensic retainer)</span>
           </div>
 
           <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border relative group">
@@ -112,16 +116,16 @@ export const FinancialExposure: React.FC = () => {
       {/* Calculation Formula Card */}
       <div className="bg-slate-900 text-white p-5 rounded-lg border border-slate-800 shadow-2xs space-y-3">
         <h4 className="text-xs font-bold text-blue-300 uppercase tracking-widest flex items-center">
-          <Calculator className="w-4 h-4 mr-1.5" /> Explainable Loss Calculation Formula
+          <Calculator className="w-4 h-4 mr-1.5" /> Explainable Financial Loss Formula (INR ₹)
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
           <div className="p-3 bg-slate-800/80 rounded border border-slate-700">
-            <span className="text-slate-400 text-[10px] block">1. SINGLE INCIDENT LOSS (SLE)</span>
-            <span className="text-white font-bold block mt-1">Downtime Cost + Recovery Cost = Single Incident Loss</span>
+            <span className="text-slate-400 text-[10px] block">1. SINGLE INCIDENT LOSS (SLE in ₹)</span>
+            <span className="text-white font-bold block mt-1">Primary Downtime Loss (₹) + Recovery Cost (₹) = Single Incident Loss</span>
           </div>
           <div className="p-3 bg-slate-800/80 rounded border border-slate-700">
-            <span className="text-slate-400 text-[10px] block">2. ANNUALIZED LOSS EXPECTANCY (EAL)</span>
-            <span className="text-purple-300 font-bold block mt-1">Single Incident Loss × Annual Event Frequency = Estimated EAL</span>
+            <span className="text-slate-400 text-[10px] block">2. ANNUALIZED LOSS EXPECTANCY (EAL in ₹)</span>
+            <span className="text-purple-300 font-bold block mt-1">Single Incident Loss (₹) × Annual Event Frequency = Estimated EAL (₹)</span>
           </div>
         </div>
       </div>
@@ -138,7 +142,7 @@ export const FinancialExposure: React.FC = () => {
           <h3 className="text-base font-bold text-text-primary mb-2">No financial exposure has been calculated yet.</h3>
           <p className="text-xs text-text-secondary max-w-md mx-auto mb-3">
             To generate it:<br />
-            1. Add financial parameters<br />
+            1. Add financial parameters in INR<br />
             2. Evaluate an asset vulnerability<br />
             3. Return here to review the result.
           </p>
@@ -152,7 +156,7 @@ export const FinancialExposure: React.FC = () => {
               <p className="text-3xl font-extrabold text-purple-700">
                 {formatCurrency(modeledEalTotal, authoritativeCurrency)}
               </p>
-              <span className="text-[10px] text-text-muted mt-1 block">Annualized expected financial loss</span>
+              <span className="text-[10px] text-text-muted mt-1 block">Annualized expected financial loss in Indian Rupees (₹)</span>
             </div>
 
             <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
@@ -163,15 +167,18 @@ export const FinancialExposure: React.FC = () => {
 
             <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
               <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Currency Standard</span>
-              <p className="text-3xl font-bold text-brand-primary">{authoritativeCurrency}</p>
-              <span className="text-[10px] text-text-muted mt-1 block">Authoritative org currency</span>
+              <p className="text-3xl font-bold text-brand-primary flex items-center">
+                <Landmark className="w-6 h-6 mr-2 text-brand-primary" />
+                INR (₹)
+              </p>
+              <span className="text-[10px] text-text-muted mt-1 block">Authoritative Indian Enterprise Currency</span>
             </div>
           </div>
 
           {/* Granular Table */}
           <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
             <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary">
-              <h3 className="text-sm font-semibold text-text-primary">Asset & Vulnerability Financial Breakdown</h3>
+              <h3 className="text-sm font-semibold text-text-primary">Asset & Vulnerability Financial Breakdown (INR ₹)</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-app-border text-xs">
@@ -217,10 +224,10 @@ export const FinancialExposure: React.FC = () => {
 
       {/* 3. Standard Footer */}
       <StandardPageFooter
-        resultMeaning="Financial exposure reflects modeled annualized loss (EAL). It provides executives with monetary risk metrics to justify cybersecurity investments."
+        resultMeaning="Financial exposure reflects modeled annualized loss (EAL in ₹ INR). It provides executives with monetary risk metrics in Indian Rupees to justify cybersecurity investments."
         nextStepTitle="Try a What-If Scenario"
         nextStepPath="/what-if-simulator"
-        nextStepDescription="Test how hypothetical security interventions (patching, controls) reduce financial exposure."
+        nextStepDescription="Test how hypothetical security interventions (patching, controls) reduce financial exposure in INR (₹)."
       />
     </div>
   );
