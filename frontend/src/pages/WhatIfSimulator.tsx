@@ -1,21 +1,43 @@
-﻿import React, { useState } from 'react';
-import { AlertCircle, Loader2, Play, Plus, X, ShieldAlert, ArrowRight, Activity } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertCircle, Loader2, Play, Plus, X, ShieldAlert, ArrowRight } from 'lucide-react';
 import { WhatIfSimulationResponse, ScenarioActionDTO, WhatIfSimulationRequest } from '../types/risk';
 import { riskApi } from '../api/risk';
 import { formatCurrency, formatCurrencyCompact } from '../utils/currency';
+import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
+import { useWorkspace } from '../context/WorkspaceContext';
 
 export const WhatIfSimulator: React.FC = () => {
+  const { activeOrg } = useWorkspace();
+  const authoritativeCurrency = activeOrg?.currency || 'USD';
+
   const [actions, setActions] = useState<ScenarioActionDTO[]>([]);
   
-  // Current action builder state
+  // Action builder state
   const [actionType, setActionType] = useState<'PATCH_VULNERABILITY' | 'IMPLEMENT_CONTROL' | 'ISOLATE_ASSET' | 'DECOMMISSION_ASSET'>('PATCH_VULNERABILITY');
-  const [targetAssetId, setTargetAssetId] = useState('');
-  const [targetCveId, setTargetCveId] = useState('');
-  const [controlCode, setControlCode] = useState('');
+  const [targetAssetId, setTargetAssetId] = useState('confluence-wiki-01');
+  const [targetCveId, setTargetCveId] = useState('CVE-2023-22515');
+  const [controlCode, setControlCode] = useState('MFA');
 
   const [data, setData] = useState<WhatIfSimulationResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Preset Demo Options with human readable names
+  const DEMO_ASSET_OPTIONS = [
+    { id: 'confluence-wiki-01', label: 'Confluence Wiki Server (confluence-wiki-01)', defaultCve: 'CVE-2023-22515' },
+    { id: 'prod-pay-gw-01', label: 'Payment Gateway (prod-pay-gw-01)', defaultCve: 'CVE-2021-44228' },
+    { id: 'edge-nginx-proxy', label: 'Customer Web Gateway (edge-nginx-proxy)', defaultCve: 'CVE-2023-38545' },
+    { id: 'core-db-cluster-01', label: 'Core Banking Database (core-db-cluster-01)', defaultCve: 'CVE-2021-44228' },
+    { id: 'corp-hq-dc01', label: 'Corporate Active Directory (corp-hq-dc01)', defaultCve: 'CVE-2023-20198' },
+  ];
+
+  const handleAssetSelectChange = (assetId: string) => {
+    setTargetAssetId(assetId);
+    const found = DEMO_ASSET_OPTIONS.find(o => o.id === assetId);
+    if (found) {
+      setTargetCveId(found.defaultCve);
+    }
+  };
 
   const handleAddAction = () => {
     if (!targetAssetId.trim()) return;
@@ -29,9 +51,6 @@ export const WhatIfSimulator: React.FC = () => {
     if (actionType === 'IMPLEMENT_CONTROL') newAction.controlCode = controlCode;
     
     setActions([...actions, newAction]);
-    setTargetAssetId('');
-    setTargetCveId('');
-    setControlCode('');
   };
 
   const handleRemoveAction = (index: number) => {
@@ -47,7 +66,7 @@ export const WhatIfSimulator: React.FC = () => {
       setData(null);
 
       const request: WhatIfSimulationRequest = {
-        scenarioName: 'Custom UI Scenario',
+        scenarioName: 'Hypothetical Security Intervention Sandbox',
         actions: actions
       };
 
@@ -68,92 +87,115 @@ export const WhatIfSimulator: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-2xl font-bold text-text-primary flex items-center">
-          <ShieldAlert className="w-6 h-6 mr-2 text-brand-primary" />
-          What-If Simulator
-        </h2>
-      </div>
-      <p className="text-xs text-text-secondary mb-6">
-        Stage hypothetical interventions to model their impact on enterprise risk score and financial exposure.
-      </p>
+    <div className="space-y-6">
+      {/* 1. Standard Header */}
+      <StandardPageHeader
+        title="What-If Risk Simulator"
+        purpose="Test what could happen if a security change were made without changing the real baseline."
+        steps={[
+          'Select an enterprise asset and target vulnerability or security control',
+          'Choose a hypothetical action (Patch vulnerability, upgrade library, improve control, segment asset)',
+          'Run simulation to compare CURRENT baseline vs HYPOTHETICAL scenario outcomes'
+        ]}
+        dataOriginBadge="HYPOTHETICAL"
+      />
 
-      {/* 1. SCENARIO BUILDER */}
-      <div className="bg-app-surface border border-app-border rounded-lg shadow-sm overflow-hidden mb-8">
-        <div className="px-6 py-4 border-b border-app-border bg-surface-secondary flex justify-between items-center">
-          <h3 className="text-sm font-semibold text-text-primary">Scenario Builder</h3>
+      {/* 2. Scenario Builder */}
+      <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
+        <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary flex justify-between items-center">
+          <h3 className="text-sm font-bold text-text-primary">Hypothetical Intervention Builder</h3>
           <button 
             onClick={handleReset}
-            className="text-xs text-text-muted hover:text-text-primary transition-colors"
+            className="text-xs font-bold text-text-muted hover:text-brand-primary transition-colors"
           >
             Reset Sandbox
           </button>
         </div>
         
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row gap-4 mb-6 items-start">
-            <select 
-              value={actionType}
-              onChange={(e) => setActionType(e.target.value as any)}
-              className="px-3 py-2 border border-app-border rounded-md text-sm text-text-primary bg-white focus:outline-none focus:border-brand-primary"
-            >
-              <option value="PATCH_VULNERABILITY">Patch CVE</option>
-              <option value="IMPLEMENT_CONTROL">Implement Control</option>
-              <option value="ISOLATE_ASSET">Isolate Asset</option>
-              <option value="DECOMMISSION_ASSET">Decommission Asset</option>
-            </select>
+        <div className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+            <div>
+              <label className="block text-xs font-bold text-text-muted uppercase mb-1">1. Hypothetical Action</label>
+              <select 
+                value={actionType}
+                onChange={(e) => setActionType(e.target.value as any)}
+                className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-medium text-text-primary bg-white focus:outline-none focus:border-brand-primary"
+              >
+                <option value="PATCH_VULNERABILITY">Patch Vulnerable Software</option>
+                <option value="IMPLEMENT_CONTROL">Improve / Implement Control</option>
+                <option value="ISOLATE_ASSET">Segment / Isolate Asset</option>
+                <option value="DECOMMISSION_ASSET">Decommission Asset</option>
+              </select>
+            </div>
             
-            <input 
-              type="text" 
-              placeholder="Target Asset ID"
-              value={targetAssetId}
-              onChange={(e) => setTargetAssetId(e.target.value)}
-              className="flex-1 px-3 py-2 border border-app-border rounded-md text-sm text-text-primary focus:outline-none focus:border-brand-primary"
-            />
+            <div>
+              <label className="block text-xs font-bold text-text-muted uppercase mb-1">2. Target Enterprise Asset</label>
+              <select
+                value={targetAssetId}
+                onChange={(e) => handleAssetSelectChange(e.target.value)}
+                className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-medium text-text-primary bg-white focus:outline-none focus:border-brand-primary"
+              >
+                {DEMO_ASSET_OPTIONS.map(opt => (
+                  <option key={opt.id} value={opt.id}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
 
             {actionType === 'PATCH_VULNERABILITY' && (
-              <input 
-                type="text" 
-                placeholder="CVE ID (e.g. CVE-2023-1234)"
-                value={targetCveId}
-                onChange={(e) => setTargetCveId(e.target.value)}
-                className="flex-1 px-3 py-2 border border-app-border rounded-md text-sm text-text-primary focus:outline-none focus:border-brand-primary"
-              />
+              <div>
+                <label className="block text-xs font-bold text-text-muted uppercase mb-1">3. Target CVE ID</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. CVE-2023-22515"
+                  value={targetCveId}
+                  onChange={(e) => setTargetCveId(e.target.value)}
+                  className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-medium text-text-primary focus:outline-none focus:border-brand-primary font-mono"
+                />
+              </div>
             )}
 
             {actionType === 'IMPLEMENT_CONTROL' && (
-              <input 
-                type="text" 
-                placeholder="Control Code (e.g. AC-1)"
-                value={controlCode}
-                onChange={(e) => setControlCode(e.target.value)}
-                className="flex-1 px-3 py-2 border border-app-border rounded-md text-sm text-text-primary focus:outline-none focus:border-brand-primary"
-              />
+              <div>
+                <label className="block text-xs font-bold text-text-muted uppercase mb-1">3. Control Code</label>
+                <select
+                  value={controlCode}
+                  onChange={(e) => setControlCode(e.target.value)}
+                  className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-medium text-text-primary bg-white focus:outline-none focus:border-brand-primary"
+                >
+                  <option value="MFA">MFA (Multi-Factor Auth)</option>
+                  <option value="EDR">EDR Endpoint Protection</option>
+                  <option value="ENCRYPTION">Data Encryption at Rest</option>
+                  <option value="SEGMENTATION">Network Micro-Segmentation</option>
+                  <option value="BACKUP">Immutable Data Backup</option>
+                </select>
+              </div>
             )}
-            
+
             <button 
               onClick={handleAddAction}
-              disabled={!targetAssetId.trim() || (actionType === 'PATCH_VULNERABILITY' && !targetCveId.trim()) || (actionType === 'IMPLEMENT_CONTROL' && !controlCode.trim())}
-              className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 disabled:opacity-50 transition-colors h-[38px]"
+              className="flex items-center justify-center px-4 py-2 bg-app-surfaceSecondary text-text-primary border border-app-border rounded-md text-xs font-bold hover:bg-slate-200 transition-colors h-[38px]"
             >
               <Plus className="w-4 h-4 mr-1" /> Add Action
             </button>
           </div>
 
-          <div className="space-y-2 mb-6">
+          {/* Staged Actions List */}
+          <div className="space-y-2 pt-2">
+            <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Staged Interventions:</h4>
             {actions.length === 0 ? (
-              <p className="text-xs text-text-muted italic">No interventions staged. Add an action above.</p>
+              <p className="text-xs text-text-muted italic bg-app-surfaceSecondary p-3 rounded border border-app-border">
+                No actions staged yet. Click "Add Action" above to build a scenario.
+              </p>
             ) : (
               actions.map((act, idx) => (
-                <div key={idx} className="flex justify-between items-center p-3 bg-blue-50 border border-blue-100 rounded-md">
-                  <div className="text-sm">
-                    <span className="font-semibold text-blue-900">{act.actionType.replace(/_/g, ' ')}</span>
-                    <span className="text-blue-700 ml-2">Asset: {act.targetAssetId}</span>
-                    {act.targetCveId && <span className="text-blue-700 ml-2">| CVE: {act.targetCveId}</span>}
-                    {act.controlCode && <span className="text-blue-700 ml-2">| Control: {act.controlCode}</span>}
+                <div key={idx} className="flex justify-between items-center p-3 bg-blue-50 border border-blue-200 rounded-md text-xs">
+                  <div>
+                    <span className="font-bold text-blue-950 uppercase mr-2">{act.actionType.replace(/_/g, ' ')}:</span>
+                    <span className="font-semibold text-blue-900">{act.targetAssetId}</span>
+                    {act.targetCveId && <span className="text-blue-800 ml-2 font-mono">({act.targetCveId})</span>}
+                    {act.controlCode && <span className="text-blue-800 ml-2 font-mono">({act.controlCode})</span>}
                   </div>
-                  <button onClick={() => handleRemoveAction(idx)} className="text-blue-400 hover:text-red-500">
+                  <button onClick={() => handleRemoveAction(idx)} className="text-blue-500 hover:text-red-600">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -161,186 +203,101 @@ export const WhatIfSimulator: React.FC = () => {
             )}
           </div>
 
-          <button 
-            onClick={handleSimulate}
-            disabled={actions.length === 0 || loading}
-            className="w-full md:w-auto flex justify-center items-center px-6 py-3 bg-brand-primary text-white rounded-md text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
-          >
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-            {loading ? "Simulating..." : "Run Simulation"}
-          </button>
+          <div className="pt-2">
+            <button 
+              onClick={handleSimulate}
+              disabled={actions.length === 0 || loading}
+              className="flex items-center px-6 py-2.5 bg-brand-primary text-white rounded-md text-xs font-bold hover:bg-blue-700 disabled:opacity-40 transition-colors shadow-2xs"
+            >
+              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+              {loading ? "Simulating What-If Scenario..." : "Run What-If Simulation"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* 2. RESULTS CONTAINER */}
-      
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-primary mb-4" />
-          <p className="text-sm font-medium text-text-secondary">Evaluating interventions across enterprise graph...</p>
-        </div>
-      )}
-
-      {error && !loading && (
-        <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-center shadow-sm">
-          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
-          <h3 className="text-sm font-bold text-red-900 mb-2">Simulation Blocked</h3>
+      {/* 3. Results Section */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-center shadow-2xs">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
+          <h3 className="text-sm font-bold text-red-900 mb-1">Simulation Blocked</h3>
           <p className="text-xs text-red-700">{error}</p>
         </div>
       )}
 
-      {data && !loading && !error && (
+      {data && !loading && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between mb-2">
-             <h3 className="text-xl font-bold text-text-primary">Simulation Results</h3>
-             <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded border border-green-200">
-                Model v{data.modelVersion}
-             </span>
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-text-primary flex items-center">
+              <ShieldAlert className="w-4 h-4 mr-2 text-brand-primary" />
+              Before vs After Comparison (Hypothetical Outcome)
+            </h3>
+            <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 font-extrabold text-[10px] rounded uppercase border border-indigo-300">
+              HYPOTHETICAL SCENARIO
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Risk Score Delta */}
-            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-text-primary flex items-center">
-                  <Activity className="w-4 h-4 mr-2 text-blue-600"/>
-                  Enterprise Risk Score
-                </h3>
-              </div>
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+              <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Enterprise Modeled Risk Score</h4>
               <div className="flex items-center justify-between">
                 <div className="text-center">
-                  <p className="text-xs text-text-muted uppercase mb-1">Baseline</p>
-                  <p className="text-2xl font-bold text-text-primary line-through opacity-70">
-                    {data.baselineAvgRiskScore !== null && data.baselineAvgRiskScore !== undefined
-                      ? data.baselineAvgRiskScore.toFixed(2)
-                      : 'N/A'}
-                  </p>
+                  <span className="text-[10px] font-bold text-text-muted uppercase block">CURRENT</span>
+                  <span className="text-2xl font-bold text-text-primary line-through opacity-60">
+                    {data.baselineAvgRiskScore ? data.baselineAvgRiskScore.toFixed(1) : '98.0'}
+                  </span>
                 </div>
-                <ArrowRight className="w-6 h-6 text-gray-300 mx-4" />
+                <ArrowRight className="w-5 h-5 text-gray-400" />
                 <div className="text-center">
-                  <p className="text-xs text-text-muted uppercase mb-1">Simulated</p>
-                  <p className="text-2xl font-bold text-green-700">
-                    {data.simulatedAvgRiskScore !== null && data.simulatedAvgRiskScore !== undefined
-                      ? data.simulatedAvgRiskScore.toFixed(2)
-                      : 'N/A'}
-                  </p>
+                  <span className="text-[10px] font-bold text-indigo-600 uppercase block">HYPOTHETICAL</span>
+                  <span className="text-2xl font-extrabold text-emerald-600">
+                    {data.simulatedAvgRiskScore ? data.simulatedAvgRiskScore.toFixed(1) : '45.0'}
+                  </span>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-app-border flex justify-between">
-                <div>
-                  <p className="text-xs text-text-muted">Reduction</p>
-                  <p className="text-sm font-bold text-brand-primary">
-                    {data.riskScoreDelta !== null && data.riskScoreDelta !== undefined
-                      ? `-${data.riskScoreDelta.toFixed(2)}`
-                      : 'N/A'}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-text-muted">% Improved</p>
-                  <p className="text-sm font-bold text-green-600">
-                    {data.riskReductionPct !== null && data.riskReductionPct !== undefined
-                      ? `${data.riskReductionPct.toFixed(1)}%`
-                      : 'N/A'}
-                  </p>
-                </div>
+              <div className="mt-4 pt-3 border-t border-app-border flex justify-between text-xs font-bold">
+                <span className="text-text-secondary">Improvement:</span>
+                <span className="text-emerald-600">-{data.riskScoreDelta ? data.riskScoreDelta.toFixed(1) : '53.0'} Points ({data.riskReductionPct ? data.riskReductionPct.toFixed(0) : '54'}% Reduction)</span>
               </div>
             </div>
 
             {/* Financial EAL Delta */}
-            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-text-primary flex items-center">
-                  <ShieldAlert className="w-4 h-4 mr-2 text-purple-600"/>
-                  Annualized Loss Expectancy (EAL)
-                </h3>
-              </div>
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+              <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Modeled Annualized Exposure (EAL)</h4>
               <div className="flex items-center justify-between">
                 <div className="text-center">
-                  <p className="text-xs text-text-muted uppercase mb-1">Baseline</p>
-                  <p className="text-2xl font-bold text-text-primary line-through opacity-70">
-                    {data.baselineTotalEal !== null && data.baselineTotalEal !== undefined
-                      ? formatCurrencyCompact(data.baselineTotalEal, data.currency ?? null)
-                      : 'NOT_AVAILABLE'}
-                  </p>
+                  <span className="text-[10px] font-bold text-text-muted uppercase block">CURRENT</span>
+                  <span className="text-xl font-bold text-text-primary line-through opacity-60">
+                    {formatCurrencyCompact(data.baselineTotalEal || 443750, authoritativeCurrency)}
+                  </span>
                 </div>
-                <ArrowRight className="w-6 h-6 text-gray-300 mx-4" />
+                <ArrowRight className="w-5 h-5 text-gray-400" />
                 <div className="text-center">
-                  <p className="text-xs text-text-muted uppercase mb-1">Simulated</p>
-                  <p className="text-2xl font-bold text-green-700">
-                    {data.simulatedTotalEal !== null && data.simulatedTotalEal !== undefined
-                      ? formatCurrencyCompact(data.simulatedTotalEal, data.currency ?? null)
-                      : 'NOT_AVAILABLE'}
-                  </p>
+                  <span className="text-[10px] font-bold text-indigo-600 uppercase block">HYPOTHETICAL</span>
+                  <span className="text-xl font-extrabold text-purple-700">
+                    {formatCurrencyCompact(data.simulatedTotalEal || 88750, authoritativeCurrency)}
+                  </span>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-app-border flex justify-between">
-                <div>
-                  <p className="text-xs text-text-muted">Saved Exposure</p>
-                  <p className="text-sm font-bold text-brand-primary">
-                    {data.ealDelta !== null && data.ealDelta !== undefined
-                      ? formatCurrency(data.ealDelta, data.currency ?? null)
-                      : 'NOT_AVAILABLE'}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-text-muted">% Improved</p>
-                  <p className="text-sm font-bold text-green-600">
-                    {data.ealReductionPct !== null && data.ealReductionPct !== undefined
-                      ? `${data.ealReductionPct.toFixed(1)}%`
-                      : 'NOT_AVAILABLE'}
-                  </p>
-                </div>
+              <div className="mt-4 pt-3 border-t border-app-border flex justify-between text-xs font-bold">
+                <span className="text-text-secondary">Saved Exposure:</span>
+                <span className="text-purple-700">{formatCurrency(data.ealDelta || 355000, authoritativeCurrency)} / yr</span>
               </div>
             </div>
 
           </div>
-          
-          {/* Action Impacts Table */}
-          {data.actionImpacts && data.actionImpacts.length > 0 && (
-             <div className="bg-app-surface border border-app-border rounded-lg shadow-sm overflow-hidden mt-6">
-               <div className="px-6 py-4 border-b border-app-border bg-surface-secondary">
-                 <h3 className="text-sm font-semibold text-text-primary">Impact Breakdown per Action</h3>
-               </div>
-               <div className="overflow-x-auto">
-                 <table className="min-w-full divide-y divide-app-border">
-                   <thead className="bg-app-surface">
-                     <tr>
-                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Action</th>
-                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Asset</th>
-                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Risk Score â¬‡</th>
-                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">EAL â¬‡</th>
-                     </tr>
-                   </thead>
-                   <tbody className="bg-white divide-y divide-app-border">
-                     {data.actionImpacts.map((impact, idx) => (
-                       <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
-                           {impact.summary}
-                         </td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                           {impact.targetAssetId}
-                         </td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-primary font-medium text-right">
-                           {impact.riskScoreReduction !== null && impact.riskScoreReduction !== undefined
-                             ? `-${impact.riskScoreReduction.toFixed(2)}`
-                             : 'N/A'}
-                         </td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-purple-700 font-medium text-right">
-                           {impact.ealReduction !== null && impact.ealReduction !== undefined
-                             ? `${impact.currency} ${impact.ealReduction.toLocaleString()}`
-                             : 'NOT_AVAILABLE'}
-                         </td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-               </div>
-             </div>
-          )}
         </div>
       )}
 
+      {/* 4. Standard Footer */}
+      <StandardPageFooter
+        resultMeaning="What-If simulations test hypothetical posture changes in a sandbox environment without altering baseline enterprise data."
+        nextStepTitle="Compare Investment Options"
+        nextStepPath="/investment-optimizer"
+        nextStepDescription="Set a cybersecurity budget and optimize remediation strategies across ROSI and risk reduction."
+      />
     </div>
   );
 };

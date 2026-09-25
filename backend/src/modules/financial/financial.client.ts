@@ -69,7 +69,7 @@ export class FinancialEngineClient {
       timeoutMs ??
       (process.env.RISK_ENGINE_TIMEOUT_MS
         ? parseInt(process.env.RISK_ENGINE_TIMEOUT_MS, 10)
-        : 5000);
+        : 30000);
 
     this.client = axios.create({
       baseURL: this.baseUrl,

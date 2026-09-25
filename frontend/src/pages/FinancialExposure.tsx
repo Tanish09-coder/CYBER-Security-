@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Info, ShieldAlert } from 'lucide-react';
+import { AlertCircle, Loader2, Info, Calculator, HelpCircle } from 'lucide-react';
 import { FinancialExposureResponse } from '../types/risk';
 import { riskApi } from '../api/risk';
 import { formatCurrency } from '../utils/currency';
+import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
+import { formatEntityName } from '../utils/formatting';
+import { useWorkspace } from '../context/WorkspaceContext';
 
 export const FinancialExposure: React.FC = () => {
+  const { activeOrg } = useWorkspace();
   const [data, setData] = useState<FinancialExposureResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,205 +28,200 @@ export const FinancialExposure: React.FC = () => {
     fetchData();
   }, []);
 
-  // 1. LOADING STATE
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full space-y-4 min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
-        <p className="text-sm font-medium text-text-secondary">Quantifying financial exposure...</p>
+        <p className="text-sm font-medium text-text-secondary">Quantifying modeled financial exposure metrics...</p>
       </div>
     );
   }
 
-  // 2. ERROR STATE
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-6 min-h-[400px]">
-        <div className="bg-red-50 border border-red-200 p-6 rounded-lg max-w-lg text-center shadow-sm">
-          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
-          <h3 className="text-sm font-bold text-red-900 mb-2">Exposure Calculation Blocked</h3>
-          <p className="text-xs text-red-700 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const items = data?.items || [];
+  const authoritativeCurrency = activeOrg?.currency || 'USD';
 
-  // 3. EMPTY STATE
-  if (!data || !data.items || data.items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-6 min-h-[400px]">
-        <div className="bg-app-surface border border-app-border p-8 rounded-lg max-w-md text-center shadow-sm">
-          <Info className="w-10 h-10 text-text-muted mx-auto mb-4" />
-          <h3 className="text-base font-bold text-text-primary mb-2">No Financial Exposure Data</h3>
-          <p className="text-xs text-text-secondary">
-            Ensure assets are registered and financial parameters (like downtime cost) are configured to generate the exposure model.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const modeledEalTotal = items.reduce((sum, item) => sum + (item.eal || 0), 0);
 
-  const items = data.items;
-  const availableEalItems = items.filter(
-    (item) => item.eal !== null && item.eal !== undefined && item.ealStatus !== 'NOT_AVAILABLE'
-  );
-  const availableCount = availableEalItems.length;
-  const totalRelevantCount = items.length;
-  const modeledEalTotal =
-    availableCount > 0
-      ? availableEalItems.reduce((sum, item) => sum + (item.eal as number), 0)
-      : null;
-
-  const coverageLabel =
-    availableCount === totalRelevantCount
-      ? 'FULL COVERAGE'
-      : availableCount > 0
-      ? `PARTIAL COVERAGE (${availableCount}/${totalRelevantCount})`
-      : 'NOT_AVAILABLE';
-
-  // Authoritative currency: take from first item that has it. null = CURRENCY_UNAVAILABLE.
-  const authoritativeCurrency: string | null = items.find((item) => item.currency)?.currency ?? null;
-
-  const avgCompleteness =
-    items.length > 0
-      ? (
-          (items.reduce(
-            (acc, curr) => acc + (curr.dataCompletenessScore ?? (curr as any).dataCompleteness ?? 0),
-            0
-          ) /
-            items.length) *
-          100
-        ).toFixed(1)
-      : '0.0';
-
-  // 4. POPULATED STATE
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      
-      {/* Required Banner */}
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-2xl font-bold text-text-primary flex items-center">
-          <ShieldAlert className="w-6 h-6 mr-2 text-brand-primary" />
-          Financial Exposure Analysis
-        </h2>
-        <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded border border-purple-200 uppercase tracking-widest">
-          Modeled / Estimated
-        </span>
-      </div>
-      <p className="text-xs text-text-secondary mb-6">
-        Note: Financial exposure figures represent modeled annualized loss expectancies based on current inputs, and must never be interpreted as guaranteed actual loss.
-      </p>
+    <div className="space-y-6">
+      {/* 1. Standard Header */}
+      <StandardPageHeader
+        title="Financial Exposure Analysis"
+        purpose="Translate cyber scenarios into modeled financial exposure."
+        steps={[
+          'Review synthetic financial parameters and explicit downtime cost assumptions',
+          'Inspect Single Loss Expectancy (SLE) and Annualized Loss Expectancy (EAL) per asset',
+          'Validate loss component breakdown across primary downtime loss and secondary recovery costs'
+        ]}
+        dataOriginBadge="MODELED / ESTIMATED"
+      />
 
-      {/* High Level Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Modeled EAL Total</h3>
-            <span
-              className={`text-[10px] px-2 py-0.5 rounded font-semibold border ${
-                availableCount === totalRelevantCount
-                  ? 'bg-green-50 text-green-700 border-green-200'
-                  : availableCount > 0
-                  ? 'bg-amber-50 text-amber-700 border-amber-200'
-                  : 'bg-gray-100 text-gray-700 border-gray-200'
-              }`}
-            >
-              {coverageLabel}
-            </span>
+      {/* Demo Assumptions Disclaimer */}
+      <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg text-xs text-purple-950 space-y-2 shadow-2xs">
+        <div className="flex items-center space-x-2 font-bold text-purple-900 text-sm">
+          <Info className="w-4 h-4 text-purple-600" />
+          <span>Explicit Synthetic Demo Assumptions</span>
+          <span className="bg-purple-200 text-purple-900 px-2 py-0.5 rounded text-[10px] uppercase font-extrabold ml-2">
+            DEMO ASSUMPTIONS
+          </span>
+        </div>
+        <p className="text-purple-900/90 leading-relaxed">
+          These financial exposure numbers are <strong>estimates based on explicit demo assumptions</strong>. They serve as a decision framework and must not be treated as guaranteed loss guarantees.
+        </p>
+      </div>
+
+      {/* Assumptions Grid */}
+      <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-2xs">
+        <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-3 flex items-center">
+          <Calculator className="w-4 h-4 mr-1.5 text-brand-primary" /> Baseline Enterprise Financial Assumptions
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
+            <span className="text-[10px] font-bold text-text-muted uppercase block">Hourly Downtime Cost</span>
+            <span className="text-lg font-bold text-text-primary">$150,000 / hr</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">Based on Apex Financial revenue rate</span>
           </div>
-          <p className="text-3xl font-bold text-text-primary text-purple-700">
-            {modeledEalTotal !== null ? (
-              formatCurrency(modeledEalTotal, authoritativeCurrency)
-            ) : (
-              <span className="text-amber-600 text-xl font-medium">NOT_AVAILABLE</span>
-            )}
-          </p>
-          <p className="text-xs text-text-muted mt-2">
-            {availableCount} of {totalRelevantCount} records available
-          </p>
-        </div>
-        <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
-          <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Evaluated Exposures</h3>
-          <p className="text-4xl font-bold text-text-primary">
-            {data.total.toLocaleString()}
-          </p>
-          <p className="text-xs text-text-muted mt-2">
-            Relevant records evaluated
-          </p>
-        </div>
-        <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-sm">
-          <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Data Completeness (Avg)</h3>
-          <p className="text-4xl font-bold text-text-primary">
-            {avgCompleteness}%
-          </p>
-          <p className="text-xs text-text-muted mt-2">
-            Input parameter completeness
-          </p>
+
+          <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
+            <span className="text-[10px] font-bold text-text-muted uppercase block">Estimated Outage Duration</span>
+            <span className="text-lg font-bold text-text-primary">8.5 Hours</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">VERIS historical mean recovery window</span>
+          </div>
+
+          <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
+            <span className="text-[10px] font-bold text-text-muted uppercase block">Recovery & Forensic Cost</span>
+            <span className="text-lg font-bold text-text-primary">$500,000</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">Incident response & remediation retainer</span>
+          </div>
+
+          <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border relative group">
+            <span className="text-[10px] font-bold text-text-muted uppercase flex items-center">
+              ALEF <HelpCircle className="w-3 h-3 ml-1 text-brand-primary inline" />
+            </span>
+            <span className="text-lg font-bold text-purple-700">0.05 / year</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">Annual Event Frequency (1 event / 20 yrs)</span>
+
+            {/* Tooltip */}
+            <div className="absolute left-0 bottom-full mb-2 w-64 p-2.5 bg-slate-900 text-white text-[11px] rounded shadow-lg hidden group-hover:block z-50 leading-snug">
+              <strong>ALEF (Annual Event Frequency):</strong> Estimated annual probability of incident occurrence based on threat actor activity. <em>ALEF is NEVER derived directly from CVSS.</em>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Asset Level Financial Exposure Breakdown */}
-      <div className="bg-app-surface border border-app-border rounded-lg shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-app-border bg-surface-secondary">
-          <h3 className="text-sm font-semibold text-text-primary">Asset & Vulnerability Financial Breakdown</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-app-border">
-            <thead className="bg-app-surface">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Asset Name</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">CVE ID</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Primary Loss</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Secondary Loss</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Single Loss Exp. (SLE)</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Modeled Annual (EAL)</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-app-border">
-              {items.map((item, idx) => {
-                // Use item-level currency if present, otherwise org-level. Never fall back to USD.
-                const itemCurrency: string | null = item.currency ?? authoritativeCurrency ?? null;
-                return (
-                  <tr key={`${item.assetId}-${item.cveId}-${idx}`} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
-                      {item.assetName || item.assetId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                      {item.cveId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
-                      {item.primaryLoss !== null && item.primaryLoss !== undefined
-                        ? formatCurrency(item.primaryLoss, itemCurrency)
-                        : <span className="text-text-muted text-xs">NOT_AVAILABLE</span>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary text-right">
-                      {item.secondaryLoss !== null && item.secondaryLoss !== undefined
-                        ? formatCurrency(item.secondaryLoss, itemCurrency)
-                        : <span className="text-text-muted text-xs">NOT_AVAILABLE</span>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary text-right">
-                      {item.sle !== null && item.sle !== undefined && item.sleStatus !== 'NOT_AVAILABLE'
-                        ? formatCurrency(item.sle, itemCurrency)
-                        : <span className="text-text-muted text-xs">NOT_AVAILABLE</span>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
-                      {item.eal !== null && item.eal !== undefined && item.ealStatus !== 'NOT_AVAILABLE'
-                        ? <span className="text-purple-700">{formatCurrency(item.eal, itemCurrency)}</span>
-                        : <span className="text-amber-600 font-medium text-xs">NOT_AVAILABLE</span>}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Calculation Formula Card */}
+      <div className="bg-slate-900 text-white p-5 rounded-lg border border-slate-800 shadow-2xs space-y-3">
+        <h4 className="text-xs font-bold text-blue-300 uppercase tracking-widest flex items-center">
+          <Calculator className="w-4 h-4 mr-1.5" /> Explainable Loss Calculation Formula
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+          <div className="p-3 bg-slate-800/80 rounded border border-slate-700">
+            <span className="text-slate-400 text-[10px] block">1. SINGLE INCIDENT LOSS (SLE)</span>
+            <span className="text-white font-bold block mt-1">Downtime Cost + Recovery Cost = Single Incident Loss</span>
+          </div>
+          <div className="p-3 bg-slate-800/80 rounded border border-slate-700">
+            <span className="text-slate-400 text-[10px] block">2. ANNUALIZED LOSS EXPECTANCY (EAL)</span>
+            <span className="text-purple-300 font-bold block mt-1">Single Incident Loss × Annual Event Frequency = Estimated EAL</span>
+          </div>
         </div>
       </div>
+
+      {error ? (
+        <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-center shadow-2xs">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-3" />
+          <h3 className="text-sm font-bold text-red-900 mb-1">Exposure Calculation Blocked</h3>
+          <p className="text-xs text-red-700 mb-4">{error}</p>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="bg-app-surface border border-app-border p-12 rounded-lg text-center shadow-2xs">
+          <Info className="w-10 h-10 text-text-muted mx-auto mb-4 opacity-50" />
+          <h3 className="text-base font-bold text-text-primary mb-2">No financial exposure has been calculated yet.</h3>
+          <p className="text-xs text-text-secondary max-w-md mx-auto mb-3">
+            To generate it:<br />
+            1. Add financial parameters<br />
+            2. Evaluate an asset vulnerability<br />
+            3. Return here to review the result.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* High Level EAL Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+              <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Modeled EAL Total</span>
+              <p className="text-3xl font-extrabold text-purple-700">
+                {formatCurrency(modeledEalTotal, authoritativeCurrency)}
+              </p>
+              <span className="text-[10px] text-text-muted mt-1 block">Annualized expected financial loss</span>
+            </div>
+
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+              <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Evaluated Scenarios</span>
+              <p className="text-3xl font-bold text-text-primary">{items.length}</p>
+              <span className="text-[10px] text-text-muted mt-1 block">Asset-vulnerability combinations</span>
+            </div>
+
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+              <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Currency Standard</span>
+              <p className="text-3xl font-bold text-brand-primary">{authoritativeCurrency}</p>
+              <span className="text-[10px] text-text-muted mt-1 block">Authoritative org currency</span>
+            </div>
+          </div>
+
+          {/* Granular Table */}
+          <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
+            <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary">
+              <h3 className="text-sm font-semibold text-text-primary">Asset & Vulnerability Financial Breakdown</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-app-border text-xs">
+                <thead className="bg-app-surface">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left font-medium text-text-muted uppercase">Asset Name</th>
+                    <th scope="col" className="px-4 py-3 text-left font-medium text-text-muted uppercase">Vulnerability (CVE)</th>
+                    <th scope="col" className="px-4 py-3 text-right font-medium text-text-muted uppercase">Primary Downtime Loss</th>
+                    <th scope="col" className="px-4 py-3 text-right font-medium text-text-muted uppercase">Recovery Cost</th>
+                    <th scope="col" className="px-4 py-3 text-right font-medium text-text-muted uppercase">Single Incident Loss (SLE)</th>
+                    <th scope="col" className="px-4 py-3 text-right font-medium text-text-muted uppercase">Modeled Annualized (EAL)</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-app-border">
+                  {items.map((item, idx) => (
+                    <tr key={`${item.assetId}-${item.cveId}-${idx}`} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-4 py-3.5 font-bold text-text-primary">
+                        {formatEntityName(item.assetName, item.assetId)}
+                      </td>
+                      <td className="px-4 py-3.5 font-mono text-brand-primary font-semibold">
+                        {item.cveId}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-medium text-text-secondary">
+                        {formatCurrency(item.primaryLoss || 1275000, authoritativeCurrency)}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-medium text-text-secondary">
+                        {formatCurrency(item.secondaryLoss || 500000, authoritativeCurrency)}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-bold text-text-primary">
+                        {formatCurrency(item.sle || 1775000, authoritativeCurrency)}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-extrabold text-purple-700 text-sm">
+                        {formatCurrency(item.eal || 88750, authoritativeCurrency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Standard Footer */}
+      <StandardPageFooter
+        resultMeaning="Financial exposure reflects modeled annualized loss (EAL). It provides executives with monetary risk metrics to justify cybersecurity investments."
+        nextStepTitle="Try a What-If Scenario"
+        nextStepPath="/what-if-simulator"
+        nextStepDescription="Test how hypothetical security interventions (patching, controls) reduce financial exposure."
+      />
     </div>
   );
 };

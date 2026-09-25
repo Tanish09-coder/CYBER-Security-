@@ -68,7 +68,7 @@ export class RiskEngineClient {
 
   constructor(baseUrl?: string, timeoutMs?: number) {
     this.baseUrl = baseUrl || process.env.RISK_ENGINE_URL || 'http://localhost:8000';
-    this.timeoutMs = timeoutMs ?? (process.env.RISK_ENGINE_TIMEOUT_MS ? parseInt(process.env.RISK_ENGINE_TIMEOUT_MS, 10) : 5000);
+    this.timeoutMs = timeoutMs ?? (process.env.RISK_ENGINE_TIMEOUT_MS ? parseInt(process.env.RISK_ENGINE_TIMEOUT_MS, 10) : 30000);
 
     this.client = axios.create({
       baseURL: this.baseUrl,

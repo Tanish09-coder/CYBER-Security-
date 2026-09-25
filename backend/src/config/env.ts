@@ -38,7 +38,7 @@ const envSchema = z.object({
   VCDB_MAX_RETRIES: z.string().default('4').transform((val) => parseInt(val, 10)),
   VCDB_STALE_AFTER_HOURS: z.string().default('168').transform((val) => parseInt(val, 10)),
   RISK_ENGINE_URL: z.string().url().default('http://localhost:8000'),
-  RISK_ENGINE_TIMEOUT_MS: z.string().default('10000').transform((val) => parseInt(val, 10)),
+  RISK_ENGINE_TIMEOUT_MS: z.string().default('30000').transform((val) => parseInt(val, 10)),
   JWT_SECRET: z.string().default('dev-secret-cyberriskos'),
   // Phase 8 — AI Explanation Assistant (all optional; TEMPLATE mode requires no API key)
   AI_EXPLANATION_PROVIDER: z.enum(['TEMPLATE', 'OPENAI']).default('TEMPLATE'),

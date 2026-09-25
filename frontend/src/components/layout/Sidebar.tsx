@@ -11,27 +11,22 @@ import {
   DollarSign,
   TrendingUp,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import { fetchApi } from '../../api/client';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 export const Sidebar: React.FC = () => {
-  const [orgName, setOrgName] = useState<string>('CyberRiskOS Enterprise');
+  const { activeOrg } = useWorkspace();
   const [isOnline, setIsOnline] = useState<boolean>(true);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchOrgAndHealth = async () => {
+    const checkHealth = async () => {
       try {
-        const [orgRes, healthRes] = await Promise.all([
-          fetchApi<{ data: Array<{ name: string }> }>('/v1/organizations').catch(() => null),
-          fetchApi<{ status: string }>('/api/health').catch(() => null),
-        ]);
-
+        const healthRes = await fetchApi<{ status: string }>('/api/health').catch(() => null);
         if (isMounted) {
-          if (orgRes && orgRes.data && orgRes.data.length > 0) {
-            setOrgName(orgRes.data[0].name);
-          }
           setIsOnline(healthRes?.status === 'ok');
         }
       } catch {
@@ -41,8 +36,8 @@ export const Sidebar: React.FC = () => {
       }
     };
 
-    fetchOrgAndHealth();
-    const interval = setInterval(fetchOrgAndHealth, 10000);
+    checkHealth();
+    const interval = setInterval(checkHealth, 10000);
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -65,6 +60,23 @@ export const Sidebar: React.FC = () => {
         {/* Navigation Links */}
         <nav className="p-3 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)] scrollbar-hide mt-2">
           
+          {/* FLAGSHIP DEMO EXPERIENCE */}
+          <div>
+            <NavLink
+              to="/demo"
+              className={({ isActive }) =>
+                `w-full flex items-center px-3 py-2.5 text-xs font-bold rounded-lg transition-all ${
+                  isActive
+                    ? 'bg-brand-primary text-white shadow-md ring-2 ring-brand-primary/50'
+                    : 'bg-gradient-to-r from-slate-900 to-brand-primary/30 border border-brand-primary/40 text-brand-primary hover:bg-brand-primary/20'
+                }`
+              }
+            >
+              <Sparkles className="w-4 h-4 mr-2.5 animate-pulse text-amber-400" />
+              <span>START DEMO EXPERIENCE</span>
+            </NavLink>
+          </div>
+
           {/* OVERVIEW */}
           <div>
             <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">
@@ -310,8 +322,8 @@ export const Sidebar: React.FC = () => {
               <Building2 className="w-4 h-4 text-text-secondary" />
             </div>
             <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-text-primary truncate" title={orgName}>
-                {orgName}
+              <p className="text-[11px] font-bold text-text-primary truncate" title={activeOrg.name}>
+                {activeOrg.name}
               </p>
               <p className="text-[10px] text-text-secondary font-medium">Role: CISO / Risk Officer</p>
             </div>

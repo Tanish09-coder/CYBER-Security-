@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, ShieldAlert, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { Search, Filter, ShieldAlert, ChevronLeft, ChevronRight, AlertCircle, Info } from 'lucide-react';
 import { vulnerabilityApi } from '../api/vulnerabilities';
 import type { VulnerabilityListResponse } from '../types/api';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/common/Table';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Skeleton } from '../components/common/Skeleton';
+import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
 
 export const Vulnerabilities: React.FC = () => {
   const [data, setData] = useState<VulnerabilityListResponse | null>(null);
@@ -17,9 +18,8 @@ export const Vulnerabilities: React.FC = () => {
   const [search, setSearch] = useState('');
   const [severity, setSeverity] = useState('');
   const [kevOnly, setKevOnly] = useState(false);
-  const [ransomwareOnly, setRansomwareOnly] = useState(false);
   const [page, setPage] = useState(1);
-  const limit = 10; // 10 per page to enable pagination across catalog
+  const limit = 10;
 
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -38,7 +38,6 @@ export const Vulnerabilities: React.FC = () => {
         search: debouncedSearch,
         severity,
         kevOnly,
-        ransomwareOnly
       });
       setData(res);
     } catch (err: any) {
@@ -46,16 +45,15 @@ export const Vulnerabilities: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, debouncedSearch, severity, kevOnly, ransomwareOnly]);
+  }, [page, limit, debouncedSearch, severity, kevOnly]);
 
   useEffect(() => {
     fetchVulnerabilities();
   }, [fetchVulnerabilities]);
 
-  // Reset page to 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, severity, kevOnly, ransomwareOnly]);
+  }, [debouncedSearch, severity, kevOnly]);
 
   const getSeverityBadgeVariant = (sev?: string | null) => {
     switch (sev?.toUpperCase()) {
@@ -69,15 +67,29 @@ export const Vulnerabilities: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-text-primary tracking-tight">Vulnerability Intelligence</h2>
-        <p className="text-text-secondary mt-1 text-sm">
-          Searchable catalog of CVEs with CVSS severity and CISA KEV exploitation indicators.
-        </p>
+      {/* 1. Standard Header */}
+      <StandardPageHeader
+        title="Software Vulnerability Intelligence"
+        purpose="Explore known software security vulnerabilities collected from NVD."
+        steps={[
+          'Search for specific CVE identifiers or software product names',
+          'Filter by CVSS severity rating (Critical, High, Medium, Low)',
+          'Identify whether vulnerabilities are actively exploited (CISA KEV)'
+        ]}
+        dataOriginBadge="REAL INTELLIGENCE"
+      />
+
+      {/* Concept Helper Box */}
+      <div className="bg-brand-primary/5 border border-brand-primary/20 rounded-lg p-3.5 flex items-center space-x-3 text-xs text-text-secondary">
+        <Info className="w-4 h-4 text-brand-primary flex-shrink-0" />
+        <div>
+          <span className="font-bold text-brand-primary mr-1">Quick Terminology Guide:</span>
+          <span><strong>CVE</strong> (Common Vulnerabilities and Exposures) uniquely identifies a flaw. <strong>CVSS</strong> (Common Vulnerability Scoring System 0–10) describes its technical severity.</span>
+        </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-app-surface border border-app-border rounded-lg p-4 shadow-sm flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+      <div className="bg-app-surface border border-app-border rounded-lg p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
@@ -114,32 +126,22 @@ export const Vulnerabilities: React.FC = () => {
             />
             <span className="text-sm text-text-primary whitespace-nowrap">CISA KEV Only</span>
           </label>
-
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={ransomwareOnly}
-              onChange={(e) => setRansomwareOnly(e.target.checked)}
-              className="rounded border-app-border bg-app-surface text-brand-primary focus:ring-brand-primary"
-            />
-            <span className="text-sm text-text-primary whitespace-nowrap">Ransomware Only</span>
-          </label>
         </div>
       </div>
 
       {/* Data Table */}
-      <div className="bg-app-surface rounded-lg shadow-sm flex flex-col border border-app-border">
+      <div className="bg-app-surface rounded-lg shadow-2xs flex flex-col border border-app-border">
         {error ? (
           <div className="p-8 text-center bg-risk-critical/5">
             <AlertCircle className="w-8 h-8 text-risk-critical mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-text-primary mb-1">Error Loading Data</h3>
-            <p className="text-sm text-text-secondary">{error}</p>
+            <h3 className="text-lg font-bold text-text-primary mb-1">Error Loading Vulnerability Intelligence</h3>
+            <p className="text-sm text-text-secondary mb-4">{error}</p>
+            <Button variant="outline" onClick={fetchVulnerabilities}>Retry</Button>
           </div>
         ) : loading ? (
           <div className="p-6 space-y-4">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex space-x-4">
-                <Skeleton className="h-10 w-1/6" />
                 <Skeleton className="h-10 w-1/6" />
                 <Skeleton className="h-10 w-2/6" />
                 <Skeleton className="h-10 w-1/6" />
@@ -151,27 +153,29 @@ export const Vulnerabilities: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>CVE ID</TableHead>
+                <TableHead>CVE Identifier</TableHead>
                 <TableHead>CVSS Score</TableHead>
-                <TableHead>CISA KEV</TableHead>
-                <TableHead>Ransomware</TableHead>
+                <TableHead>Technical Severity</TableHead>
+                <TableHead>CISA KEV Status</TableHead>
                 <TableHead>Attack Vector</TableHead>
-                <TableHead>Provider</TableHead>
-                <TableHead>Published</TableHead>
+                <TableHead>Published Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.data.map((vuln) => (
-                <TableRow key={vuln.cveId} className="group">
+                <TableRow key={vuln.cveId} className="group hover:bg-gray-50/50">
                   <TableCell className="font-bold">
-                    <Link to={`/vulnerabilities/${vuln.cveId}`} className="text-brand-primary hover:underline transition-colors">
+                    <Link to={`/vulnerabilities/${vuln.cveId}`} className="text-brand-primary hover:underline font-mono">
                       {vuln.cveId}
                     </Link>
+                  </TableCell>
+                  <TableCell className="font-bold">
+                    {vuln.cvss?.baseScore != null ? vuln.cvss.baseScore.toFixed(1) : '—'}
                   </TableCell>
                   <TableCell>
                     {vuln.cvss ? (
                       <Badge variant={getSeverityBadgeVariant(vuln.cvss.severity)}>
-                        {vuln.cvss.baseScore.toFixed(1)} {vuln.cvss.severity}
+                        {vuln.cvss.severity}
                       </Badge>
                     ) : (
                       <span className="text-text-muted">—</span>
@@ -181,24 +185,14 @@ export const Vulnerabilities: React.FC = () => {
                     {vuln.knownExploited ? (
                       <Badge variant="critical" className="font-bold">
                         <ShieldAlert className="w-3 h-3 mr-1" />
-                        KEV
+                        ACTIVELY EXPLOITED
                       </Badge>
                     ) : (
-                      <span className="text-text-muted">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {vuln.ransomwareCampaignUse === 'Known' ? (
-                      <Badge variant="critical">Known</Badge>
-                    ) : (
-                      <span className="text-text-muted">—</span>
+                      <span className="text-text-muted text-xs">Not Listed</span>
                     )}
                   </TableCell>
                   <TableCell className="capitalize text-text-secondary text-sm">
                     {vuln.cvss?.attackVector?.toLowerCase() || '—'}
-                  </TableCell>
-                  <TableCell className="text-sm text-text-primary">
-                    {vuln.source.provider || '—'}
                   </TableCell>
                   <TableCell className="text-sm text-text-secondary">
                     {vuln.publishedAt ? new Date(vuln.publishedAt).toLocaleDateString() : '—'}
@@ -210,8 +204,8 @@ export const Vulnerabilities: React.FC = () => {
         ) : (
           <div className="p-12 text-center bg-app-surfaceSecondary rounded-b-lg">
             <ShieldAlert className="w-10 h-10 text-text-muted mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-bold text-text-primary">No vulnerabilities found</h3>
-            <p className="text-sm text-text-secondary mt-1">Adjust your filters or search criteria.</p>
+            <h3 className="text-lg font-bold text-text-primary">No vulnerabilities match your filter criteria.</h3>
+            <p className="text-sm text-text-secondary mt-1">To view data: adjust search keywords or uncheck filter boxes.</p>
           </div>
         )}
 
@@ -244,6 +238,14 @@ export const Vulnerabilities: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* 3. Standard Footer */}
+      <StandardPageFooter
+        resultMeaning="Each CVE describes a technical software flaw documented by NIST NVD. High CVSS scores indicate high potential technical severity, but business impact depends on asset criticality and control implementation."
+        nextStepTitle="View Affected Enterprise Assets"
+        nextStepPath="/assets"
+        nextStepDescription="See how these software vulnerabilities affect Apex Financial Enterprises demo assets."
+      />
     </div>
   );
 };

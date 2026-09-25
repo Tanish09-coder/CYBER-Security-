@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { HelpCircle, RefreshCw } from 'lucide-react';
+import { HelpCircle, RefreshCw, Building2 } from 'lucide-react';
 import { fetchApi } from '../../api/client';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 const getTitleFromPath = (pathname: string): string => {
   const path = pathname.split('/')[1];
@@ -29,6 +30,7 @@ const getTitleFromPath = (pathname: string): string => {
 export const Header: React.FC = () => {
   const location = useLocation();
   const pageTitle = getTitleFromPath(location.pathname);
+  const { activeOrg, setShowFirstTimeTour } = useWorkspace();
 
   const [healthStatus, setHealthStatus] = useState<'HEALTHY' | 'DEGRADED' | 'DISCONNECTED'>('HEALTHY');
   const [serverTimestamp, setServerTimestamp] = useState<string | null>(null);
@@ -67,6 +69,12 @@ export const Header: React.FC = () => {
         <h2 className="text-lg font-bold text-text-primary capitalize tracking-tight">
           {pageTitle}
         </h2>
+
+        <div className="hidden md:flex items-center space-x-2 bg-app-surfaceSecondary px-3 py-1 rounded-md border border-app-border text-xs text-text-secondary">
+          <Building2 className="w-3.5 h-3.5 text-brand-primary" />
+          <span className="font-semibold text-text-primary">{activeOrg.name}</span>
+          <span className="text-[10px] text-text-muted font-mono uppercase">({activeOrg.currency || 'USD'})</span>
+        </div>
       </div>
 
       <div className="flex items-center space-x-6">
@@ -102,7 +110,11 @@ export const Header: React.FC = () => {
         
         <div className="h-4 w-px bg-app-border" />
         
-        <button className="p-2 text-text-muted hover:text-brand-primary rounded-md hover:bg-app-surfaceSecondary transition-colors">
+        <button 
+          onClick={() => setShowFirstTimeTour(true)}
+          title="Open Product Tour"
+          className="p-2 text-text-muted hover:text-brand-primary rounded-md hover:bg-app-surfaceSecondary transition-colors"
+        >
           <HelpCircle className="w-4 h-4" />
         </button>
       </div>

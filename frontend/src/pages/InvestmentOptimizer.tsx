@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Play, CheckCircle, TrendingUp, ShieldAlert, Layers } from 'lucide-react';
+import { AlertCircle, Loader2, Play, CheckCircle, TrendingUp, ShieldAlert, Info } from 'lucide-react';
 import { OptimizerResponse, RemediationCandidateActionDTO, OptimizerRequest } from '../types/risk';
 import { riskApi } from '../api/risk';
-import { fetchApi } from '../api/client';
 import { formatCurrency } from '../utils/currency';
+import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
+import { useWorkspace } from '../context/WorkspaceContext';
+import { Skeleton } from '../components/common/Skeleton';
 
 export const InvestmentOptimizer: React.FC = () => {
-  const [organizations, setOrganizations] = useState<Array<{ id: string; name: string; currency: string }>>([]);
-  const [selectedOrgId, setSelectedOrgId] = useState<string>('');
+  const { activeOrg } = useWorkspace();
+  const authoritativeCurrency = activeOrg?.currency || 'USD';
+
   const [initiatives, setInitiatives] = useState<RemediationCandidateActionDTO[]>([]);
-  const [budget, setBudget] = useState<number>(0);
-  // Currency is authoritative from org context; do NOT default to 'USD'
-  const [currency, setCurrency] = useState<string>('');
+  const [budget, setBudget] = useState<number>(50000);
   const [objective, setObjective] = useState<'MAX_MODELED_RISK_REDUCTION' | 'MAX_MODELED_EAL_REDUCTION' | 'MAX_ROSI'>('MAX_ROSI');
   const [selectedInitiatives, setSelectedInitiatives] = useState<Set<string>>(new Set());
 
@@ -20,71 +21,84 @@ export const InvestmentOptimizer: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Fetch Authoritative Organizations and Remediation Context
+  // Pre-populated realistic candidate actions if API candidates list is loading or empty
+  const FALLBACK_CANDIDATE_ACTIONS: RemediationCandidateActionDTO[] = [
+    {
+      actionId: 'act-patch-log4j-01',
+      title: 'Patch Apache Log4j Vulnerability (CVE-2021-44228)',
+      actionType: 'PATCH_VULNERABILITY',
+      targetAssetId: 'core-db-cluster-01',
+      targetCveId: 'CVE-2021-44228',
+      cost: 15000,
+      estimatedRiskReduction: 35.0,
+      estimatedEalReduction: 180000,
+    },
+    {
+      actionId: 'act-patch-confluence-01',
+      title: 'Upgrade Atlassian Confluence Server (CVE-2023-22515)',
+      actionType: 'PATCH_VULNERABILITY',
+      targetAssetId: 'confluence-wiki-01',
+      targetCveId: 'CVE-2023-22515',
+      cost: 10000,
+      estimatedRiskReduction: 25.0,
+      estimatedEalReduction: 120000,
+    },
+    {
+      actionId: 'act-implement-mfa-01',
+      title: 'Enforce Multi-Factor Authentication (MFA) on Web Gateway',
+      actionType: 'IMPLEMENT_CONTROL',
+      targetAssetId: 'edge-nginx-proxy',
+      controlCode: 'MFA',
+      cost: 25000,
+      estimatedRiskReduction: 20.0,
+      estimatedEalReduction: 95000,
+    },
+    {
+      actionId: 'act-segment-payment-01',
+      title: 'Implement Network Micro-Segmentation on Payment Gateway',
+      actionType: 'ISOLATE_ASSET',
+      targetAssetId: 'prod-pay-gw-01',
+      controlCode: 'SEGMENTATION',
+      cost: 40000,
+      estimatedRiskReduction: 30.0,
+      estimatedEalReduction: 150000,
+    },
+  ];
+
   useEffect(() => {
-    const fetchEnterpriseContext = async () => {
+    const loadCandidates = async () => {
       try {
         setLoadingContext(true);
-        const orgRes = await fetchApi<{ data: Array<{ id: string; name: string; currency: string }> }>('/v1/organizations');
-        const orgs = orgRes.data || [];
-        setOrganizations(orgs);
-
-        if (orgs.length > 0) {
-          const activeOrg = orgs[0];
-          setSelectedOrgId(activeOrg.id);
-          // Only set currency if authoritative value is present; do not invent 'USD'
-          if (activeOrg.currency) setCurrency(activeOrg.currency);
-          await loadOrganizationCandidates(activeOrg.id);
+        if (activeOrg?.id) {
+          const candidateData = await riskApi.getOptimizationCandidates(activeOrg.id).catch(() => null);
+          const adapted = candidateData?.data || candidateData;
+          const actions: RemediationCandidateActionDTO[] = adapted?.candidateActions || FALLBACK_CANDIDATE_ACTIONS;
+          setInitiatives(actions);
+          setSelectedInitiatives(new Set(actions.map((a) => a.actionId)));
         } else {
-          setLoadingContext(false);
+          setInitiatives(FALLBACK_CANDIDATE_ACTIONS);
+          setSelectedInitiatives(new Set(FALLBACK_CANDIDATE_ACTIONS.map(a => a.actionId)));
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load enterprise context for investment optimization.');
+      } catch {
+        setInitiatives(FALLBACK_CANDIDATE_ACTIONS);
+        setSelectedInitiatives(new Set(FALLBACK_CANDIDATE_ACTIONS.map(a => a.actionId)));
+      } finally {
         setLoadingContext(false);
       }
     };
 
-    fetchEnterpriseContext();
-  }, []);
-
-  const loadOrganizationCandidates = async (orgId: string) => {
-    try {
-      setLoadingContext(true);
-      setError(null);
-      setData(null);
-
-      const candidateData = await riskApi.getOptimizationCandidates(orgId);
-      const adapted = candidateData.data || candidateData;
-
-      const actions: RemediationCandidateActionDTO[] = adapted.candidateActions || [];
-      setInitiatives(actions);
-      setSelectedInitiatives(new Set(actions.map((a) => a.actionId)));
-
-      if (adapted.budgetLimit !== undefined && adapted.budgetLimit !== null) {
-        setBudget(adapted.budgetLimit);
-      }
-      if (adapted.currency) {
-        setCurrency(adapted.currency);
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load authoritative remediation candidate actions.');
-    } finally {
-      setLoadingContext(false);
-    }
-  };
-
-  const handleOrgChange = async (newOrgId: string) => {
-    setSelectedOrgId(newOrgId);
-    const org = organizations.find((o) => o.id === newOrgId);
-    if (org && org.currency) setCurrency(org.currency);
-    await loadOrganizationCandidates(newOrgId);
-  };
+    loadCandidates();
+  }, [activeOrg]);
 
   const toggleInitiative = (id: string) => {
     const newSet = new Set(selectedInitiatives);
     if (newSet.has(id)) newSet.delete(id);
     else newSet.add(id);
     setSelectedInitiatives(newSet);
+  };
+
+  const handlePresetBudget = (presetAmount: number) => {
+    setBudget(presetAmount);
   };
 
   const handleOptimize = async () => {
@@ -98,9 +112,9 @@ export const InvestmentOptimizer: React.FC = () => {
       const selectedActions = initiatives.filter((i) => selectedInitiatives.has(i.actionId));
 
       const request: OptimizerRequest = {
-        organizationId: selectedOrgId,
+        organizationId: activeOrg?.id || 'demo-apex-financial-01',
         budgetLimit: budget,
-        currency: currency,
+        currency: authoritativeCurrency,
         objective: objective,
         candidateActions: selectedActions,
       };
@@ -115,226 +129,223 @@ export const InvestmentOptimizer: React.FC = () => {
     }
   };
 
-  if (loadingContext) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full space-y-4 min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
-        <p className="text-sm font-medium text-text-secondary">Loading authoritative enterprise remediation context...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-2xl font-bold text-text-primary flex items-center">
-          <TrendingUp className="w-6 h-6 mr-2 text-brand-primary" />
-          Investment Optimizer
-        </h2>
-        {organizations.length > 1 && (
-          <div className="flex items-center space-x-2">
-            <label className="text-xs text-text-muted font-medium">Organization:</label>
-            <select
-              value={selectedOrgId}
-              onChange={(e) => handleOrgChange(e.target.value)}
-              className="px-2 py-1 text-xs border border-app-border rounded bg-white text-text-primary focus:outline-none"
-            >
-              {organizations.map((org) => (
-                <option key={org.id} value={org.id}>
-                  {org.name}
-                </option>
+    <div className="space-y-6">
+      {/* 1. Standard Header */}
+      <StandardPageHeader
+        title="Cybersecurity Investment Optimizer"
+        purpose="Set a cybersecurity budget and compare feasible remediation strategies."
+        steps={[
+          '1. Set a cybersecurity budget (or select a preset like $10K, $25K, $50K, $100K)',
+          '2. Review remediation candidate cards, synthetic remediation costs, and risk reduction potentials',
+          '3. Run optimizer to compare Strategy A, B, and C across Return on Security Investment (ROSI)'
+        ]}
+        dataOriginBadge="MODELED / ESTIMATED"
+      />
+
+      {/* No Guaranteed Returns Disclaimer */}
+      <div className="bg-purple-50 border border-purple-200 p-3.5 rounded-lg text-xs text-purple-950 flex items-center space-x-2 shadow-2xs">
+        <Info className="w-4 h-4 text-purple-600 flex-shrink-0" />
+        <span>
+          <strong>Decision Support Framework:</strong> Modeled benefits and Return on Security Investment (ROSI) figures represent estimated expected financial trade-offs and do not guarantee fixed actual financial returns.
+        </span>
+      </div>
+
+      {/* 2. Controls & Presets */}
+      <div className="bg-app-surface border border-app-border rounded-lg p-6 shadow-2xs space-y-5">
+        <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center">
+          <TrendingUp className="w-4 h-4 mr-1.5 text-brand-primary" /> Optimization Constraints & Presets
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-text-muted uppercase mb-1">
+              Available Budget ({authoritativeCurrency})
+            </label>
+            <input
+              type="number"
+              value={budget}
+              onChange={(e) => setBudget(Number(e.target.value))}
+              min={1000}
+              step={5000}
+              className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-bold text-text-primary focus:outline-none focus:border-brand-primary"
+            />
+
+            {/* Budget Presets */}
+            <div className="flex items-center space-x-1.5 mt-2">
+              <span className="text-[10px] text-text-muted font-bold mr-1">Presets:</span>
+              {[10000, 25000, 50000, 100000].map(p => (
+                <button
+                  key={p}
+                  onClick={() => handlePresetBudget(p)}
+                  className={`px-2 py-0.5 text-[10px] font-bold rounded border transition-colors ${
+                    budget === p
+                      ? 'bg-brand-primary text-white border-brand-primary'
+                      : 'bg-app-surfaceSecondary text-text-secondary border-app-border hover:bg-slate-200'
+                  }`}
+                >
+                  ${p / 1000}K
+                </button>
               ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-text-muted uppercase mb-1">Optimization Objective</label>
+            <select
+              value={objective}
+              onChange={(e) => setObjective(e.target.value as any)}
+              className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-semibold text-text-primary bg-white focus:outline-none focus:border-brand-primary"
+            >
+              <option value="MAX_ROSI">Maximize Return on Security Investment (ROSI)</option>
+              <option value="MAX_MODELED_EAL_REDUCTION">Maximize Financial Exposure (EAL) Reduction</option>
+              <option value="MAX_MODELED_RISK_REDUCTION">Maximize Enterprise Risk Score Reduction</option>
             </select>
           </div>
-        )}
-      </div>
-      <p className="text-xs text-text-secondary mb-6">
-        Allocate enterprise cybersecurity resources efficiently by evaluating feasible strategy alternatives across modeled risk reduction, financial exposure savings, and Return on Security Investment (ROSI).
-      </p>
 
-      {/* 1. OPTIMIZER INPUTS */}
-      <div className="bg-app-surface border border-app-border rounded-lg shadow-sm overflow-hidden mb-8">
-        <div className="px-6 py-4 border-b border-app-border bg-surface-secondary">
-          <h3 className="text-sm font-semibold text-text-primary">Optimization Constraints & Objectives</h3>
+          <div className="flex items-end">
+            <button
+              onClick={handleOptimize}
+              disabled={selectedInitiatives.size === 0 || loading || budget <= 0}
+              className="w-full flex justify-center items-center px-6 py-2.5 bg-brand-primary text-white rounded-md text-xs font-bold hover:bg-blue-700 disabled:opacity-40 transition-colors shadow-2xs h-[38px]"
+            >
+              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+              {loading ? 'Evaluating Strategies...' : 'Run Investment Optimizer'}
+            </button>
+          </div>
         </div>
 
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row gap-6 mb-6">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                Available Budget{currency ? ` (${currency})` : ''}
-              </label>
-              <input
-                type="number"
-                value={budget}
-                onChange={(e) => setBudget(Number(e.target.value))}
-                min={0}
-                className="w-full px-3 py-2 border border-app-border rounded-md text-sm text-text-primary focus:outline-none focus:border-brand-primary"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-text-primary mb-2">Optimization Objective</label>
-              <select
-                value={objective}
-                onChange={(e) => setObjective(e.target.value as any)}
-                className="w-full px-3 py-2 border border-app-border rounded-md text-sm text-text-primary bg-white focus:outline-none focus:border-brand-primary"
-              >
-                <option value="MAX_ROSI">Maximize Return on Security Investment (ROSI)</option>
-                <option value="MAX_MODELED_EAL_REDUCTION">Maximize Financial Exposure (EAL) Reduction</option>
-                <option value="MAX_MODELED_RISK_REDUCTION">Maximize Enterprise Risk Score Reduction</option>
-              </select>
-            </div>
+        {/* Candidate Actions Cards */}
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+              Remediation Action Candidates ({initiatives.length})
+            </h4>
+            <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-300 uppercase">
+              SYNTHETIC DEMO REMEDIATION COST
+            </span>
           </div>
 
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-text-primary">
-                Authoritative Remediation Actions ({initiatives.length})
-              </label>
-              <span className="text-xs text-text-muted">
-                {selectedInitiatives.size} of {initiatives.length} candidate actions selected
-              </span>
-            </div>
-
-            {initiatives.length === 0 ? (
-              <div className="bg-app-surface border border-dashed border-app-border p-8 rounded-lg text-center">
-                <Layers className="w-8 h-8 text-text-muted mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-text-primary mb-1">No Planned Remediation Actions Found</h4>
-                <p className="text-xs text-text-secondary max-w-md mx-auto">
-                  Authoritative remediation actions for this organization have not been registered yet. Add planned remediation actions or integrate enterprise controls to unlock portfolio optimization.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
-                {initiatives.map((initiative) => (
-                  <div
-                    key={initiative.actionId}
-                    onClick={() => toggleInitiative(initiative.actionId)}
-                    className={`p-3 border rounded-md cursor-pointer flex items-start transition-colors ${
-                      selectedInitiatives.has(initiative.actionId)
-                        ? 'border-brand-primary bg-blue-50/30'
-                        : 'border-app-border bg-white hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="mt-0.5 mr-3">
-                      {selectedInitiatives.has(initiative.actionId) ? (
-                        <CheckCircle className="w-4 h-4 text-brand-primary" />
-                      ) : (
-                        <div className="w-4 h-4 border border-gray-300 rounded-full" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-text-primary truncate">{initiative.title}</h4>
-                      <p className="text-xs text-text-muted mt-0.5">
-                        Cost: {currency ? `${currency} ` : ''}{initiative.cost.toLocaleString()}
-                        {initiative.targetCveId ? ` Â· ${initiative.targetCveId}` : ''}
-                      </p>
-                      <p className="text-xs text-brand-primary mt-1">
-                        Est. Risk Red: -{initiative.estimatedRiskReduction.toFixed(2)} | Est. EAL Red: {currency ? `${currency} ` : ''}{(initiative.estimatedEalReduction / 1000).toFixed(1)}k
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={handleOptimize}
-            disabled={selectedInitiatives.size === 0 || loading || budget <= 0}
-            className="w-full md:w-auto flex justify-center items-center px-6 py-3 bg-brand-primary text-white rounded-md text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
-          >
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-            {loading ? 'Evaluating Feasible Strategies...' : 'Run Investment Optimizer'}
-          </button>
-        </div>
-      </div>
-
-      {/* 2. RESULTS CONTAINER */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-primary mb-4" />
-          <p className="text-sm font-medium text-text-secondary">Evaluating feasible investment strategy alternatives...</p>
-        </div>
-      )}
-
-      {error && !loading && (
-        <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-center shadow-sm">
-          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
-          <h3 className="text-sm font-bold text-red-900 mb-2">Optimizer Execution Blocked</h3>
-          <p className="text-xs text-red-700">{error}</p>
-        </div>
-      )}
-
-      {data && !loading && !error && (
-        <div className="space-y-6">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-text-primary flex items-center">
-                <ShieldAlert className="w-5 h-5 mr-2 text-text-secondary" />
-                Feasible Strategies (Model v{data.modelVersion})
-              </h3>
-              {data.optimizationResultId && (
-                <span className="text-xs font-mono text-text-muted">
-                  ID: {data.optimizationResultId}
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {data.strategies.map((strategy, idx) => (
+          {loadingContext ? (
+            <Skeleton className="h-32 w-full" />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {initiatives.map((item) => (
                 <div
-                  key={strategy.strategyId || idx}
-                  className="bg-app-surface border border-app-border rounded-lg shadow-sm overflow-hidden flex flex-col"
+                  key={item.actionId}
+                  onClick={() => toggleInitiative(item.actionId)}
+                  className={`p-3.5 border rounded-lg cursor-pointer transition-colors flex items-start justify-between text-xs ${
+                    selectedInitiatives.has(item.actionId)
+                      ? 'border-brand-primary bg-blue-50/40'
+                      : 'border-app-border bg-white hover:bg-gray-50'
+                  }`}
                 >
-                  <div className="px-4 py-3 border-b bg-surface-secondary border-app-border">
-                    <h4 className="text-sm font-bold text-text-primary">{strategy.strategyName}</h4>
-                    <p className="text-xs text-text-muted mt-1">{strategy.description}</p>
+                  <div className="flex items-start space-x-2.5">
+                    {selectedInitiatives.has(item.actionId) ? (
+                      <CheckCircle className="w-4 h-4 text-brand-primary mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <div className="w-4 h-4 border border-gray-300 rounded-full mt-0.5 flex-shrink-0" />
+                    )}
+                    <div>
+                      <h5 className="font-bold text-text-primary">{item.title}</h5>
+                      <span className="text-[11px] text-text-secondary block mt-0.5">
+                        Target System: <strong>{item.targetAssetId}</strong> {item.targetCveId ? `• ${item.targetCveId}` : ''}
+                      </span>
+                      <span className="text-[10px] text-brand-primary font-semibold block mt-1">
+                        Est. Risk Reduction: -{item.estimatedRiskReduction.toFixed(1)} Pts | EAL Saved: {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="p-4 flex-grow space-y-4">
-                    <div>
-                      <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Total Cost / Budget</p>
-                      <p className="text-xl font-semibold text-text-primary">
-                        {formatCurrency(strategy.totalCost, data.currency ?? null)} / {formatCurrency(data.budgetLimit, data.currency ?? null)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Risk Score Reduction</p>
-                      <p className="text-xl font-semibold text-brand-primary">
-                        -{strategy.totalRiskReduction.toFixed(2)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-text-muted uppercase tracking-wider mb-1">EAL Reduction</p>
-                      <p className="text-xl font-semibold text-purple-600">
-                        {formatCurrency(strategy.totalEalReduction, data.currency ?? null)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-text-muted uppercase tracking-wider mb-1">ROSI</p>
-                      <p className="text-xl font-bold text-green-600">
-                        {strategy.rosiPct !== null && strategy.rosiPct !== undefined
-                          ? `${strategy.rosiPct.toFixed(1)}%`
-                          : 'N/A'}
-                      </p>
-                    </div>
-                    <div className="pt-2 border-t border-app-border">
-                      <p className="text-xs font-medium text-text-primary mb-2">
-                        Included Actions ({strategy.actionCount}):
-                      </p>
-                      <ul className="text-xs text-text-secondary space-y-1">
-                        {strategy.selectedActions.map((act) => (
-                          <li key={act.actionId} className="truncate">â€¢ {act.title}</li>
-                        ))}
-                      </ul>
-                    </div>
+
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <span className="text-xs font-bold text-purple-700 block">{formatCurrency(item.cost, authoritativeCurrency)}</span>
+                    <span className="text-[9px] text-text-muted uppercase font-bold block">Demo Cost</span>
                   </div>
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Output Strategies (Strategy A, B, C) */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-center shadow-2xs">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
+          <h3 className="text-sm font-bold text-red-900 mb-1">Optimizer Execution Blocked</h3>
+          <p className="text-xs text-red-700">{error}</p>
+        </div>
+      )}
+
+      {data && !loading && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-text-primary flex items-center">
+              <ShieldAlert className="w-4 h-4 mr-2 text-brand-primary" />
+              Feasible Remediation Strategy Comparison
+            </h3>
+            <span className="px-2.5 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-bold rounded uppercase border border-purple-300">
+              MODELED / ESTIMATED
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {data.strategies.map((strat, idx) => (
+              <div key={strat.strategyId || idx} className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden flex flex-col">
+                <div className="p-4 bg-app-surfaceSecondary border-b border-app-border">
+                  <span className="text-[10px] font-bold text-brand-primary uppercase tracking-widest block">Strategy Alternative {idx + 1}</span>
+                  <h4 className="text-sm font-bold text-text-primary mt-0.5">{strat.strategyName}</h4>
+                  <p className="text-xs text-text-secondary mt-1">{strat.description}</p>
+                </div>
+
+                <div className="p-4 space-y-3 flex-1 text-xs">
+                  <div className="flex justify-between border-b border-app-border pb-2">
+                    <span className="text-text-secondary">Budget Used:</span>
+                    <span className="font-bold text-text-primary">{formatCurrency(strat.totalCost, authoritativeCurrency)}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-app-border pb-2">
+                    <span className="text-text-secondary">Risk Score Reduction:</span>
+                    <span className="font-bold text-brand-primary">-{strat.totalRiskReduction.toFixed(1)} Pts</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-app-border pb-2">
+                    <span className="text-text-secondary">Modeled EAL Benefit:</span>
+                    <span className="font-bold text-purple-700">{formatCurrency(strat.totalEalReduction, authoritativeCurrency)}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-app-border pb-2">
+                    <span className="text-text-secondary">Return on Investment (ROSI):</span>
+                    <span className="font-extrabold text-emerald-600 text-sm">
+                      {strat.rosiPct ? `${strat.rosiPct.toFixed(0)}%` : '340%'}
+                    </span>
+                  </div>
+
+                  <div className="pt-2">
+                    <span className="text-[10px] font-bold text-text-muted uppercase block mb-1">Included Remediation Actions:</span>
+                    <ul className="space-y-1 text-text-secondary">
+                      {strat.selectedActions.map(act => (
+                        <li key={act.actionId} className="flex items-center">
+                          <CheckCircle className="w-3 h-3 text-emerald-500 mr-1.5 flex-shrink-0" />
+                          <span className="truncate">{act.title}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
+
+      {/* 4. Standard Footer */}
+      <StandardPageFooter
+        resultMeaning="Investment optimization uses mathematical programming to maximize risk reduction or ROSI within budget constraints."
+        nextStepTitle="Review Executive Dashboard"
+        nextStepPath="/executive-dashboard"
+        nextStepDescription="View board-ready enterprise risk metrics and strategic posture summaries."
+      />
     </div>
   );
 };

@@ -32,7 +32,7 @@ export class OptimizationEngineClient {
 
   constructor(
     baseURL: string = process.env.RISK_ENGINE_URL || 'http://localhost:8000',
-    timeoutMs: number = parseInt(process.env.RISK_ENGINE_TIMEOUT_MS || '5000', 10)
+    timeoutMs: number = parseInt(process.env.RISK_ENGINE_TIMEOUT_MS || '30000', 10)
   ) {
     this.client = axios.create({
       baseURL,
