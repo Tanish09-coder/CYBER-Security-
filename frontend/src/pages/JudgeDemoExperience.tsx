@@ -92,27 +92,27 @@ export const JudgeDemoExperience: React.FC = () => {
 
   // Hero Scenario Constants (Grounded in Apex Financial Enterprises Demo)
   const heroData = {
-    systemName: 'Confluence Wiki Server',
-    hostname: 'confluence-wiki-01.apex.internal',
-    software: 'Atlassian Confluence Server 8.5.0',
+    systemName: 'UPI Switch Gateway Proxy',
+    hostname: 'mumbai-upi-switch-01.bharatbank.internal',
+    software: 'Atlassian Confluence / UPI Gateway 8.5.0',
     cve: 'CVE-2023-22515',
     cvss: 10.0,
     severity: 'CRITICAL',
     kevStatus: 'Active Exploitation (CISA KEV Verified)',
-    businessRole: 'Enterprise Knowledge Base & Documentation Portal',
+    businessRole: 'UPI Real-Time Payments Switch & API Gateway',
     criticality: 'Tier 1 — Mission Critical',
     exposure: 'Internet-Facing Gateway',
     currentRiskScore: 98.0,
     hypotheticalRiskScore: 15.0,
 
-    // Financial Assumptions (Explicit Demo Values)
-    downtimeCostPerHour: 80000,
+    // Financial Assumptions (Explicit Indian Demo Values in INR ₹)
+    downtimeCostPerHour: 1250000, // ₹12.5 Lakhs / hr
     outageHours: 4,
-    recoveryCost: 180000,
+    recoveryCost: 4000000, // ₹40 Lakhs Retainer
     alef: 0.25, // 1 incident every 4 years
-    downtimeLoss: 320000, // 4 * 80k
-    singleIncidentLoss: 500000, // 320k + 180k
-    annualizedExposure: 125000, // 500k * 0.25
+    downtimeLoss: 5000000, // 4 * ₹12.5L = ₹50 Lakhs
+    singleIncidentLoss: 9000000, // ₹50L + ₹40L = ₹90 Lakhs
+    annualizedExposure: 2250000, // ₹90L * 0.25 = ₹22.5 Lakhs / yr
     hypotheticalExposure: 0,
   };
 
@@ -377,7 +377,7 @@ export const JudgeDemoExperience: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                 <div>
                   <div className="text-slate-400">Hourly Downtime Cost</div>
-                  <div className="text-sm font-bold text-white">${heroData.downtimeCostPerHour.toLocaleString()}/hr</div>
+                  <div className="text-sm font-bold text-white">₹{heroData.downtimeCostPerHour.toLocaleString('en-IN')}/hr</div>
                 </div>
                 <div>
                   <div className="text-slate-400">Estimated Outage Duration</div>
@@ -385,7 +385,7 @@ export const JudgeDemoExperience: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-slate-400">Incident Recovery Cost</div>
-                  <div className="text-sm font-bold text-white">${heroData.recoveryCost.toLocaleString()}</div>
+                  <div className="text-sm font-bold text-white">₹{heroData.recoveryCost.toLocaleString('en-IN')}</div>
                 </div>
                 <div>
                   <div className="text-slate-400">Annual Event Frequency</div>
@@ -398,22 +398,22 @@ export const JudgeDemoExperience: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
               <div className="p-5 rounded-xl bg-app-surfaceSecondary border border-app-border space-y-2">
                 <div className="text-xs font-semibold text-text-secondary">Downtime Loss (4 hrs)</div>
-                <div className="text-2xl font-bold text-text-primary">${heroData.downtimeLoss.toLocaleString()}</div>
-                <div className="text-[11px] text-text-muted">4 hours × $80,000/hr</div>
+                <div className="text-2xl font-bold text-text-primary">₹{heroData.downtimeLoss.toLocaleString('en-IN')}</div>
+                <div className="text-[11px] text-text-muted">4 hours × ₹12.5 Lakhs/hr</div>
               </div>
 
               <div className="p-5 rounded-xl bg-app-surfaceSecondary border border-app-border space-y-2">
                 <div className="text-xs font-semibold text-text-secondary">Single Incident Loss</div>
-                <div className="text-2xl font-bold text-amber-500">${heroData.singleIncidentLoss.toLocaleString()}</div>
-                <div className="text-[11px] text-text-muted">$320,000 Downtime + $180,000 Recovery</div>
+                <div className="text-2xl font-bold text-amber-500">₹{heroData.singleIncidentLoss.toLocaleString('en-IN')}</div>
+                <div className="text-[11px] text-text-muted">₹50 Lakhs Downtime + ₹40 Lakhs Recovery</div>
               </div>
 
               <div className="p-5 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-brand-primary/40 space-y-2 shadow-md">
                 <div className="text-xs font-bold text-brand-primary uppercase tracking-widest">
                   MODELED ANNUAL FINANCIAL EXPOSURE
                 </div>
-                <div className="text-3xl font-black text-red-500">${heroData.annualizedExposure.toLocaleString()}<span className="text-xs text-slate-400 font-normal">/yr</span></div>
-                <div className="text-[11px] text-slate-400">$500,000 Loss × 0.25 Event Frequency</div>
+                <div className="text-3xl font-black text-red-500">₹{heroData.annualizedExposure.toLocaleString('en-IN')}<span className="text-xs text-slate-400 font-normal">/yr</span></div>
+                <div className="text-[11px] text-slate-400">₹90 Lakhs Loss × 0.25 Event Frequency</div>
               </div>
             </div>
 
@@ -422,7 +422,7 @@ export const JudgeDemoExperience: React.FC = () => {
                 <div className="text-brand-primary font-bold">FINANCIAL CONTRACT FORMULAS</div>
                 <div>Single Loss Expectancy (SLE) = (Outage Hours * Hourly Rate) + Recovery Cost</div>
                 <div>Annual Loss Expectancy (EAL) = SLE * Annual Event Frequency (ALEF)</div>
-                <div>Currency: USD (Apex Financial Enterprises Demo)</div>
+                <div>Currency: INR (Bharat Digital Financial Services Demo)</div>
               </div>
             )}
           </div>
@@ -576,11 +576,11 @@ export const JudgeDemoExperience: React.FC = () => {
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-app-surfaceSecondary border border-app-border">
               <div>
-                <h3 className="text-sm font-bold text-text-primary">Demo Budget Presets</h3>
+                <h3 className="text-sm font-bold text-text-primary">Demo Budget Presets (INR ₹)</h3>
                 <p className="text-xs text-text-secondary">Select available cybersecurity remediation budget for optimization modeling</p>
               </div>
               <div className="flex items-center space-x-2">
-                {[10000, 25000, 30000, 50000, 100000].map((b) => (
+                {[1000000, 2500000, 5000000, 10000000].map((b) => (
                   <button
                     key={b}
                     onClick={() => setSelectedBudget(b)}
@@ -590,7 +590,7 @@ export const JudgeDemoExperience: React.FC = () => {
                         : 'bg-app-surface border border-app-border text-text-secondary hover:bg-app-surfaceSecondary'
                     }`}
                   >
-                    ${(b / 1000).toFixed(0)}K
+                    {b >= 10000000 ? `₹${(b / 10000000).toFixed(0)}Cr` : `₹${(b / 100000).toFixed(0)}L`}
                   </button>
                 ))}
               </div>
@@ -603,12 +603,12 @@ export const JudgeDemoExperience: React.FC = () => {
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-500/30 uppercase">
                     CANDIDATE 1
                   </span>
-                  <span className="text-xs font-bold text-brand-primary">$12,000 COST</span>
+                  <span className="text-xs font-bold text-brand-primary">₹8,30,000 COST</span>
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Upgrade Confluence Server</h4>
-                <p className="text-xs text-text-secondary">Addresses critical CVE-2023-22515 on Confluence Wiki Server</p>
+                <h4 className="text-sm font-bold text-text-primary">Upgrade UPI Switch Edge Firewall</h4>
+                <p className="text-xs text-text-secondary">Addresses critical CVE-2023-22515 on Mumbai UPI Gateway</p>
                 <div className="pt-2 border-t border-app-border text-xs text-emerald-500 font-semibold">
-                  Exposure Addressed: $125,000/yr
+                  Exposure Addressed: ₹22,50,000/yr
                 </div>
               </div>
 
@@ -617,12 +617,12 @@ export const JudgeDemoExperience: React.FC = () => {
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-500/30 uppercase">
                     CANDIDATE 2
                   </span>
-                  <span className="text-xs font-bold text-brand-primary">$15,000 COST</span>
+                  <span className="text-xs font-bold text-brand-primary">₹12,50,000 COST</span>
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Deploy Enforced MFA</h4>
-                <p className="text-xs text-text-secondary">Implements multi-factor authentication across identity provider</p>
+                <h4 className="text-sm font-bold text-text-primary">Patch Core Banking Ledger DB</h4>
+                <p className="text-xs text-text-secondary">Remediates critical CVE-2021-44228 Log4j flaw on Bengaluru CBS</p>
                 <div className="pt-2 border-t border-app-border text-xs text-emerald-500 font-semibold">
-                  Control Credit: +35% Protection
+                  Exposure Addressed: ₹45,00,000/yr
                 </div>
               </div>
 
@@ -631,12 +631,12 @@ export const JudgeDemoExperience: React.FC = () => {
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-500/30 uppercase">
                     CANDIDATE 3
                   </span>
-                  <span className="text-xs font-bold text-brand-primary">$8,000 COST</span>
+                  <span className="text-xs font-bold text-brand-primary">₹5,00,000 COST</span>
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Patch Apache Log4j</h4>
-                <p className="text-xs text-text-secondary">Remediates logging library vulnerability on Customer Web Proxy</p>
+                <h4 className="text-sm font-bold text-text-primary">Deploy Enforced Hardware MFA</h4>
+                <p className="text-xs text-text-secondary">Implements FIDO2 keys across NetBanking administrator endpoints</p>
                 <div className="pt-2 border-t border-app-border text-xs text-emerald-500 font-semibold">
-                  Exposure Addressed: $45,000/yr
+                  Control Credit: +35% Protection
                 </div>
               </div>
             </div>
@@ -650,7 +650,7 @@ export const JudgeDemoExperience: React.FC = () => {
               {/* STRATEGY A */}
               <div className="p-6 rounded-xl bg-slate-900 border border-brand-primary/50 space-y-4 shadow-lg ring-2 ring-brand-primary/30">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-primary">STRATEGY A (BALANCED)</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand-primary">STRATEGY A (MAXIMIZED RISK REDUCTION)</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/30">
                     RECOMMENDED
                   </span>
@@ -658,19 +658,19 @@ export const JudgeDemoExperience: React.FC = () => {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Budget Used:</span>
-                    <span className="font-bold text-white">$27,000 / $30,000</span>
+                    <span className="font-bold text-white">₹20.8 Lakhs / ₹25 Lakhs</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Actions Included:</span>
-                    <span className="font-bold text-white">Upgrade Confluence + Deploy MFA</span>
+                    <span className="font-bold text-white">Patch CBS DB + Upgrade UPI Switch</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Residual Annual Exposure:</span>
-                    <span className="font-bold text-emerald-400">$10,000 / yr</span>
+                    <span className="font-bold text-emerald-400">₹2.5 Lakhs / yr</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Modeled ROSI:</span>
-                    <span className="font-bold text-emerald-300">362% Return</span>
+                    <span className="font-bold text-emerald-300">420% Return</span>
                   </div>
                 </div>
               </div>
@@ -678,7 +678,7 @@ export const JudgeDemoExperience: React.FC = () => {
               {/* STRATEGY B */}
               <div className="p-6 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300">STRATEGY B (VULNERABILITY FOCUS)</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300">STRATEGY B (BALANCED GATEWAY FOCUS)</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">
                     FEASIBLE
                   </span>
@@ -686,19 +686,19 @@ export const JudgeDemoExperience: React.FC = () => {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Budget Used:</span>
-                    <span className="font-bold text-white">$20,000 / $30,000</span>
+                    <span className="font-bold text-white">₹13.3 Lakhs / ₹25 Lakhs</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Actions Included:</span>
-                    <span className="font-bold text-white">Upgrade Confluence + Patch Log4j</span>
+                    <span className="font-bold text-white">Upgrade UPI Switch + Deploy MFA</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Residual Annual Exposure:</span>
-                    <span className="font-bold text-amber-400">$35,000 / yr</span>
+                    <span className="font-bold text-amber-400">₹8.5 Lakhs / yr</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Modeled ROSI:</span>
-                    <span className="font-bold text-emerald-300">285% Return</span>
+                    <span className="font-bold text-emerald-300">340% Return</span>
                   </div>
                 </div>
               </div>
@@ -706,7 +706,7 @@ export const JudgeDemoExperience: React.FC = () => {
               {/* STRATEGY C */}
               <div className="p-6 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300">STRATEGY C (IDENTITY FOCUS)</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300">STRATEGY C (MINIMUM COST)</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">
                     FEASIBLE
                   </span>
@@ -714,15 +714,15 @@ export const JudgeDemoExperience: React.FC = () => {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Budget Used:</span>
-                    <span className="font-bold text-white">$23,000 / $30,000</span>
+                    <span className="font-bold text-white">₹5.0 Lakhs / ₹25 Lakhs</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Actions Included:</span>
-                    <span className="font-bold text-white">Deploy MFA + Patch Log4j</span>
+                    <span className="font-bold text-white">Deploy MFA Only</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Residual Annual Exposure:</span>
-                    <span className="font-bold text-red-400">$125,000 / yr (Confluence Open)</span>
+                    <span className="font-bold text-red-400">₹22.5 Lakhs / yr (UPI Gateway Open)</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Modeled ROSI:</span>
@@ -752,15 +752,15 @@ export const JudgeDemoExperience: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-slate-400">Original Modeled Exposure</div>
-                  <div className="text-sm font-bold text-red-400">$125,000 / year</div>
+                  <div className="text-sm font-bold text-red-400">₹22.5 Lakhs / year</div>
                 </div>
                 <div>
                   <div className="text-slate-400">Selected Remediation Budget</div>
-                  <div className="text-sm font-bold text-white">$27,000 (Strategy A)</div>
+                  <div className="text-sm font-bold text-white">₹20.8 Lakhs (Strategy A)</div>
                 </div>
                 <div>
                   <div className="text-slate-400">Residual Exposure Post-Investment</div>
-                  <div className="text-sm font-bold text-emerald-400">$10,000 / year</div>
+                  <div className="text-sm font-bold text-emerald-400">₹2.5 Lakhs / year</div>
                 </div>
               </div>
             </div>
@@ -769,11 +769,11 @@ export const JudgeDemoExperience: React.FC = () => {
             <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs text-center overflow-x-auto">
               <div className="font-bold text-red-400">DETECT (Signal)</div>
               <ArrowRight className="w-4 h-4 text-slate-600" />
-              <div className="font-bold text-amber-400">QUANTIFY ($125K)</div>
+              <div className="font-bold text-amber-400">QUANTIFY (₹22.5L)</div>
               <ArrowRight className="w-4 h-4 text-slate-600" />
               <div className="font-bold text-purple-400">SIMULATE (What-If)</div>
               <ArrowRight className="w-4 h-4 text-slate-600" />
-              <div className="font-bold text-blue-400">OPTIMIZE ($27K Budget)</div>
+              <div className="font-bold text-blue-400">OPTIMIZE (₹25L Budget)</div>
               <ArrowRight className="w-4 h-4 text-slate-600" />
               <div className="font-bold text-emerald-400">DECIDE (Strategy A)</div>
             </div>

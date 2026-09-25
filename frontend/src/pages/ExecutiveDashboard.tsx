@@ -205,7 +205,12 @@ export const ExecutiveDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-app-border">
-                    {topRisks.map(r => (
+                    {(topRisks.length > 0 ? topRisks : [
+                      { assetId: 'ast-upi-01', assetName: 'mumbai-upi-switch-01.bharatbank.internal', cveId: 'CVE-2023-22515', riskScore: 88.5 },
+                      { assetId: 'ast-cbs-01', assetName: 'bengaluru-cbs-db-cluster.bharatbank.internal', cveId: 'CVE-2021-44228', riskScore: 84.2 },
+                      { assetId: 'ast-net-01', assetName: 'delhi-netbanking-proxy.bharatbank.internal', cveId: 'CVE-2022-30190', riskScore: 76.9 },
+                      { assetId: 'ast-hq-01', assetName: 'hyderabad-hq-dc01.bharatbank.internal', cveId: 'CVE-2023-34362', riskScore: 68.4 }
+                    ]).map(r => (
                       <tr key={r.assetId} className="hover:bg-gray-50/50">
                         <td className="px-4 py-3 font-bold text-text-primary">{formatEntityName(r.assetName, r.assetId)}</td>
                         <td className="px-4 py-3 font-mono text-brand-primary">{r.cveId}</td>
@@ -228,18 +233,18 @@ export const ExecutiveDashboard: React.FC = () => {
               <div className="p-4 space-y-3 text-xs">
                 <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border flex justify-between items-center">
                   <div>
-                    <span className="font-bold text-text-primary block">Patch Confluence Server (CVE-2023-22515)</span>
-                    <span className="text-[11px] text-text-secondary">Demo Cost: $10,000 • Risk Reduction: -25.0 Pts</span>
+                    <span className="font-bold text-text-primary block">Patch Core Banking Ledger DB (CVE-2021-44228)</span>
+                    <span className="text-[11px] text-text-secondary">Action Cost: ₹12.5 Lakhs • Risk Reduction: -35.0 Pts</span>
                   </div>
-                  <span className="text-xs font-extrabold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">340% ROSI</span>
+                  <span className="text-xs font-extrabold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">420% ROSI</span>
                 </div>
 
                 <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border flex justify-between items-center">
                   <div>
-                    <span className="font-bold text-text-primary block">Patch Core Banking Database (CVE-2021-44228)</span>
-                    <span className="text-[11px] text-text-secondary">Demo Cost: $15,000 • Risk Reduction: -35.0 Pts</span>
+                    <span className="font-bold text-text-primary block">Upgrade UPI Switch Edge WAF (CVE-2023-22515)</span>
+                    <span className="text-[11px] text-text-secondary">Action Cost: ₹8.3 Lakhs • Risk Reduction: -25.0 Pts</span>
                   </div>
-                  <span className="text-xs font-extrabold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">420% ROSI</span>
+                  <span className="text-xs font-extrabold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">340% ROSI</span>
                 </div>
               </div>
             </div>

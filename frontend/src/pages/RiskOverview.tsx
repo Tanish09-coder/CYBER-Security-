@@ -477,7 +477,7 @@ export const RiskOverview: React.FC = () => {
         resultMeaning="Risk scores represent explainable severity indices. They are used to prioritize remediation and serve as direct inputs into the financial exposure engine."
         nextStepTitle="View Financial Exposure"
         nextStepPath="/financial-exposure"
-        nextStepDescription="Translate technical risk scores into modeled monetary loss expectancies ($ USD)."
+        nextStepDescription="Translate technical risk scores into modeled monetary loss expectancies (₹ INR)."
       />
     </div>
   );
