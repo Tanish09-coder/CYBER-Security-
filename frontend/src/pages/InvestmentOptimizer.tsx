@@ -102,12 +102,14 @@ export const InvestmentOptimizer: React.FC = () => {
       const selectedActions = initiatives.filter((i) => selectedInitiatives.has(i.actionId));
 
       const request: OptimizerRequest = {
-        organizationId: activeOrg?.id || 'demo-apex-financial-01',
         budgetLimit: budget,
         currency: authoritativeCurrency,
         objective: objective,
         candidateActions: selectedActions,
       };
+      if (activeOrg?.id) {
+        request.organizationId = activeOrg.id;
+      }
 
       const response = await riskApi.optimizeBudget(request);
       const unwrapped = (response as any)?.data ? (response as any).data : response;
