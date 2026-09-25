@@ -77,8 +77,8 @@ export class FinancialContextService {
     return this.repo.getFrameworkCoverage(frameworkCode, organizationId);
   }
 
-  async getComplianceGaps(organizationId: string) {
-    return this.repo.getComplianceGaps(organizationId);
+  async getComplianceGaps(organizationId: string, frameworkCode?: string) {
+    return this.repo.getComplianceGaps(organizationId, frameworkCode);
   }
 
   async getAggregatedRiskInputsBundle(organizationId: string): Promise<EnterpriseRiskInputsBundle> {

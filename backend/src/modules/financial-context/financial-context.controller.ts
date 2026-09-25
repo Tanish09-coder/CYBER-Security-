@@ -227,12 +227,12 @@ export class FinancialContextController {
 
   getComplianceGaps = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { organizationId } = req.query;
+      const { organizationId, frameworkCode } = req.query;
       if (!organizationId || typeof organizationId !== 'string') {
         res.status(400).json({ error: 'organizationId query parameter is required' });
         return;
       }
-      const gaps = await this.service.getComplianceGaps(organizationId);
+      const gaps = await this.service.getComplianceGaps(organizationId, typeof frameworkCode === 'string' ? frameworkCode : undefined);
       res.status(200).json({ gaps, totalGaps: gaps.length });
     } catch (err) {
       next(err);
