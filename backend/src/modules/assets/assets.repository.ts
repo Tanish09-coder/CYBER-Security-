@@ -112,11 +112,11 @@ export class AssetRepository {
     let paramIdx = 1;
 
     if (filters.organizationId) {
-      whereClauses.push(`organization_id = $${paramIdx++}`);
+      whereClauses.push(`organization_id::text = $${paramIdx++}`);
       values.push(filters.organizationId);
     }
     if (filters.businessUnitId) {
-      whereClauses.push(`business_unit_id = $${paramIdx++}`);
+      whereClauses.push(`business_unit_id::text = $${paramIdx++}`);
       values.push(filters.businessUnitId);
     }
     if (filters.assetType) {

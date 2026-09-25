@@ -10,7 +10,7 @@ import { ASSET_TYPES, ENVIRONMENTS, DATA_CLASSIFICATIONS } from './assets.types'
 // Shared Primitives
 // ---------------------------------------------------------------------------
 
-const uuidSchema = z.string().trim().uuid({ message: 'Invalid UUID format' });
+const uuidSchema = z.string().trim();
 
 const macAddressSchema = z
   .string()
