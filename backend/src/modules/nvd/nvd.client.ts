@@ -83,6 +83,20 @@ export class NvdClient {
           axiosErr.code === 'ECONNABORTED' ||
           axiosErr.message?.toLowerCase().includes('timeout');
 
+        // NIST returns HTTP 404 with header 'message: Invalid apiKey.' if the provided apiKey is expired or invalid
+        const nistMessageHeader = (axiosErr.response?.headers?.['message'] as string) || '';
+        if (status === 404 && nistMessageHeader.toLowerCase().includes('apikey')) {
+          if (this.apiKey) {
+            logger.warn('NVD API key rejected by NIST as invalid/expired. Removing apiKey and falling back to official public mode.');
+            this.apiKey = undefined;
+            delete this.axiosInstance.defaults.headers['apiKey'];
+            if (axiosErr.config?.headers) {
+              delete axiosErr.config.headers['apiKey'];
+            }
+            return await requestFn();
+          }
+        }
+
         // Do NOT retry on client bad request or invalid queries
         if (status === 400 || status === 404) {
           logger.warn(`NVD request rejected with HTTP ${status} (No retry)`, {

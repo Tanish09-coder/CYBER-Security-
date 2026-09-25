@@ -20,23 +20,33 @@ export const Sidebar: React.FC = () => {
   const [isOnline, setIsOnline] = useState<boolean>(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchOrgAndHealth = async () => {
       try {
         const [orgRes, healthRes] = await Promise.all([
           fetchApi<{ data: Array<{ name: string }> }>('/v1/organizations').catch(() => null),
-          fetchApi<{ status: string }>('/health').catch(() => null),
+          fetchApi<{ status: string }>('/api/health').catch(() => null),
         ]);
 
-        if (orgRes && orgRes.data && orgRes.data.length > 0) {
-          setOrgName(orgRes.data[0].name);
+        if (isMounted) {
+          if (orgRes && orgRes.data && orgRes.data.length > 0) {
+            setOrgName(orgRes.data[0].name);
+          }
+          setIsOnline(healthRes?.status === 'ok');
         }
-        setIsOnline(healthRes?.status === 'ok');
       } catch {
-        setIsOnline(false);
+        if (isMounted) {
+          setIsOnline(false);
+        }
       }
     };
 
     fetchOrgAndHealth();
+    const interval = setInterval(fetchOrgAndHealth, 10000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
   return (
     <aside className="w-64 bg-app-surface border-r border-app-border flex flex-col justify-between select-none z-10 relative">

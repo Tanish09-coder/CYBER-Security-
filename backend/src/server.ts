@@ -126,16 +126,19 @@ const expensiveEndpointLimiter = rateLimit({
 app.use(defaultRateLimiter);
 
 // -----------------------------------------------------------------------------
-// Health Check
+// Health Check (Expose both canonical /health and API route /api/health)
 // -----------------------------------------------------------------------------
-app.get('/health', (req: Request, res: Response) => {
+const healthHandler = (req: Request, res: Response) => {
   res.json({
     status: 'ok',
     service: 'cyberriskos-api-gateway',
     timestamp: new Date().toISOString(),
     requestId: (req as any).requestId,
   });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // -----------------------------------------------------------------------------
 // Production Module Routers (Canonical & Compatibility Aliases)

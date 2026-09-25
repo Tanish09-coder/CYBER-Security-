@@ -37,7 +37,7 @@ export const Header: React.FC = () => {
     let isMounted = true;
     const checkBackendHealth = async () => {
       try {
-        const res = await fetchApi<{ status: string; timestamp?: string }>('/health');
+        const res = await fetchApi<{ status: string; timestamp?: string }>('/api/health');
         if (isMounted) {
           if (res?.status === 'ok') {
             setHealthStatus('HEALTHY');
@@ -54,7 +54,7 @@ export const Header: React.FC = () => {
     };
 
     checkBackendHealth();
-    const interval = setInterval(checkBackendHealth, 30000);
+    const interval = setInterval(checkBackendHealth, 10000);
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -78,7 +78,7 @@ export const Header: React.FC = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-risk-success opacity-20"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-risk-success"></span>
               </span>
-              GATEWAY ONLINE
+              CONNECTED
             </>
           ) : (
             <>

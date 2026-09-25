@@ -79,6 +79,72 @@ export async function initMemoryDb(): Promise<any> {
       }
     }
 
+    const SNAPSHOT_FILE = path.join(__dirname, '../../../data/db_snapshot.json');
+
+    const restoreMemorySnapshot = () => {
+      try {
+        if (!fs.existsSync(SNAPSHOT_FILE)) return;
+        const raw = fs.readFileSync(SNAPSHOT_FILE, 'utf-8');
+        const snapshot = JSON.parse(raw);
+        let restoredCount = 0;
+        for (const [table, rows] of Object.entries(snapshot)) {
+          if (!Array.isArray(rows) || rows.length === 0) continue;
+          for (const row of rows) {
+            const keys = Object.keys(row);
+            const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+            const cols = keys.map((k) => `"${k}"`).join(', ');
+            const values = keys.map((k) => {
+              const val = (row as any)[k];
+              if (val && typeof val === 'object') return JSON.stringify(val);
+              return val;
+            });
+            const sql = `INSERT INTO "${table}" (${cols}) VALUES (${placeholders}) ON CONFLICT DO NOTHING;`;
+            try {
+              memoryDb.public.none(sql, values);
+              restoredCount++;
+            } catch (_) {}
+          }
+        }
+        logger.info(`Memory database restored ${restoredCount} rows from persistent disk snapshot (${SNAPSHOT_FILE})`);
+      } catch (err: any) {
+        logger.warn('Failed to restore db snapshot', { error: err.message });
+      }
+    };
+
+    let saveTimer: NodeJS.Timeout | null = null;
+    const saveMemorySnapshot = () => {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        try {
+          const dataDir = path.dirname(SNAPSHOT_FILE);
+          if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+          const tables = [
+            'organizations', 'business_units', 'assets', 'asset_software', 'security_controls',
+            'asset_controls', 'enterprise_financial_parameters', 'risk_results', 'financial_results',
+            'cpe_matches', 'vulnerabilities', 'vulnerability_cvss_metrics', 'vulnerability_cpes',
+            'cisa_kev_entries', 'mitre_attack_tactics', 'mitre_attack_techniques', 'vcdb_incidents',
+            'remediation_actions', 'scenarios'
+          ];
+
+          const snapshot: Record<string, any[]> = {};
+          for (const t of tables) {
+            try {
+              snapshot[t] = memoryDb.public.many(`SELECT * FROM "${t}"`);
+            } catch {
+              snapshot[t] = [];
+            }
+          }
+          fs.writeFileSync(SNAPSHOT_FILE, JSON.stringify(snapshot, null, 2), 'utf-8');
+        } catch (err: any) {
+          logger.debug('Snapshot save note: ' + err.message);
+        }
+      }, 500);
+    };
+
+    // Restore disk state into pg-mem
+    restoreMemorySnapshot();
+
     const pgAdapter = memoryDb.adapters.createPg();
     const memPool = new pgAdapter.Pool();
 
@@ -100,24 +166,32 @@ export async function initMemoryDb(): Promise<any> {
       return p;
     };
 
+    const isMutatingQuery = (text: string) => {
+      const t = text.trim().toUpperCase();
+      return t.startsWith('INSERT') || t.startsWith('UPDATE') || t.startsWith('DELETE') || t.startsWith('TRUNCATE');
+    };
+
     memoryAdapter = {
       isMemory: true,
       query: async (text: string, params?: any[]) => {
         const safeParams = params ? params.map(sanitizeParam) : params;
-        return memPool.query(text, safeParams);
+        const res = await memPool.query(text, safeParams);
+        if (isMutatingQuery(text)) saveMemorySnapshot();
+        return res;
       },
       connect: async () => {
         const client = await memPool.connect();
         const origQuery = client.query.bind(client);
-        client.query = (text: any, params?: any) => {
-          if (Array.isArray(params)) {
-            return origQuery(text, params.map(sanitizeParam));
-          }
-          return origQuery(text, params);
+        client.query = async (text: any, params?: any) => {
+          const safeParams = Array.isArray(params) ? params.map(sanitizeParam) : params;
+          const res = await origQuery(text, safeParams);
+          if (typeof text === 'string' && isMutatingQuery(text)) saveMemorySnapshot();
+          return res;
         };
         return client;
       },
       end: async () => {
+        saveMemorySnapshot();
         return memPool.end();
       },
     };

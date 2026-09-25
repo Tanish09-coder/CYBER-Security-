@@ -93,7 +93,8 @@ export interface RiskEvaluationResultDTO {
   severity: RiskSeverity; // API alias: level
   factors: FactorExplanationDTO[];
   missingDataWarnings: string[];
-  dataCompletenessScore: number; // 0.0 to 1.0 (API alias: dataCompleteness)
+  dataCompletenessScore: number; // 0.0 to 1.0 — STRUCTURAL: schema fields populated
+  controlAssessmentCoverage?: number | null; // 0.0 to 1.0 — EVIDENCE: non-UNKNOWN controls / total; null = no controls registered
   riskFlags: string[];
   modelVersion: string; // "1.0.0"
   provenanceHash: string;
@@ -114,13 +115,15 @@ export interface BatchRiskEvaluationResultDTO {
 export interface RiskScoreItemDTO {
   id: string;
   assetId: string;
+  assetName?: string;
   cveId: string;
   score: number | null;
   level: RiskSeverity;
   baseCvss: number | null;
   modelVersion: string;
   inputProvenanceHash: string;
-  dataCompleteness: number;
+  dataCompleteness: number; // STRUCTURAL: schema fields populated
+  controlAssessmentCoverage?: number | null; // EVIDENCE: non-UNKNOWN controls / total
   factors: FactorExplanationDTO[];
   missingDataWarnings: string[];
   riskFlags: string[];

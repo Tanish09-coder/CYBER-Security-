@@ -6,7 +6,7 @@
 # =============================================================================
 
 from datetime import datetime, timezone
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 
 from app.schemas.risk_input import (
     RiskSeverity,
@@ -270,7 +270,7 @@ class RiskModelV1Calculator:
             )
 
         # ---------------------------------------------------------------------
-        # 9. Data Completeness Score Calculation
+        # 9. Data Completeness Score Calculation (STRUCTURAL — all schema fields)
         # ---------------------------------------------------------------------
         data_completeness = cls._compute_data_completeness(
             has_cvss=vuln.cvss_score is not None,
@@ -278,6 +278,13 @@ class RiskModelV1Calculator:
             has_exposure=asset.is_internet_facing is not None,
             has_controls=controls is not None and len(controls) > 0,
         )
+
+        # ---------------------------------------------------------------------
+        # 9b. Control Assessment Coverage (EVIDENCE — non-UNKNOWN controls only)
+        # Separate from structuralInputCompleteness.
+        # UNKNOWN != assessed. Only IMPLEMENTED, PARTIAL, NOT_IMPLEMENTED count.
+        # ---------------------------------------------------------------------
+        control_assessment_coverage = cls._compute_control_assessment_coverage(controls)
 
         # ---------------------------------------------------------------------
         # 10. Deterministic SHA-256 Provenance Hash
@@ -298,6 +305,7 @@ class RiskModelV1Calculator:
             factors=factors,
             missingDataWarnings=missing_data_warnings,
             dataCompletenessScore=data_completeness,
+            controlAssessmentCoverage=control_assessment_coverage,
             riskFlags=risk_flags,
             modelVersion=cls.MODEL_VERSION,
             provenanceHash=provenance_hash,
@@ -356,6 +364,7 @@ class RiskModelV1Calculator:
         has_exposure: bool,
         has_controls: bool,
     ) -> float:
+        """STRUCTURAL completeness: are schema fields populated?"""
         points = sum([
             1.0 if has_cvss else 0.0,
             1.0 if has_criticality else 0.0,
@@ -363,3 +372,20 @@ class RiskModelV1Calculator:
             1.0 if has_controls else 0.0,
         ])
         return round(points / 4.0, 2)
+
+    @staticmethod
+    def _compute_control_assessment_coverage(controls) -> Optional[float]:
+        """
+        EVIDENCE coverage: fraction of controls positively assessed (not UNKNOWN).
+        Only IMPLEMENTED, PARTIAL, NOT_IMPLEMENTED count as assessed.
+        UNKNOWN = not assessed.
+        Returns None if no controls are registered at all.
+        Returns 0.0 if all registered controls are UNKNOWN.
+        """
+        if controls is None or len(controls) == 0:
+            return None
+        assessed = sum(
+            1 for c in controls
+            if c.status in (ControlStatus.IMPLEMENTED, ControlStatus.PARTIAL, ControlStatus.NOT_IMPLEMENTED)
+        )
+        return round(assessed / len(controls), 2)

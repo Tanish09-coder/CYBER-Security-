@@ -81,8 +81,12 @@ export const Integrations: React.FC = () => {
           provider="NIST"
           status={nvdError ? 'ERROR' : nvdData ? determineStatus(nvdData.enabled, nvdData.isStale) : 'ERROR'}
           lastSyncAt={nvdData?.lastSyncAt}
-          dataAgeHours={nvdData?.dataAgeHours}
-          recordCount={nvdData?.lastSuccessfulRun?.recordsInserted}
+          dataAgeHours={nvdData?.dataAgeHours ?? undefined}
+          recordCount={
+            nvdData?.lastSuccessfulRun
+              ? (nvdData.lastSuccessfulRun.recordsInserted ?? nvdData.lastSuccessfulRun.recordsReceived)
+              : undefined
+          }
           sourceUrl={nvdData?.sourceUrl}
           isLoading={nvdLoading}
           error={nvdError}
@@ -94,7 +98,7 @@ export const Integrations: React.FC = () => {
           provider="CISA"
           status={cisaError && !cisaSyncing ? 'ERROR' : cisaData ? determineStatus(cisaData.enabled, cisaData.isStale) : 'ERROR'}
           lastSyncAt={cisaData?.lastSyncAt}
-          dataAgeHours={cisaData?.dataAgeHours}
+          dataAgeHours={cisaData?.dataAgeHours ?? undefined}
           recordCount={cisaData?.totalActiveKevCount}
           sourceUrl={cisaData?.sourceUrl}
           isLoading={cisaLoading && !cisaSyncing}

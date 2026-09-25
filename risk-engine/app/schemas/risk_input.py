@@ -121,11 +121,15 @@ class RiskEvaluationResultSchema(BaseModel):
     severity: RiskSeverity
     factors: List[FactorExplanationSchema]
     missing_data_warnings: List[str] = Field(default_factory=list, alias="missingDataWarnings")
-    data_completeness_score: float = Field(..., ge=0.0, le=1.0, alias="dataCompletenessScore")
+    data_completeness_score: float = Field(..., ge=0.0, le=1.0, alias="dataCompletenessScore",
+        description="Structural input completeness: fraction of schema fields populated.")
+    control_assessment_coverage: Optional[float] = Field(None, ge=0.0, le=1.0, alias="controlAssessmentCoverage",
+        description="Evidence coverage: fraction of controls positively assessed (IMPLEMENTED/PARTIAL/NOT_IMPLEMENTED). UNKNOWN does not count. None if no controls registered.")
     risk_flags: List[str] = Field(default_factory=list, alias="riskFlags")
     model_version: str = Field("1.0.0", alias="modelVersion")
     provenance_hash: str = Field(..., alias="provenanceHash", min_length=64, max_length=64)
     evaluated_at: str = Field(..., alias="evaluatedAt")
+
 
 
 class BatchRiskEvaluationResultSchema(BaseModel):

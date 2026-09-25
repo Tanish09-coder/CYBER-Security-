@@ -1,27 +1,30 @@
 export interface NvdStatusResponse {
   enabled: boolean;
-  sourceUrl: string;
+  sourceUrl?: string;
   lastSyncAt: string | null;
   lastSuccessfulRun?: {
     status: string;
-    recordsInserted: number;
-  };
+    recordsInserted?: number;
+    recordsReceived?: number;
+  } | null;
   latestRun?: {
     status: string;
-  };
-  dataAgeHours: number;
-  isStale: boolean;
-  staleThresholdHours: number;
+  } | null;
+  dataAgeHours?: number | null;
+  isStale?: boolean;
+  staleThresholdHours?: number;
 }
 
 export interface CisaKevStatusResponse {
   enabled: boolean;
   sourceUrl: string;
   lastSyncAt: string | null;
+  lastSuccessfulRun?: any;
+  latestRun?: any;
   totalActiveKevCount?: number;
-  dataAgeHours: number;
-  isStale: boolean;
-  staleThresholdHours: number;
+  dataAgeHours?: number | null;
+  isStale?: boolean;
+  staleThresholdHours?: number;
 }
 
 export interface CisaKevSyncResponse {

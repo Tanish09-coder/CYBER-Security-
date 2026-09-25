@@ -119,9 +119,13 @@ export class NvdService {
 
   async getSyncStatus(): Promise<{
     enabled: boolean;
+    sourceUrl: string;
     lastSyncAt: string | null;
     lastSuccessfulRun: any;
     latestRun: any;
+    dataAgeHours?: number | null;
+    isStale?: boolean;
+    staleThresholdHours?: number;
   }> {
     const source = await this.ingestionRepo.getOrCreateNvdDataSource();
     const [latestRun, lastSuccessfulRun] = await Promise.all([
@@ -129,11 +133,25 @@ export class NvdService {
       this.ingestionRepo.getLastSuccessfulRun(source.id),
     ]);
 
+    let dataAgeHours: number | null = null;
+    let isStale = false;
+
+    if (source.lastSyncAt) {
+      const syncTime = new Date(source.lastSyncAt).getTime();
+      const now = Date.now();
+      dataAgeHours = Math.max(0, parseFloat(((now - syncTime) / (1000 * 60 * 60)).toFixed(1)));
+      isStale = dataAgeHours > 24;
+    }
+
     return {
       enabled: source.enabled,
+      sourceUrl: source.baseUrl,
       lastSyncAt: source.lastSyncAt || null,
       lastSuccessfulRun,
       latestRun,
+      dataAgeHours,
+      isStale,
+      staleThresholdHours: 24,
     };
   }
 }

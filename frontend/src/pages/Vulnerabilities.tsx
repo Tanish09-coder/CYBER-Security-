@@ -19,7 +19,7 @@ export const Vulnerabilities: React.FC = () => {
   const [kevOnly, setKevOnly] = useState(false);
   const [ransomwareOnly, setRansomwareOnly] = useState(false);
   const [page, setPage] = useState(1);
-  const limit = 25; // default as per new API contract
+  const limit = 10; // 10 per page to enable pagination across catalog
 
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] = useState(search);

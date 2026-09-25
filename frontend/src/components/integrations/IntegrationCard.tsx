@@ -94,19 +94,23 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
             <div>
               <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Last Sync</span>
               <span className="text-sm text-text-primary font-mono">
-                {lastSyncAt ? new Date(lastSyncAt).toLocaleString() : '—'}
+                {lastSyncAt ? new Date(lastSyncAt).toLocaleString() : 'Never synced'}
               </span>
             </div>
             <div>
               <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Data Age</span>
               <span className="text-sm text-text-primary">
-                {dataAgeHours !== undefined ? `${dataAgeHours} hours` : '—'}
+                {dataAgeHours !== undefined && dataAgeHours !== null
+                  ? `${dataAgeHours} hours`
+                  : (!lastSyncAt ? 'Never synced' : '—')}
               </span>
             </div>
             <div>
               <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Total Records</span>
               <span className="text-sm text-text-primary font-mono">
-                {recordCount !== undefined ? recordCount.toLocaleString() : 'Not provided'}
+                {recordCount !== undefined && recordCount !== null
+                  ? recordCount.toLocaleString()
+                  : (!lastSyncAt ? 'Never synced' : 'Not provided')}
               </span>
             </div>
           </div>

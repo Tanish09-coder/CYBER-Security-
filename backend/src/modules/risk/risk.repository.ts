@@ -162,38 +162,38 @@ export class RiskRepository {
     let idx = 1;
 
     if (params.assetId) {
-      conditions.push(`rr.asset_id = $${idx++}`);
+      conditions.push(`asset_id = $${idx++}`);
       values.push(params.assetId);
     }
 
     if (params.cveId) {
-      conditions.push(`rr.cve_id = $${idx++}`);
+      conditions.push(`cve_id = $${idx++}`);
       values.push(params.cveId);
     }
 
     const targetLevel = params.level || params.severity;
     if (targetLevel) {
-      conditions.push(`rr.level = $${idx++}`);
+      conditions.push(`level = $${idx++}`);
       values.push(targetLevel);
     }
 
     if (params.minScore !== undefined) {
-      conditions.push(`rr.score >= $${idx++}`);
+      conditions.push(`score >= $${idx++}`);
       values.push(params.minScore);
     }
 
     if (params.maxScore !== undefined) {
-      conditions.push(`rr.score <= $${idx++}`);
+      conditions.push(`score <= $${idx++}`);
       values.push(params.maxScore);
     }
 
     if (params.modelVersion) {
-      conditions.push(`rr.model_version = $${idx++}`);
+      conditions.push(`model_version = $${idx++}`);
       values.push(params.modelVersion);
     }
 
     if (params.organizationId) {
-      conditions.push(`rr.organization_id = $${idx++}`);
+      conditions.push(`organization_id = $${idx++}`);
       values.push(params.organizationId);
     }
 
@@ -202,7 +202,7 @@ export class RiskRepository {
     // Count query on risk_results
     const countSql = `
       SELECT COUNT(*)::int AS total
-      FROM risk_results rr
+      FROM risk_results
       WHERE ${whereClause}
     `;
     const countRes = await query(countSql, values);
@@ -211,27 +211,39 @@ export class RiskRepository {
     // Data query: paginated risk_results with deterministic ordering
     const dataSql = `
       SELECT 
-        rr.id,
-        rr.asset_id,
-        rr.cve_id,
-        rr.score,
-        rr.level,
-        rr.base_cvss,
-        rr.model_version,
-        rr.input_provenance_hash,
-        rr.data_completeness,
-        rr.factors,
-        rr.missing_data_warnings,
-        rr.risk_flags,
-        rr.evaluated_at
-      FROM risk_results rr
+        id,
+        asset_id,
+        cve_id,
+        score,
+        level,
+        base_cvss,
+        model_version,
+        input_provenance_hash,
+        data_completeness,
+        factors,
+        missing_data_warnings,
+        risk_flags,
+        evaluated_at
+      FROM risk_results
       WHERE ${whereClause}
-      ORDER BY rr.score DESC, rr.evaluated_at DESC, rr.id ASC
+      ORDER BY score DESC, evaluated_at DESC, id ASC
       LIMIT $${idx++} OFFSET $${idx++}
     `;
 
     const dataValues = [...values, limit, offset];
     const dataRes = await query(dataSql, dataValues);
+
+    // Fetch asset names for asset_ids in result batch
+    const assetMap = new Map<string, string>();
+    const assetIds = Array.from(new Set(dataRes.rows.map((r: any) => r.asset_id).filter(Boolean)));
+    if (assetIds.length > 0) {
+      try {
+        const assetRes = await query(`SELECT id, name FROM assets WHERE id = ANY($1::uuid[])`, [assetIds]);
+        for (const a of assetRes.rows) {
+          assetMap.set(a.id, a.name);
+        }
+      } catch {}
+    }
 
     const items: RiskScoreItemDTO[] = dataRes.rows.map((row: any) => {
       const score = row.score !== null && row.score !== undefined ? parseFloat(row.score) : null;
@@ -239,6 +251,7 @@ export class RiskRepository {
       return {
         id: row.id,
         assetId: row.asset_id,
+        assetName: assetMap.get(row.asset_id) || undefined,
         cveId: row.cve_id,
         score,
         level: row.level,
