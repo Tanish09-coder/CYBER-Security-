@@ -50,11 +50,13 @@ export const Compliance: React.FC = () => {
 
         const fwRes = await fetchApi<{ frameworks: ComplianceFramework[]; total: number }>('/v1/compliance/frameworks').catch(() => ({
           frameworks: [
-            { id: 'fw-nist-csf', code: 'NIST_CSF_V2', name: 'NIST Cybersecurity Framework 2.0' },
-            { id: 'fw-iso-27001', code: 'ISO_27001_2022', name: 'ISO/IEC 27001:2022' },
-            { id: 'fw-soc2', code: 'SOC2_TYPE2', name: 'SOC 2 Type II Trust Services' }
+            { id: 'fw-rbi-csf', code: 'RBI_CSF', name: 'RBI Cyber Security Framework for Banks' },
+            { id: 'fw-sebi-cs', code: 'SEBI_CS', name: 'SEBI Cybersecurity Framework' },
+            { id: 'fw-cis-v8', code: 'CIS_V8', name: 'CIS Critical Security Controls v8' },
+            { id: 'fw-nist-csf', code: 'NIST_CSF', name: 'NIST Cybersecurity Framework v2.0' },
+            { id: 'fw-iso-27001', code: 'ISO_27001', name: 'ISO/IEC 27001:2022' }
           ],
-          total: 3
+          total: 5
         }));
 
         const fwList = fwRes.frameworks || [];
@@ -63,7 +65,7 @@ export const Compliance: React.FC = () => {
         if (fwList.length > 0) {
           const initialCode = fwList[0].code;
           setSelectedFrameworkCode(initialCode);
-          await fetchFrameworkDetails(initialCode, activeOrg?.id || 'demo-apex-financial-01');
+          await fetchFrameworkDetails(initialCode, activeOrg?.id || '');
         }
       } catch (err: any) {
         setError(err.message || 'Failed to load compliance framework catalog.');
@@ -84,16 +86,16 @@ export const Compliance: React.FC = () => {
         fetchApi<FrameworkCoverage>(`/v1/compliance/frameworks/${encodeURIComponent(code)}/coverage?organizationId=${encodeURIComponent(orgId)}`).catch(() => ({
           frameworkCode: code,
           organizationId: orgId,
-          totalFrameworkControls: 24,
-          implementedControls: 18,
-          partialControls: 4,
-          notImplementedControls: 2,
-          coveragePercentage: 75.0,
+          totalFrameworkControls: 7,
+          implementedControls: 5,
+          partialControls: 1,
+          notImplementedControls: 1,
+          coveragePercentage: 71.4,
         })),
         fetchApi<{ gaps: ComplianceGap[]; totalGaps: number }>(`/v1/compliance/gaps?organizationId=${encodeURIComponent(orgId)}`).catch(() => ({
           gaps: [
-            { controlCode: 'PR.AC-01', controlTitle: 'Access Control Policy & Enforcement', unprotectedAssetsCount: 1, severity: 'HIGH' },
-            { controlCode: 'DE.CM-01', controlTitle: 'Continuous Network Monitoring', unprotectedAssetsCount: 2, severity: 'MEDIUM' }
+            { controlCode: 'RBI.CS.07 / SEGMENTATION', controlTitle: 'Network Micro-segmentation on Payment Gateways', unprotectedAssetsCount: 2, severity: 'HIGH' },
+            { controlCode: 'RBI.CS.06 / PAM', controlTitle: 'Privileged Access Management for Database Superusers', unprotectedAssetsCount: 1, severity: 'MEDIUM' }
           ],
           totalGaps: 2
         })),
@@ -110,7 +112,7 @@ export const Compliance: React.FC = () => {
 
   const handleFrameworkChange = async (newCode: string) => {
     setSelectedFrameworkCode(newCode);
-    await fetchFrameworkDetails(newCode, activeOrg?.id || 'demo-apex-financial-01');
+    await fetchFrameworkDetails(newCode, activeOrg?.id || '');
   };
 
   if (loading) {
