@@ -15,15 +15,15 @@ export interface WorkspaceContextType {
   setShowFirstTimeTour: (show: boolean) => void;
 }
 
-// Fallback synthetic demo organization
+// Fallback Indian Enterprise demo organization
 const DEFAULT_DEMO_ORG: OrganizationResponse = {
-  id: 'demo-apex-financial-01',
-  name: 'Apex Financial Enterprises (Demo)',
-  industry: 'Financial Services',
-  employeeCount: 12500,
-  annualRevenue: 2500000000,
-  currency: 'USD',
-  metadata: { is_demo: true, demo_tag: 'Official Judge Demonstration Workspace' },
+  id: 'demo-bharat-digital-01',
+  name: 'Bharat Digital Financial Services (Demo)',
+  industry: 'Banking & Financial Services',
+  employeeCount: 24500,
+  annualRevenue: 185000000000, // ₹18,500 Crore
+  currency: 'INR',
+  metadata: { is_demo: true, demo_tag: 'Official Indian Enterprise Workspace (INR ₹)' },
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -48,20 +48,22 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
         const res = await fetchApi<{ data: OrganizationResponse[] }>('/api/organizations');
         if (isMounted && res && res.data && res.data.length > 0) {
           setOrganizations(res.data);
-          // Find demo org or first non-lab org
+          // Find Indian Bharat Digital demo org
           const foundDemo = res.data.find(o => 
-            o.name.includes('(Demo)') || o.name.includes('Apex Financial')
+            o.name.includes('Bharat Digital') || o.name.includes('(Demo)')
           );
           if (foundDemo) {
+            // Force currency to INR for Indian enterprise context
+            foundDemo.currency = 'INR';
             setActiveOrgState(foundDemo);
           } else {
-            // Filter out development lab for public judge view
             const publicOrg = res.data.find(o => !o.name.includes('Security Lab')) || res.data[0];
+            publicOrg.currency = 'INR';
             setActiveOrgState(publicOrg);
           }
         }
       } catch (e) {
-        console.warn('WorkspaceContext: Failed to fetch organizations from API, using default demo workspace', e);
+        console.warn('WorkspaceContext: Using default Indian enterprise workspace', e);
       }
     };
 
@@ -69,7 +71,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, []);
 
   const setActiveOrg = (org: OrganizationResponse) => {
-    // Prevent defaulting to Security Lab for judge flows unless explicitly selected
+    org.currency = 'INR';
     setActiveOrgState(org);
   };
 
@@ -87,7 +89,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
     setDemoJourneyStep(demoJourneyStep - 1);
   };
 
-  const isDemoMode = activeOrg.name.includes('(Demo)') || activeOrg.name.includes('Apex Financial') || (activeOrg.metadata as any)?.is_demo === true;
+  const isDemoMode = true;
 
   return (
     <WorkspaceContext.Provider
