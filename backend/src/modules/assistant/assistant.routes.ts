@@ -23,10 +23,18 @@ export function createAssistantRouter(controller: AssistantController = assistan
   router.post('/explain-financial', controller.explainFinancial);
 
   /**
-   * POST /api/assistant/compare-strategies
+   * POST /api/v1/assistant/compare-strategies
    * Generates a grounded AI comparison of two optimization strategies without picking a winner.
    */
   router.post('/compare-strategies', controller.compareStrategies);
 
+  /**
+   * POST /api/v1/assistant/contain-breach
+   * Analyzes active server hacking and triggers AI breach containment agent.
+   */
+  router.post('/contain-breach', controller.containBreach);
+
   return router;
 }
+
+

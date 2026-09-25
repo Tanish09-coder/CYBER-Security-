@@ -19,7 +19,8 @@ interface SectorInfo {
 
 // Sector Mapping helper for enterprise assets
 const getSectorForAsset = (assetName?: string, assetId?: string): SectorInfo => {
-  const name = (assetName || '').toLowerCase();
+  const name = ((assetName || '') + ' ' + (assetId || '')).toLowerCase();
+
   
   if (name.includes('upi') || name.includes('payment') || name.includes('9551cb7c')) {
     return {

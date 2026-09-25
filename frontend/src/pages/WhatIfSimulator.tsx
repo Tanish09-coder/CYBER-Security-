@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { AlertCircle, Loader2, Play, Plus, X, ShieldAlert, ArrowRight } from 'lucide-react';
 import { WhatIfSimulationResponse, ScenarioActionDTO, WhatIfSimulationRequest } from '../types/risk';
 import { riskApi } from '../api/risk';
-import { formatCurrency, formatCurrencyCompact } from '../utils/currency';
+import { formatCurrency } from '../utils/currency';
+
 import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
 

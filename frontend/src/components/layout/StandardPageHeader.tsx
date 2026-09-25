@@ -1,6 +1,6 @@
 import React from 'react';
-import { HelpCircle, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { HelpCircle } from 'lucide-react';
+
 
 export interface StandardPageHeaderProps {
   title: string;

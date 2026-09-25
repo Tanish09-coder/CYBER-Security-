@@ -59,5 +59,6 @@ export function currencyLabel(currency: string | null | undefined): string {
 }
 
 export function isCurrencyAvailable(currency: string | null | undefined): boolean {
-  return true;
+  return currency !== undefined;
 }
+

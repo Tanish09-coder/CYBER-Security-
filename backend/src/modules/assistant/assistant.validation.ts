@@ -77,3 +77,22 @@ export const strategyComparisonSchema = z
   );
 
 export type StrategyComparisonInput = z.infer<typeof strategyComparisonSchema>;
+
+// ---------------------------------------------------------------------------
+// POST /api/assistant/contain-breach
+// Active Breach Containment AI Agent Schema
+// ---------------------------------------------------------------------------
+
+export const breachContainmentSchema = z.object({
+  serverId: z.string().min(1, 'Server ID is required.'),
+  serverName: z.string().min(1, 'Server name is required.'),
+  ipAddress: z.string().optional(),
+  osEnvironment: z.string().optional(),
+  incidentType: z.string().min(1, 'Incident type is required.'),
+  threatSeverity: z.string().default('CRITICAL'),
+  detectedAnomalies: z.array(z.string()).optional(),
+  affectedServices: z.array(z.string()).optional(),
+});
+
+export type BreachContainmentInput = z.infer<typeof breachContainmentSchema>;
+
