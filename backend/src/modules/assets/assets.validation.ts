@@ -134,8 +134,8 @@ export const assetImportJsonSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const assetQuerySchema = z.object({
-  organizationId: uuidSchema.optional(),
-  businessUnitId: uuidSchema.optional(),
+  organizationId: z.string().trim().optional(),
+  businessUnitId: z.string().trim().optional(),
   assetType: z.string().optional(),
   isInternetFacing: z
     .string()

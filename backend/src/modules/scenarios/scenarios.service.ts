@@ -283,10 +283,20 @@ export class ScenariosService {
       let assetSql: string;
       let assetParams: any[];
       if (assetIds.length > 0) {
-        const placeholders = assetIds.map((_, i) => `$${i + 1}`).join(', ');
-        const placeholdersOffset = assetIds.map((_, i) => `$${i + 1 + assetIds.length}`).join(', ');
-        assetSql = `SELECT id, name, business_criticality, is_internet_facing FROM assets WHERE id IN (${placeholders}) OR name IN (${placeholdersOffset})`;
-        assetParams = [...assetIds, ...assetIds];
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const validUuids = assetIds.filter((id) => uuidRegex.test(id));
+        const textNames = assetIds;
+
+        if (validUuids.length > 0) {
+          const uPlaceholders = validUuids.map((_, i) => `$${i + 1}`).join(', ');
+          const nPlaceholders = textNames.map((_, i) => `$${i + 1 + validUuids.length}`).join(', ');
+          assetSql = `SELECT id, name, business_criticality, is_internet_facing FROM assets WHERE id IN (${uPlaceholders}) OR name IN (${nPlaceholders})`;
+          assetParams = [...validUuids, ...textNames];
+        } else {
+          const nPlaceholders = textNames.map((_, i) => `$${i + 1}`).join(', ');
+          assetSql = `SELECT id, name, business_criticality, is_internet_facing FROM assets WHERE name IN (${nPlaceholders})`;
+          assetParams = [...textNames];
+        }
       } else {
         assetSql = 'SELECT id, name, business_criticality, is_internet_facing FROM assets LIMIT 100';
         assetParams = [];
