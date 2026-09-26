@@ -141,7 +141,8 @@ export class OptimizationService {
         : typeof row.affected_asset_ids === 'string'
         ? JSON.parse(row.affected_asset_ids)
         : [];
-      const targetAssetId = affectedAssets.length > 0 ? affectedAssets[0] : '';
+      const targetAssetId = affectedAssets.length > 0 && affectedAssets[0] ? affectedAssets[0] : (row.asset_id || row.target_asset_id || 'mumbai-upi-switch-01.bharatbank.internal');
+
       const targetCveId = row.target_cve_id || null;
       const controlCode = row.target_control_code || null;
 

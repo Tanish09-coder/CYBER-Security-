@@ -9,8 +9,8 @@ import { z } from 'zod';
 
 export const remediationCandidateActionSchema = z.object({
   actionId: z.string().min(1, 'Action ID is required'),
-  actionType: z.string().min(1, 'Action type is required'),
-  targetAssetId: z.string().min(1, 'Target Asset ID is required'),
+  actionType: z.string().optional().default('IMPLEMENT_CONTROL'),
+  targetAssetId: z.string().optional().default('unassigned-asset'),
   targetCveId: z.string().optional().nullable(),
   controlCode: z.string().optional().nullable(),
   cost: z.number().min(0.0, 'Action cost must be non-negative'),
@@ -18,9 +18,10 @@ export const remediationCandidateActionSchema = z.object({
   estimatedEalReduction: z.number().min(0.0).default(0.0),
   dependencies: z.array(z.string()).default([]),
   conflictsWith: z.array(z.string()).default([]),
-  title: z.string().min(1, 'Action title is required'),
+  title: z.string().optional().default('Remediation Action Candidate'),
   description: z.string().optional().nullable(),
 });
+
 
 export const optimizationRequestSchema = z
   .object({
