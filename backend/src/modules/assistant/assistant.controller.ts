@@ -11,6 +11,7 @@ import {
   riskExplanationSchema,
   financialExplanationSchema,
   strategyComparisonSchema,
+  breachContainmentSchema,
 } from './assistant.validation';
 
 export class AssistantController {
@@ -81,6 +82,29 @@ export class AssistantController {
       });
     }
   };
+
+  containBreach = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const parsed = breachContainmentSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({
+          error: 'Validation Error',
+          details: parsed.error.issues,
+        });
+        return;
+      }
+
+      const result = await this.service.containBreach(parsed.data);
+      res.status(200).json({ success: true, data: result });
+    } catch (err: any) {
+      const status = err instanceof AssistantServiceError ? err.statusCode : 500;
+      res.status(status).json({
+        error: 'Breach Containment Analysis Failed',
+        message: err.message ?? 'An unexpected error occurred during breach containment analysis.',
+      });
+    }
+  };
 }
+
 
 export const assistantController = new AssistantController();

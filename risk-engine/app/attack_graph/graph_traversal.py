@@ -32,7 +32,7 @@ class AttackGraphTraversalEngine:
         if payload.target_asset_ids:
             target_ids = set(payload.target_asset_ids).intersection(nodes_map.keys())
         else:
-            target_ids = {n.asset_id for n in payload.nodes if n.criticality_tier == 1}
+            target_ids = {n.asset_id for n in payload.nodes if n.criticality_tier and (n.criticality_tier >= 4 or n.criticality_tier == 1)}
 
         # If no entry points or no target crown jewels, no valid multi-hop attack paths exist
         if not entry_ids or not target_ids:

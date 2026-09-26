@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 
-const uuidSchema = z.string().trim().uuid({ message: 'Invalid UUID format' });
+const uuidSchema = z.string().trim();
 
 export const softwareItemSchema = z.object({
   vendor: z

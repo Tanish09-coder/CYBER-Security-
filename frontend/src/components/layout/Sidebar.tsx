@@ -11,9 +11,9 @@ import {
   DollarSign,
   TrendingUp,
   CheckCircle2,
-  AlertCircle,
-  Sparkles
+  AlertCircle
 } from 'lucide-react';
+
 import { fetchApi } from '../../api/client';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
@@ -111,7 +111,21 @@ export const Sidebar: React.FC = () => {
               <Flame className="w-4 h-4 mr-3" />
               <span>Threat Intelligence</span>
             </NavLink>
+            <NavLink
+              to="/breach-containment"
+              className={({ isActive }) =>
+                `w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors mt-1 ${
+                  isActive
+                    ? 'bg-red-950/40 text-red-400 font-semibold border-l-2 border-red-500'
+                    : 'text-text-secondary hover:bg-app-surfaceSecondary hover:text-red-400'
+                }`
+              }
+            >
+              <ShieldAlert className="w-4 h-4 mr-3 text-red-400 animate-pulse" />
+              <span className="font-semibold text-red-400">Breach Containment AI</span>
+            </NavLink>
           </div>
+
 
           {/* ENVIRONMENT */}
           <div>

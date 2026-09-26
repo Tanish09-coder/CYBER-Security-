@@ -112,14 +112,11 @@ export class AssetRepository {
     let paramIdx = 1;
 
     if (filters.organizationId) {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (uuidRegex.test(filters.organizationId)) {
-        whereClauses.push(`organization_id = $${paramIdx++}`);
-        values.push(filters.organizationId);
-      }
+      whereClauses.push(`organization_id::text = $${paramIdx++}`);
+      values.push(filters.organizationId);
     }
     if (filters.businessUnitId) {
-      whereClauses.push(`business_unit_id = $${paramIdx++}`);
+      whereClauses.push(`business_unit_id::text = $${paramIdx++}`);
       values.push(filters.businessUnitId);
     }
     if (filters.assetType) {
@@ -162,126 +159,6 @@ export class AssetRepository {
     const dataSql = `SELECT * FROM assets ${whereSql} ORDER BY business_criticality ASC, created_at DESC LIMIT $${paramIdx++} OFFSET $${paramIdx++}`;
 
     const dataRes = await query<StoredAsset>(dataSql, dataValues);
-
-    if (dataRes.rows.length === 0 && !filters.search && !filters.assetType) {
-      const demoAssets: StoredAsset[] = [
-        {
-          id: 'confluence-wiki-01',
-          organization_id: filters.organizationId || 'demo-apex-financial-01',
-          business_unit_id: null,
-          asset_identifier: 'confluence-wiki-01',
-          name: 'Confluence Wiki Server',
-          hostname: 'confluence-wiki-01.apex.internal',
-          ip_address: '10.0.4.15',
-          mac_address: null,
-          asset_type: 'server',
-          operating_system: 'Linux RHEL 8',
-          environment: 'Production',
-          owner: 'IT Ops',
-          is_internet_facing: true,
-          business_criticality: 1,
-          data_classification: 'Confidential',
-          revenue_dependency_pct: '25',
-          operational_importance: '90',
-          metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'prod-pay-gw-01',
-          organization_id: filters.organizationId || 'demo-apex-financial-01',
-          business_unit_id: null,
-          asset_identifier: 'prod-pay-gw-01',
-          name: 'Payment Processing Gateway',
-          hostname: 'prod-pay-gw-01.apex.internal',
-          ip_address: '10.0.1.20',
-          mac_address: null,
-          asset_type: 'server',
-          operating_system: 'Linux Ubuntu 22.04',
-          environment: 'Production',
-          owner: 'FinTech Platform Team',
-          is_internet_facing: true,
-          business_criticality: 1,
-          data_classification: 'Restricted',
-          revenue_dependency_pct: '60',
-          operational_importance: '98',
-          metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'edge-nginx-proxy',
-          organization_id: filters.organizationId || 'demo-apex-financial-01',
-          business_unit_id: null,
-          asset_identifier: 'edge-nginx-proxy',
-          name: 'Customer Web Gateway',
-          hostname: 'edge-nginx-proxy.apex.internal',
-          ip_address: '10.0.2.5',
-          mac_address: null,
-          asset_type: 'server',
-          operating_system: 'Linux Debian 12',
-          environment: 'Production',
-          owner: 'Edge Ops',
-          is_internet_facing: true,
-          business_criticality: 2,
-          data_classification: 'Internal',
-          revenue_dependency_pct: '15',
-          operational_importance: '80',
-          metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'core-db-cluster-01',
-          organization_id: filters.organizationId || 'demo-apex-financial-01',
-          business_unit_id: null,
-          asset_identifier: 'core-db-cluster-01',
-          name: 'Core Banking Database Cluster',
-          hostname: 'core-db-cluster-01.apex.internal',
-          ip_address: '10.0.3.50',
-          mac_address: null,
-          asset_type: 'database',
-          operating_system: 'Oracle Linux 8',
-          environment: 'Production',
-          owner: 'Database Admin Team',
-          is_internet_facing: false,
-          business_criticality: 1,
-          data_classification: 'Restricted',
-          revenue_dependency_pct: '85',
-          operational_importance: '99',
-          metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'corp-hq-dc01',
-          organization_id: filters.organizationId || 'demo-apex-financial-01',
-          business_unit_id: null,
-          asset_identifier: 'corp-hq-dc01',
-          name: 'Corporate Active Directory Domain Controller',
-          hostname: 'corp-hq-dc01.apex.internal',
-          ip_address: '10.0.0.2',
-          mac_address: null,
-          asset_type: 'workstation',
-          operating_system: 'Windows Server 2022',
-          environment: 'Production',
-          owner: 'SecOps',
-          is_internet_facing: false,
-          business_criticality: 2,
-          data_classification: 'Confidential',
-          revenue_dependency_pct: '10',
-          operational_importance: '85',
-          metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ];
-
-      return {
-        assets: demoAssets,
-        total: demoAssets.length,
-      };
-    }
 
     return {
       assets: dataRes.rows,

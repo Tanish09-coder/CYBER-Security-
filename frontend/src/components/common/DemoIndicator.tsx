@@ -20,12 +20,12 @@ export const DemoIndicator: React.FC = () => {
 
         <div className="group relative hidden sm:flex items-center text-slate-300 hover:text-white cursor-help transition-colors">
           <Info className="w-3.5 h-3.5 mr-1 text-blue-400" />
-          <span className="text-[11px] underline decoration-dotted">Enterprise data is synthetic demo context</span>
+          <span className="text-[11px] underline decoration-dotted">Indian Enterprise Context (Bharat Digital Financial Services • INR ₹)</span>
           
           {/* Tooltip */}
           <div className="absolute left-0 top-full mt-1.5 w-80 p-3 bg-slate-900 text-slate-200 text-[11px] rounded-md shadow-xl border border-slate-700 hidden group-hover:block z-50 leading-relaxed">
-            <p className="font-bold text-white mb-1">Authoritative vs Synthetic Data Policy</p>
-            <p className="mb-2">Enterprise context (assets, revenue, topology) is synthetic demo data created for evaluation.</p>
+            <p className="font-bold text-white mb-1">Authoritative vs Enterprise Data Policy</p>
+            <p className="mb-2">Enterprise context (assets, revenue, topology) models Bharat Digital Financial Services (₹18,500 Cr Revenue, INR ₹ context).</p>
             <p className="text-emerald-400 font-semibold flex items-center">
               <ShieldCheck className="w-3.5 h-3.5 mr-1 inline" />
               Cyber threat intelligence is sourced live from NIST NVD, CISA KEV, MITRE ATT&CK, and VCDB.
@@ -39,9 +39,9 @@ export const DemoIndicator: React.FC = () => {
           <ShieldCheck className="w-3 h-3 mr-1 text-emerald-400" />
           REAL INTELLIGENCE
         </span>
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-950 text-amber-300 border border-amber-700/50 uppercase tracking-wider">
-          <Cpu className="w-3 h-3 mr-1 text-amber-400" />
-          DEMO ENTERPRISE DATA
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-950 text-blue-300 border border-blue-700/50 uppercase tracking-wider">
+          <Cpu className="w-3 h-3 mr-1 text-blue-400" />
+          INDIAN ENTERPRISE CONTEXT (INR ₹)
         </span>
       </div>
     </div>

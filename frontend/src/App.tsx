@@ -5,8 +5,8 @@ import { Header } from './components/layout/Header';
 import { PageContainer } from './components/layout/PageContainer';
 import { WorkspaceProvider } from './context/WorkspaceContext';
 import { DemoIndicator } from './components/common/DemoIndicator';
-import { DemoJourney } from './components/layout/DemoJourney';
 import { FirstTimeTourModal } from './components/common/FirstTimeTourModal';
+
 
 import { Integrations } from './pages/Integrations';
 import { Vulnerabilities } from './pages/Vulnerabilities';
@@ -22,6 +22,7 @@ import { ExecutiveDashboard } from './pages/ExecutiveDashboard';
 import { Compliance } from './pages/Compliance';
 import { AttackPath } from './pages/AttackPath';
 import { AIAssistant } from './pages/AIAssistant';
+import { BreachContainmentAgent } from './pages/BreachContainmentAgent';
 import { JudgeDemoExperience } from './pages/JudgeDemoExperience';
 
 export const App: React.FC = () => {
@@ -46,6 +47,7 @@ export const App: React.FC = () => {
                 <Route path="/assets" element={<Assets />} />
                 <Route path="/controls" element={<Controls />} />
                 <Route path="/threat-intel" element={<ThreatIntel />} />
+                <Route path="/breach-containment" element={<BreachContainmentAgent />} />
                 <Route path="/risk-overview" element={<RiskOverview />} />
                 <Route path="/financial-exposure" element={<FinancialExposure />} />
                 <Route path="/what-if-simulator" element={<WhatIfSimulator />} />
@@ -59,6 +61,7 @@ export const App: React.FC = () => {
             </PageContainer>
           </div>
         </div>
+
 
         {/* Onboarding First-Time Tour Modal */}
         <FirstTimeTourModal />

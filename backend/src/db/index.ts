@@ -63,14 +63,7 @@ export async function initMemoryDb(): Promise<any> {
       implementation: () => crypto.randomUUID(),
     });
 
-    let migrationsDir = path.join(__dirname, 'migrations');
-    if (!fs.existsSync(migrationsDir)) {
-      migrationsDir = path.join(process.cwd(), 'src/db/migrations');
-    }
-    if (!fs.existsSync(migrationsDir)) {
-      migrationsDir = path.join(__dirname, '../../src/db/migrations');
-    }
-
+    const migrationsDir = path.join(__dirname, 'migrations');
     if (fs.existsSync(migrationsDir)) {
       const files = fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort();
       for (const file of files) {
@@ -86,13 +79,7 @@ export async function initMemoryDb(): Promise<any> {
       }
     }
 
-    let SNAPSHOT_FILE = path.join(process.cwd(), '../data/db_snapshot.json');
-    if (!fs.existsSync(SNAPSHOT_FILE)) {
-      SNAPSHOT_FILE = path.join(process.cwd(), 'data/db_snapshot.json');
-    }
-    if (!fs.existsSync(SNAPSHOT_FILE)) {
-      SNAPSHOT_FILE = path.join(__dirname, '../../../data/db_snapshot.json');
-    }
+    const SNAPSHOT_FILE = path.join(__dirname, '../../../data/db_snapshot.json');
 
     const restoreMemorySnapshot = () => {
       try {

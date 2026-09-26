@@ -73,7 +73,7 @@ export const Header: React.FC = () => {
         <div className="hidden md:flex items-center space-x-2 bg-app-surfaceSecondary px-3 py-1 rounded-md border border-app-border text-xs text-text-secondary">
           <Building2 className="w-3.5 h-3.5 text-brand-primary" />
           <span className="font-semibold text-text-primary">{activeOrg.name}</span>
-          <span className="text-[10px] text-text-muted font-mono uppercase">({activeOrg.currency || 'USD'})</span>
+          <span className="text-[10px] text-text-muted font-mono uppercase">({activeOrg.currency || 'INR'})</span>
         </div>
       </div>
 

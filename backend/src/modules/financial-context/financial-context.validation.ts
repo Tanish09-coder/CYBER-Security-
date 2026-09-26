@@ -14,7 +14,7 @@ export const financialParametersSchema = z.object({
 });
 
 export const remediationActionSchema = z.object({
-  organizationId: z.string().uuid({ message: 'organizationId must be a valid UUID' }),
+  organizationId: z.string({ message: 'organizationId is required' }),
   title: z.string().min(1, { message: 'title is required' }),
   description: z.string().optional(),
   actionType: z.enum(['ENABLE_CONTROL', 'PATCH_CVE', 'SEGMENT_NETWORK', 'REMEDIATE_VULNERABILITY']),
@@ -38,7 +38,7 @@ export const assetDependencySchema = z.object({
 });
 
 export const complianceEvidenceSchema = z.object({
-  organizationId: z.string().uuid({ message: 'organizationId must be a valid UUID' }),
+  organizationId: z.string({ message: 'organizationId is required' }),
   complianceControlId: z.string().uuid({ message: 'complianceControlId must be a valid UUID' }),
   assetId: z.string().uuid().optional(),
   evidenceUri: z.string().min(1, { message: 'evidenceUri is required' }),

@@ -46,6 +46,14 @@ from app.schemas.attack_graph_input import (
 )
 from app.attack_graph.graph_engine import AttackGraphEngine
 
+# Active Breach Containment AI Agent
+from app.schemas.containment_input import (
+    BreachContainmentInputSchema,
+    BreachContainmentResultSchema,
+)
+from app.ai.breach_containment_agent import BreachContainmentAgent
+
+
 app = FastAPI(
     title="CyberRiskOS Risk, Financial & Simulation Engine",
     description="Deterministic cyber-risk quantification, financial exposure / EAL calculation, What-If scenario simulation, and multi-strategy investment optimization service.",
@@ -169,4 +177,21 @@ def analyze_attack_paths_endpoint(payload: AttackGraphInputSchema):
         return AttackGraphEngine.analyze(payload)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Attack path analysis error: {str(e)}")
+
+
+# -----------------------------------------------------------------------------
+# Active Breach Containment AI Agent Endpoint
+# -----------------------------------------------------------------------------
+
+@app.post("/api/v1/breach-containment/analyze", response_model=BreachContainmentResultSchema)
+def analyze_breach_containment_endpoint(payload: BreachContainmentInputSchema):
+    """
+    Analyzes active ongoing server hacking events and generates real-time
+    containment playbooks, CLI scripts, and INR financial mitigation metrics.
+    """
+    try:
+        return BreachContainmentAgent.generate_containment_plan(payload)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Breach containment error: {str(e)}")
+
 

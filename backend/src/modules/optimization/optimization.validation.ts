@@ -25,7 +25,7 @@ export const remediationCandidateActionSchema = z.object({
 export const optimizationRequestSchema = z
   .object({
     budgetLimit: z.number().min(0.0, 'Budget limit must be non-negative').optional(),
-    organizationId: z.string().uuid().optional(),
+    organizationId: z.string().optional(),
     businessUnitId: z.string().uuid().optional(),
     currency: z.string().max(10).optional().nullable(), // Authoritative from org when organizationId provided
     objective: z

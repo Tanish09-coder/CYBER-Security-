@@ -5,7 +5,10 @@ import { AttackGraphAnalysisResultDTO } from '../types/attack-paths';
 import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
 import { formatEntityName } from '../utils/formatting';
 
+import { useWorkspace } from '../context/WorkspaceContext';
+
 export const AttackPath: React.FC = () => {
+  const { activeOrg } = useWorkspace();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<AttackGraphAnalysisResultDTO | null>(null);
@@ -14,7 +17,7 @@ export const AttackPath: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await attackPathsApi.getAttackGraph();
+        const res = await attackPathsApi.getAttackGraph(activeOrg?.id);
         setGraphData(res.data);
       } catch (err: any) {
         setError(err.message || 'Failed to generate attack graphs.');
@@ -23,7 +26,7 @@ export const AttackPath: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [activeOrg]);
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-full space-y-4 min-h-[400px]">

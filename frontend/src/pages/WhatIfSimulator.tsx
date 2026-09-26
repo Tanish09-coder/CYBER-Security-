@@ -2,33 +2,34 @@ import React, { useState } from 'react';
 import { AlertCircle, Loader2, Play, Plus, X, ShieldAlert, ArrowRight } from 'lucide-react';
 import { WhatIfSimulationResponse, ScenarioActionDTO, WhatIfSimulationRequest } from '../types/risk';
 import { riskApi } from '../api/risk';
-import { formatCurrency, formatCurrencyCompact } from '../utils/currency';
+import { formatCurrency } from '../utils/currency';
+
 import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
 
 export const WhatIfSimulator: React.FC = () => {
   const { activeOrg } = useWorkspace();
-  const authoritativeCurrency = activeOrg?.currency || 'USD';
+  const authoritativeCurrency = activeOrg?.currency || 'INR';
 
   const [actions, setActions] = useState<ScenarioActionDTO[]>([]);
   
   // Action builder state
   const [actionType, setActionType] = useState<'PATCH_VULNERABILITY' | 'IMPLEMENT_CONTROL' | 'ISOLATE_ASSET' | 'DECOMMISSION_ASSET'>('PATCH_VULNERABILITY');
-  const [targetAssetId, setTargetAssetId] = useState('confluence-wiki-01');
-  const [targetCveId, setTargetCveId] = useState('CVE-2023-22515');
-  const [controlCode, setControlCode] = useState('MFA');
+  const [targetAssetId, setTargetAssetId] = useState('mumbai-upi-switch-01.bharatbank.internal');
+  const [targetCveId, setTargetCveId] = useState('CVE-2021-44228');
+  const [controlCode, setControlCode] = useState('EDR');
 
   const [data, setData] = useState<WhatIfSimulationResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Preset Demo Options with human readable names
+  // Authoritative Indian Enterprise Datacenter Asset Options
   const DEMO_ASSET_OPTIONS = [
-    { id: 'confluence-wiki-01', label: 'Confluence Wiki Server (confluence-wiki-01)', defaultCve: 'CVE-2023-22515' },
-    { id: 'prod-pay-gw-01', label: 'Payment Gateway (prod-pay-gw-01)', defaultCve: 'CVE-2021-44228' },
-    { id: 'edge-nginx-proxy', label: 'Customer Web Gateway (edge-nginx-proxy)', defaultCve: 'CVE-2023-38545' },
-    { id: 'core-db-cluster-01', label: 'Core Banking Database (core-db-cluster-01)', defaultCve: 'CVE-2021-44228' },
-    { id: 'corp-hq-dc01', label: 'Corporate Active Directory (corp-hq-dc01)', defaultCve: 'CVE-2023-20198' },
+    { id: 'mumbai-upi-switch-01.bharatbank.internal', label: 'Mumbai UPI & IMPS Payment Switch (mumbai-upi-switch-01)', defaultCve: 'CVE-2021-41773' },
+    { id: 'bengaluru-cbs-db-cluster.bharatbank.internal', label: 'Bengaluru CBS Core Banking DB (bengaluru-cbs-db-cluster)', defaultCve: 'CVE-2021-44228' },
+    { id: 'delhi-netbanking-proxy.bharatbank.internal', label: 'Delhi NetBanking & Mobile Proxy (delhi-netbanking-proxy)', defaultCve: 'CVE-2023-38545' },
+    { id: 'hyderabad-hq-dc01.bharatbank.internal', label: 'Hyderabad HQ Active Directory (hyderabad-hq-dc01)', defaultCve: 'CVE-2023-20198' },
+    { id: 'chennai-internal-wiki.bharatbank.internal', label: 'Chennai Internal Wiki Server (chennai-internal-wiki)', defaultCve: 'CVE-2023-22515' },
   ];
 
   const handleAssetSelectChange = (assetId: string) => {
@@ -66,7 +67,7 @@ export const WhatIfSimulator: React.FC = () => {
       setData(null);
 
       const request: WhatIfSimulationRequest = {
-        scenarioName: 'Hypothetical Security Intervention Sandbox',
+        scenarioName: 'Indian Enterprise Hypothetical Security Sandbox',
         actions: actions
       };
 
@@ -90,12 +91,12 @@ export const WhatIfSimulator: React.FC = () => {
     <div className="space-y-6">
       {/* 1. Standard Header */}
       <StandardPageHeader
-        title="What-If Risk Simulator"
-        purpose="Test what could happen if a security change were made without changing the real baseline."
+        title="What-If Risk Simulator (INR ₹)"
+        purpose="Test hypothetical Indian security posture changes in a sandbox environment without altering baseline enterprise data."
         steps={[
-          'Select an enterprise asset and target vulnerability or security control',
-          'Choose a hypothetical action (Patch vulnerability, upgrade library, improve control, segment asset)',
-          'Run simulation to compare CURRENT baseline vs HYPOTHETICAL scenario outcomes'
+          'Select an Indian enterprise asset (Mumbai UPI Switch, Bengaluru CBS DB) and target vulnerability',
+          'Choose a hypothetical action (Patch Log4j, upgrade EDR control, segment network path)',
+          'Run simulation to compare CURRENT baseline vs HYPOTHETICAL scenario outcomes in INR (₹)'
         ]}
         dataOriginBadge="HYPOTHETICAL"
       />
@@ -103,7 +104,7 @@ export const WhatIfSimulator: React.FC = () => {
       {/* 2. Scenario Builder */}
       <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
         <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary flex justify-between items-center">
-          <h3 className="text-sm font-bold text-text-primary">Hypothetical Intervention Builder</h3>
+          <h3 className="text-sm font-bold text-text-primary">Hypothetical Intervention Builder (INR ₹)</h3>
           <button 
             onClick={handleReset}
             className="text-xs font-bold text-text-muted hover:text-brand-primary transition-colors"
@@ -146,7 +147,7 @@ export const WhatIfSimulator: React.FC = () => {
                 <label className="block text-xs font-bold text-text-muted uppercase mb-1">3. Target CVE ID</label>
                 <input 
                   type="text" 
-                  placeholder="e.g. CVE-2023-22515"
+                  placeholder="e.g. CVE-2021-44228"
                   value={targetCveId}
                   onChange={(e) => setTargetCveId(e.target.value)}
                   className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-medium text-text-primary focus:outline-none focus:border-brand-primary font-mono"
@@ -162,9 +163,9 @@ export const WhatIfSimulator: React.FC = () => {
                   onChange={(e) => setControlCode(e.target.value)}
                   className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-medium text-text-primary bg-white focus:outline-none focus:border-brand-primary"
                 >
-                  <option value="MFA">MFA (Multi-Factor Auth)</option>
-                  <option value="EDR">EDR Endpoint Protection</option>
-                  <option value="ENCRYPTION">Data Encryption at Rest</option>
+                  <option value="EDR">EDR Endpoint Protection (Active Blocking)</option>
+                  <option value="MFA">MFA Multi-Factor Auth</option>
+                  <option value="ENCRYPTION">Data Encryption at Rest & Transit</option>
                   <option value="SEGMENTATION">Network Micro-Segmentation</option>
                   <option value="BACKUP">Immutable Data Backup</option>
                 </select>
@@ -184,7 +185,7 @@ export const WhatIfSimulator: React.FC = () => {
             <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Staged Interventions:</h4>
             {actions.length === 0 ? (
               <p className="text-xs text-text-muted italic bg-app-surfaceSecondary p-3 rounded border border-app-border">
-                No actions staged yet. Click "Add Action" above to build a scenario.
+                No actions staged yet. Select an Indian bank server and click "Add Action" above to build a scenario.
               </p>
             ) : (
               actions.map((act, idx) => (
@@ -210,7 +211,7 @@ export const WhatIfSimulator: React.FC = () => {
               className="flex items-center px-6 py-2.5 bg-brand-primary text-white rounded-md text-xs font-bold hover:bg-blue-700 disabled:opacity-40 transition-colors shadow-2xs"
             >
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-              {loading ? "Simulating What-If Scenario..." : "Run What-If Simulation"}
+              {loading ? "Simulating Indian What-If Scenario..." : "Run What-If Simulation"}
             </button>
           </div>
         </div>
@@ -230,7 +231,7 @@ export const WhatIfSimulator: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-text-primary flex items-center">
               <ShieldAlert className="w-4 h-4 mr-2 text-brand-primary" />
-              Before vs After Comparison (Hypothetical Outcome)
+              Before vs After Comparison (Hypothetical Outcome in INR ₹)
             </h3>
             <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 font-extrabold text-[10px] rounded uppercase border border-indigo-300">
               HYPOTHETICAL SCENARIO
@@ -258,32 +259,36 @@ export const WhatIfSimulator: React.FC = () => {
                 </div>
               </div>
               <div className="mt-4 pt-3 border-t border-app-border flex justify-between text-xs font-bold">
-                <span className="text-text-secondary">Improvement:</span>
-                <span className="text-emerald-600">-{data.riskScoreDelta ? data.riskScoreDelta.toFixed(1) : '53.0'} Points ({data.riskReductionPct ? data.riskReductionPct.toFixed(0) : '54'}% Reduction)</span>
+                <span className="text-text-secondary font-medium">Risk Score Improvement:</span>
+                <span className="text-emerald-600 font-extrabold">
+                  -{Math.abs(data.riskScoreDelta || 53.0).toFixed(1)} Points ({Math.abs(data.riskReductionPct || 54.0).toFixed(0)}% Reduction)
+                </span>
               </div>
             </div>
 
             {/* Financial EAL Delta */}
             <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
-              <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Modeled Annualized Exposure (EAL)</h4>
+              <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Modeled Annualized Exposure (EAL in ₹)</h4>
               <div className="flex items-center justify-between">
                 <div className="text-center">
                   <span className="text-[10px] font-bold text-text-muted uppercase block">CURRENT</span>
                   <span className="text-xl font-bold text-text-primary line-through opacity-60">
-                    {formatCurrencyCompact(data.baselineTotalEal || 443750, authoritativeCurrency)}
+                    {formatCurrency(data.baselineTotalEal || 1250000, authoritativeCurrency)}
                   </span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400" />
                 <div className="text-center">
                   <span className="text-[10px] font-bold text-indigo-600 uppercase block">HYPOTHETICAL</span>
                   <span className="text-xl font-extrabold text-purple-700">
-                    {formatCurrencyCompact(data.simulatedTotalEal || 88750, authoritativeCurrency)}
+                    {formatCurrency(data.simulatedTotalEal || 88750, authoritativeCurrency)}
                   </span>
                 </div>
               </div>
               <div className="mt-4 pt-3 border-t border-app-border flex justify-between text-xs font-bold">
-                <span className="text-text-secondary">Saved Exposure:</span>
-                <span className="text-purple-700">{formatCurrency(data.ealDelta || 355000, authoritativeCurrency)} / yr</span>
+                <span className="text-text-secondary font-medium">Saved Annual Exposure:</span>
+                <span className="text-purple-700 font-extrabold">
+                  {formatCurrency(Math.abs(data.ealDelta || 1161250), authoritativeCurrency)} / yr
+                </span>
               </div>
             </div>
 
@@ -296,7 +301,7 @@ export const WhatIfSimulator: React.FC = () => {
         resultMeaning="What-If simulations test hypothetical posture changes in a sandbox environment without altering baseline enterprise data."
         nextStepTitle="Compare Investment Options"
         nextStepPath="/investment-optimizer"
-        nextStepDescription="Set a cybersecurity budget and optimize remediation strategies across ROSI and risk reduction."
+        nextStepDescription="Set a cybersecurity budget and optimize remediation strategies across ROSI and risk reduction in Indian Rupees (₹)."
       />
     </div>
   );

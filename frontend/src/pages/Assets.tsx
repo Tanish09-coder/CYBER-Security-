@@ -99,7 +99,7 @@ export const Assets: React.FC = () => {
           <span><strong>Active Demo Environment:</strong> Payment Processing Gateway, Core Banking Ledger, Customer Web Proxy, Confluence Wiki.</span>
         </div>
         <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded uppercase">
-          Apex Financial Enterprises
+          Bharat Digital Financial Services (Demo)
         </span>
       </div>
       

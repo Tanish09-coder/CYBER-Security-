@@ -6,8 +6,9 @@ import {
 } from '../types/attack-paths';
 
 export const attackPathsApi = {
-  getAttackGraph: () => {
-    return fetchApi<{ success: boolean; data: AttackGraphAnalysisResultDTO }>('/v1/attack-paths');
+  getAttackGraph: (orgId?: string) => {
+    const query = orgId ? `?organizationId=${encodeURIComponent(orgId)}` : '';
+    return fetchApi<{ success: boolean; data: AttackGraphAnalysisResultDTO }>(`/v1/attack-paths${query}`);
   },
   
   getChokePoints: (limit: number = 10) => {

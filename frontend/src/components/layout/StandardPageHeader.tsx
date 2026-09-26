@@ -1,6 +1,6 @@
 import React from 'react';
-import { HelpCircle, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { HelpCircle } from 'lucide-react';
+
 
 export interface StandardPageHeaderProps {
   title: string;
@@ -71,43 +71,6 @@ export interface StandardPageFooterProps {
   nextStepDescription?: string;
 }
 
-export const StandardPageFooter: React.FC<StandardPageFooterProps> = ({
-  resultMeaning,
-  nextStepTitle,
-  nextStepPath,
-  nextStepDescription,
-}) => {
-  const navigate = useNavigate();
-
-  return (
-    <div className="mt-8 space-y-4 pt-6 border-t border-app-border">
-      {/* What does this result mean? Card */}
-      <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-2xs">
-        <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-2 flex items-center">
-          <HelpCircle className="w-4 h-4 mr-1.5 text-brand-primary" />
-          What does this result mean?
-        </h4>
-        <p className="text-sm text-text-secondary leading-relaxed font-normal">{resultMeaning}</p>
-      </div>
-
-      {/* Next Step CTA */}
-      <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-lg p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-        <div>
-          <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Next Logical Module</span>
-          <h4 className="text-base font-bold text-white mt-0.5">{nextStepTitle}</h4>
-          {nextStepDescription && (
-            <p className="text-xs text-blue-100/80 mt-1">{nextStepDescription}</p>
-          )}
-        </div>
-
-        <button
-          onClick={() => navigate(nextStepPath)}
-          className="flex items-center justify-center px-5 py-2.5 bg-white text-blue-950 font-bold text-xs rounded-md hover:bg-blue-50 transition-colors flex-shrink-0 shadow-sm"
-        >
-          {nextStepTitle}
-          <ChevronRight className="w-4 h-4 ml-1.5" />
-        </button>
-      </div>
-    </div>
-  );
+export const StandardPageFooter: React.FC<StandardPageFooterProps> = () => {
+  return null;
 };
