@@ -1,6 +1,5 @@
 import React from 'react';
-import { HelpCircle, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { HelpCircle } from 'lucide-react';
 
 export interface StandardPageHeaderProps {
   title: string;
@@ -9,60 +8,45 @@ export interface StandardPageHeaderProps {
   dataOriginBadge?: 'REAL INTELLIGENCE' | 'DEMO ENTERPRISE DATA' | 'MODELED / ESTIMATED' | 'HYPOTHETICAL';
 }
 
+const BADGE_CLASSES: Record<string, string> = {
+  'REAL INTELLIGENCE':   'gov-badge gov-badge-real',
+  'DEMO ENTERPRISE DATA': 'gov-badge gov-badge-demo',
+  'MODELED / ESTIMATED': 'gov-badge gov-badge-modeled',
+  'HYPOTHETICAL':        'gov-badge gov-badge-hypo',
+};
+
 export const StandardPageHeader: React.FC<StandardPageHeaderProps> = ({
-  title,
-  purpose,
-  steps,
-  dataOriginBadge = 'DEMO ENTERPRISE DATA',
-}) => {
-  const getBadgeStyle = () => {
-    switch (dataOriginBadge) {
-      case 'REAL INTELLIGENCE':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      case 'MODELED / ESTIMATED':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'HYPOTHETICAL':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-300';
-      default:
-        return 'bg-amber-100 text-amber-800 border-amber-300';
-    }
-  };
+  title, purpose, steps, dataOriginBadge = 'DEMO ENTERPRISE DATA',
+}) => (
+  <div className="animate-fade-in" style={{ marginBottom: 24 }}>
+    {/* Title row */}
+    <div className="gov-section-header">
+      <h1>
+        {title}
+        <span className={BADGE_CLASSES[dataOriginBadge] ?? 'gov-badge gov-badge-demo'}>
+          {dataOriginBadge}
+        </span>
+      </h1>
+      <p>{purpose}</p>
+    </div>
 
-  return (
-    <div className="space-y-4 mb-6">
-      {/* Title & Purpose Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-app-border pb-4">
-        <div>
-          <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-bold text-text-primary tracking-tight">{title}</h1>
-            <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold border uppercase tracking-wider ${getBadgeStyle()}`}>
-              {dataOriginBadge}
-            </span>
-          </div>
-          <p className="text-sm text-text-secondary mt-1 font-normal leading-relaxed">{purpose}</p>
-        </div>
+    {/* Instruction box */}
+    <div className="gov-instruction-box">
+      <div className="gov-instruction-title">
+        <HelpCircle size={14} color="var(--saffron)" />
+        What do I do here?
       </div>
-
-      {/* What do I do here? 2-3 Simple Steps Box */}
-      <div className="bg-app-surface border border-app-border rounded-lg p-4 shadow-2xs">
-        <div className="flex items-center space-x-2 text-xs font-bold text-text-primary uppercase tracking-wider mb-2">
-          <HelpCircle className="w-4 h-4 text-brand-primary" />
-          <span>What do I do here?</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          {steps.map((step, idx) => (
-            <div key={idx} className="flex items-start space-x-2 bg-app-surfaceSecondary p-2.5 rounded border border-app-border">
-              <span className="w-5 h-5 rounded-full bg-brand-primary/10 text-brand-primary font-bold flex items-center justify-center flex-shrink-0 text-[11px]">
-                {idx + 1}
-              </span>
-              <span className="text-text-secondary font-medium leading-snug">{step}</span>
-            </div>
-          ))}
-        </div>
+      <div className="gov-steps-grid">
+        {steps.map((step, i) => (
+          <div key={i} className="gov-step">
+            <div className="gov-step-num">{i + 1}</div>
+            <div className="gov-step-text">{step}</div>
+          </div>
+        ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 export interface StandardPageFooterProps {
   resultMeaning: string;
@@ -71,6 +55,4 @@ export interface StandardPageFooterProps {
   nextStepDescription?: string;
 }
 
-export const StandardPageFooter: React.FC<StandardPageFooterProps> = () => {
-  return null;
-};
+export const StandardPageFooter: React.FC<StandardPageFooterProps> = () => null;

@@ -31,7 +31,10 @@ export class NvdClient {
     this.apiKey = options?.apiKey !== undefined ? options.apiKey : env.NVD_API_KEY;
     this.timeoutMs = options?.timeoutMs || env.NVD_TIMEOUT_MS;
     this.maxRetries = options?.maxRetries !== undefined ? options.maxRetries : env.NVD_MAX_RETRIES;
-    this.requestDelayMs = options?.requestDelayMs !== undefined ? options.requestDelayMs : env.NVD_REQUEST_DELAY_MS;
+    
+    // NIST allows 50 req/30s with an API key (~600ms), but only 5 req/30s without one (~6000ms).
+    const defaultDelay = this.apiKey ? 600 : 6500;
+    this.requestDelayMs = options?.requestDelayMs !== undefined ? options.requestDelayMs : (env.NVD_REQUEST_DELAY_MS === 600 ? defaultDelay : env.NVD_REQUEST_DELAY_MS);
 
     const headers: Record<string, string> = {
       'User-Agent': 'CyberRiskOS-NVD-Ingestor/1.0',
@@ -89,6 +92,7 @@ export class NvdClient {
           if (this.apiKey) {
             logger.warn('NVD API key rejected by NIST as invalid/expired. Removing apiKey and falling back to official public mode.');
             this.apiKey = undefined;
+            this.requestDelayMs = 6500;
             delete this.axiosInstance.defaults.headers['apiKey'];
             if (axiosErr.config?.headers) {
               delete axiosErr.config.headers['apiKey'];

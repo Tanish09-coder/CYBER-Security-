@@ -89,7 +89,7 @@ describe('NvdService', () => {
     );
   });
 
-  it('should require explicit date range if incremental sync has no prior sync timestamp', async () => {
+  it('should fallback to 30 days if incremental sync has no prior sync timestamp', async () => {
     mockIngestionRepo.getOrCreateNvdDataSource.mockResolvedValueOnce({
       id: 'source-1',
       name: 'National Vulnerability Database',
@@ -102,9 +102,30 @@ describe('NvdService', () => {
       updatedAt: new Date().toISOString(),
     });
 
-    await expect(nvdService.syncIncremental()).rejects.toThrow(
-      'No previous synchronization found'
-    );
+    mockClient.fetchModifiedCves.mockResolvedValueOnce({
+      totalResults: 0,
+      startIndex: 0,
+      resultsPerPage: 100,
+      format: 'NVD_CVE',
+      version: '2.0',
+      timestamp: new Date().toISOString(),
+      vulnerabilities: [],
+    });
+
+    mockIngestionService.processCveItems.mockResolvedValueOnce({
+      runId: 'run-incremental',
+      status: 'COMPLETED',
+      syncType: 'INCREMENTAL',
+      recordsReceived: 0,
+      recordsInserted: 0,
+      recordsUpdated: 0,
+      recordsSkipped: 0,
+      errorCount: 0,
+      durationMs: 80,
+    });
+
+    const result = await nvdService.syncIncremental();
+    expect(result.status).toBe('COMPLETED');
   });
 
   it('should execute incremental sync when lastSyncAt exists', async () => {

@@ -81,13 +81,16 @@ export class NvdService {
   async syncIncremental(pageSize: number = 100): Promise<IngestionResult> {
     const source = await this.ingestionRepo.getOrCreateNvdDataSource();
 
+    let lastModStartDate: string;
     if (!source.lastSyncAt) {
-      throw new Error(
-        'No previous synchronization found. An explicit date range is required for initial sync to avoid downloading the full historical NVD archive.'
-      );
+      logger.info('No previous sync found. Defaulting to last 30 days for initial incremental sync.');
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      lastModStartDate = thirtyDaysAgo.toISOString();
+    } else {
+      lastModStartDate = new Date(source.lastSyncAt).toISOString();
     }
 
-    const lastModStartDate = new Date(source.lastSyncAt).toISOString();
     const lastModEndDate = new Date().toISOString();
 
     let startIndex = 0;

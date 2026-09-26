@@ -716,7 +716,7 @@ export class MitreAttackRepository {
       const res = await query(
         `INSERT INTO mitre_attack_tactic_techniques (tactic_id, technique_id, source)
          VALUES ${valuePlaceholders.join(', ')}
-         ON CONFLICT (tactic_id, technique_id) DO NOTHING`,
+         ON CONFLICT DO NOTHING`,
         params
       );
       if (res.rowCount && res.rowCount > 0) {

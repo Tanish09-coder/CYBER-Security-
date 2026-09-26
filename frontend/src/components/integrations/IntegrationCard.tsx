@@ -1,8 +1,5 @@
 import React from 'react';
-import { Badge, type BadgeVariant } from '../common/Badge';
-import { Button } from '../common/Button';
-import { Skeleton } from '../common/Skeleton';
-import { AlertCircle, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, RefreshCw, ExternalLink, Database, Wifi, WifiOff } from 'lucide-react';
 
 export type IntegrationStatus = 'ENABLED' | 'STALE' | 'SYNCING' | 'ERROR' | 'DISABLED';
 
@@ -18,130 +15,173 @@ export interface IntegrationCardProps {
   error?: string | null;
   onSync?: () => void;
   isSyncing?: boolean;
+  questionLabel?: string;
+  accentColor?: 'saffron' | 'navy' | 'green' | 'red';
+  icon?: React.ReactNode;
 }
 
+const STATUS_CONFIG: Record<IntegrationStatus, {
+  badgeClass: string;
+  dotClass: string;
+  label: string;
+  icon: React.ReactNode;
+}> = {
+  ENABLED:  { badgeClass: 'gov-badge gov-badge-enabled', dotClass: 'online',  label: 'ENABLED',  icon: <CheckCircle2 size={11} /> },
+  STALE:    { badgeClass: 'gov-badge gov-badge-stale',   dotClass: 'warn',    label: 'STALE',    icon: <Clock size={11} /> },
+  ERROR:    { badgeClass: 'gov-badge gov-badge-critical',dotClass: 'offline', label: 'ERROR',    icon: <AlertCircle size={11} /> },
+  SYNCING:  { badgeClass: 'gov-badge gov-badge-info',    dotClass: 'online',  label: 'SYNCING',  icon: <RefreshCw size={11} style={{ animation: 'spin 1s linear infinite' }} /> },
+  DISABLED: { badgeClass: 'gov-badge',                   dotClass: 'offline', label: 'DISABLED', icon: <WifiOff size={11} /> },
+};
+
+const ACCENT_BORDER: Record<string, string> = {
+  saffron: 'var(--saffron)',
+  navy:    'var(--navy)',
+  green:   'var(--india-green)',
+  red:     'var(--red)',
+};
+
 export const IntegrationCard: React.FC<IntegrationCardProps> = ({
-  sourceName,
-  provider,
-  status,
-  lastSyncAt,
-  dataAgeHours,
-  recordCount,
-  sourceUrl,
-  isLoading,
-  error,
-  onSync,
-  isSyncing
+  sourceName, provider, status, lastSyncAt, dataAgeHours,
+  recordCount, sourceUrl, isLoading, error, onSync, isSyncing,
+  questionLabel, accentColor = 'saffron', icon,
 }) => {
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.DISABLED;
+  const accentBorder = ACCENT_BORDER[accentColor];
+
   if (isLoading) {
     return (
-      <div className="bg-app-surface border border-app-border rounded-lg p-6 shadow-sm">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <Skeleton className="h-6 w-48 mb-2" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-          <Skeleton className="h-6 w-20 rounded" />
+      <div className="gov-integration-card" style={{ borderTop: `3px solid ${accentBorder}` }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-light)' }}>
+          <div style={{ height: 14, width: 200, background: 'var(--bg-light-blue)', borderRadius: 2, marginBottom: 8 }} />
+          <div style={{ height: 11, width: 100, background: 'var(--bg-light-blue)', borderRadius: 2 }} />
         </div>
-        <div className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
+        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[1, 2].map(i => (
+            <div key={i} style={{ height: 11, background: 'var(--bg-light-blue)', borderRadius: 2, width: i === 2 ? '60%' : '80%' }} />
+          ))}
         </div>
       </div>
     );
   }
 
-  const getStatusConfig = (s: IntegrationStatus): { variant: BadgeVariant; icon: React.ReactNode } => {
-    switch (s) {
-      case 'ENABLED': return { variant: 'success', icon: <CheckCircle2 className="w-3 h-3 mr-1" /> };
-      case 'STALE': return { variant: 'warning', icon: <Clock className="w-3 h-3 mr-1" /> };
-      case 'ERROR': return { variant: 'critical', icon: <AlertCircle className="w-3 h-3 mr-1" /> };
-      case 'SYNCING': return { variant: 'info', icon: <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> };
-      case 'DISABLED':
-      default:
-        return { variant: 'neutral', icon: null };
-    }
-  };
+  const formattedDate = lastSyncAt
+    ? new Date(lastSyncAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '—';
 
-  const statusConfig = getStatusConfig(status);
+  const ageDisplay = dataAgeHours !== undefined && dataAgeHours !== null
+    ? dataAgeHours > 100 ? 'Historical' : `${dataAgeHours.toFixed(1)} hrs`
+    : '—';
+
+  const ageColor = dataAgeHours !== undefined
+    ? dataAgeHours > 48 ? 'var(--red)' : dataAgeHours > 24 ? 'var(--amber)' : 'var(--india-green)'
+    : 'var(--text-muted)';
 
   return (
-    <div className="bg-app-surface border border-app-border rounded-lg p-6 shadow-sm flex flex-col h-full">
-      <div className="flex justify-between items-start mb-6">
+    <div className="gov-integration-card" style={{ borderTop: `3px solid ${accentBorder}`, display: 'flex', flexDirection: 'column' }}>
+      {/* Card header */}
+      <div className="gov-integration-card-header">
         <div>
-          <h3 className="text-lg font-bold text-text-primary">{sourceName}</h3>
-          <p className="text-sm text-text-secondary">Provider: {provider}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
+            {questionLabel && (
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-body)' }}>
+                {questionLabel}
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ lineHeight: 0, color: accentBorder }}>{icon}</div>
+            <span style={{ fontSize: 14.5, fontWeight: 800, color: 'var(--text-dark)' }}>{sourceName}</span>
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>Provider: {provider}</div>
         </div>
-        <Badge variant={statusConfig.variant}>
-          {statusConfig.icon}
-          {status}
-        </Badge>
+
+        {/* Status badge */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span className={`gov-status-dot ${cfg.dotClass}`} />
+            <span className={cfg.badgeClass} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {cfg.icon} {cfg.label}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {error ? (
-        <div className="flex-1 bg-risk-critical/5 border border-risk-critical/20 rounded p-4 text-sm text-risk-critical">
-          <div className="flex items-start">
-            <AlertCircle className="w-5 h-5 mr-2 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold mb-1">Unable to load integration status</p>
-              <p className="opacity-90">{error}</p>
+      {/* Card body */}
+      <div className="gov-integration-card-body" style={{ flex: 1 }}>
+        {error ? (
+          <div className="gov-alert gov-alert-red" style={{ margin: 0 }}>
+            <div className="gov-alert-title">
+              <AlertCircle size={14} /> Unable to Load Integration Status
             </div>
+            <span style={{ fontSize: 12 }}>{error}</span>
           </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex flex-col space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Last Sync</span>
-              <span className="text-sm text-text-primary font-mono">
-                {lastSyncAt ? new Date(lastSyncAt).toLocaleString() : 'Never synced'}
-              </span>
+        ) : (
+          <>
+            {/* Stats grid */}
+            <div className="gov-stat-row">
+              <div className="gov-stat">
+                <div className="gov-stat-label">Last Sync</div>
+                <div className="gov-stat-value" style={{ fontFamily: 'monospace', fontSize: 12 }}>{formattedDate}</div>
+              </div>
+              <div className="gov-stat">
+                <div className="gov-stat-label">Data Age</div>
+                <div className="gov-stat-value" style={{ color: ageColor }}>{ageDisplay}</div>
+              </div>
             </div>
-            <div>
-              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Data Age</span>
-              <span className="text-sm text-text-primary">
-                {dataAgeHours !== undefined && dataAgeHours !== null
-                  ? `${dataAgeHours} hours`
-                  : (!lastSyncAt ? 'Never synced' : '—')}
-              </span>
-            </div>
-            <div>
-              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Total Records</span>
-              <span className="text-sm text-text-primary font-mono">
-                {recordCount !== undefined && recordCount !== null
-                  ? recordCount.toLocaleString()
-                  : (!lastSyncAt ? 'Never synced' : 'Not provided')}
-              </span>
-            </div>
-          </div>
 
-          {sourceUrl && (
-            <div className="pt-2">
-              <span className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Source Endpoint</span>
-              <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-primary hover:underline break-all">
-                {sourceUrl}
-              </a>
+            {/* Record count — big number */}
+            <div style={{
+              background: 'var(--bg-light-blue)',
+              border: '1px solid var(--border-light)',
+              padding: '12px 14px',
+              marginBottom: 14,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <div className="gov-stat-label">Total Records</div>
+                <div className="gov-stat-value big" style={{ color: accentBorder }}>
+                  {recordCount !== undefined && recordCount !== null
+                    ? recordCount.toLocaleString('en-IN')
+                    : '—'}
+                </div>
+              </div>
+              <Database size={28} color={accentBorder} opacity={0.2} />
             </div>
-          )}
-        </div>
-      )}
 
-      {onSync && (
-        <div className="mt-6 pt-4 border-t border-app-border flex justify-end">
-          <Button 
-            variant="primary" 
-            onClick={onSync} 
-            disabled={isSyncing || status === 'SYNCING'}
-          >
-            {isSyncing ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Syncing...
-              </>
-            ) : (
-              'Sync Data Now'
+            {/* Source endpoint */}
+            {sourceUrl && (
+              <div className="gov-stat" style={{ marginBottom: 0 }}>
+                <div className="gov-stat-label">Source Endpoint</div>
+                <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="gov-source-link" style={{ marginTop: 4 }}>
+                  <ExternalLink size={11} />
+                  {sourceUrl}
+                </a>
+              </div>
             )}
-          </Button>
+          </>
+        )}
+      </div>
+
+      {/* Sync button */}
+      {onSync && (
+        <div style={{
+          padding: '10px 16px',
+          borderTop: '1px solid var(--border-light)',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          background: 'var(--bg-page)',
+        }}>
+          <button
+            className="gov-btn gov-btn-primary"
+            onClick={onSync}
+            disabled={isSyncing}
+            style={{ opacity: isSyncing ? 0.7 : 1, fontSize: 12, padding: '7px 16px' }}
+          >
+            <RefreshCw size={12} style={{ animation: isSyncing ? 'spin 1s linear infinite' : 'none' }} />
+            {isSyncing ? 'Syncing...' : 'Sync Data Now'}
+          </button>
         </div>
       )}
     </div>

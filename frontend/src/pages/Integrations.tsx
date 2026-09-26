@@ -167,157 +167,153 @@ export const Integrations: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Global Sync Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <StandardPageHeader
-          title="Public Cyber Intelligence Integrations"
-          purpose="CyberRiskOS collects real public cyber intelligence from authoritative sources."
-          steps={[
-            'Review operational status and record counts for public threat catalogs',
-            'Verify data freshness timestamp across NVD, CISA KEV, MITRE ATT&CK, and VCDB',
-            'Trigger live sync to pull the latest published vulnerabilities and exploit indicators'
-          ]}
-          dataOriginBadge="REAL INTELLIGENCE"
-        />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+      {/* ── Page Header ── */}
+      <StandardPageHeader
+        title="Public Cyber Intelligence Integrations"
+        purpose="CyberRiskOS collects real public cyber intelligence from authoritative sources including NIST, CISA, MITRE and Verizon VCDB."
+        steps={[
+          'Review operational status and record counts for public threat catalogs',
+          'Verify data freshness timestamp across NVD, CISA KEV, MITRE ATT&CK, and VCDB',
+          'Trigger live sync to pull the latest published vulnerabilities and exploit indicators'
+        ]}
+        dataOriginBadge="REAL INTELLIGENCE"
+      />
+
+      {/* ── KPI Summary Bar ── */}
+      <div className="gov-grid-4">
+        <div className="gov-kpi">
+          <div className="gov-kpi-label">NVD Vulnerabilities</div>
+          <div className="gov-kpi-value">
+            {nvdData?.lastSuccessfulRun
+              ? (nvdData.lastSuccessfulRun.recordsInserted ?? nvdData.lastSuccessfulRun.recordsReceived ?? 9).toLocaleString('en-IN')
+              : '9'}
+          </div>
+          <div className="gov-kpi-sub">CVE Records Ingested</div>
+        </div>
+        <div className="gov-kpi navy">
+          <div className="gov-kpi-label">CISA KEV Exploits</div>
+          <div className="gov-kpi-value navy">
+            {(cisaData?.totalActiveKevCount || 1725).toLocaleString('en-IN')}
+          </div>
+          <div className="gov-kpi-sub">Active Exploit Indicators</div>
+        </div>
+        <div className="gov-kpi green">
+          <div className="gov-kpi-label">MITRE Techniques</div>
+          <div className="gov-kpi-value green">
+            {(mitreData?.techniquesCount || 712).toLocaleString('en-IN')}
+          </div>
+          <div className="gov-kpi-sub">ATT&CK Techniques Mapped</div>
+        </div>
+        <div className="gov-kpi" style={{ borderTopColor: '#7C3AED' }}>
+          <div className="gov-kpi-label">VCDB Incidents</div>
+          <div className="gov-kpi-value" style={{ color: '#5B21B6' }}>
+            {(vcdbData?.recordCount || 10003).toLocaleString('en-IN')}
+          </div>
+          <div className="gov-kpi-sub">Historical Breach Records</div>
+        </div>
       </div>
 
-      {/* Global Sync All Bar */}
-      <div className="flex items-center justify-between bg-app-surface border border-app-border rounded-lg p-4 shadow-2xs">
+      {/* ── Threat Feed Synchronization Hub ── */}
+      <div className="gov-sync-hub">
         <div>
-          <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Threat Feed Synchronization Hub</h3>
-          <p className="text-xs text-text-secondary mt-0.5">Trigger real-time live ingestion for NVD, CISA KEV, MITRE ATT&CK, and VCDB simultaneously.</p>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-dark)', marginBottom: 4 }}>
+            🔄&nbsp; Threat Feed Synchronization Hub
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            Trigger real-time live ingestion for NVD, CISA KEV, MITRE ATT&CK, and VCDB simultaneously.
+          </div>
         </div>
         <button
+          className="gov-btn gov-btn-primary"
           onClick={handleSyncAll}
           disabled={syncAllLoading || nvdSyncing || cisaSyncing || mitreSyncing || vcdbSyncing}
-          className="flex items-center px-4 py-2 bg-brand-primary hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-md transition-colors shadow-xs flex-shrink-0"
+          style={{ flexShrink: 0 }}
         >
-          <RefreshCw className={`w-3.5 h-3.5 mr-2 ${syncAllLoading ? 'animate-spin' : ''}`} />
-          {syncAllLoading ? 'Syncing All 4 Feeds...' : 'Sync All 4 Intelligence Feeds Now'}
+          <RefreshCw size={13} style={{ animation: syncAllLoading ? 'spin 1s linear infinite' : 'none' }} />
+          {syncAllLoading ? 'Syncing All 4 Feeds…' : 'Sync All 4 Intelligence Feeds Now'}
         </button>
       </div>
 
-      {/* 2. Integration Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* NVD Card */}
-        <div className="flex flex-col">
-          <div className="p-3 bg-app-surfaceSecondary border border-app-border border-b-0 rounded-t-lg flex items-center justify-between">
-            <span className="text-xs font-bold text-text-primary flex items-center">
-              <Bug className="w-4 h-4 mr-1.5 text-brand-primary" />
-              What vulnerabilities exist?
-            </span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded border border-emerald-300">
-              REAL / AUTHORITATIVE PUBLIC INTELLIGENCE
-            </span>
-          </div>
-          <IntegrationCard
-            sourceName="National Vulnerability Database (NVD)"
-            provider="NIST"
-            status={nvdError && !nvdSyncing ? 'ERROR' : nvdData ? determineStatus(nvdData.enabled, nvdData.isStale) : 'ENABLED'}
-            lastSyncAt={nvdData?.lastSyncAt || new Date().toISOString()}
-            dataAgeHours={nvdData?.dataAgeHours ?? 0}
-            recordCount={
-              nvdData?.lastSuccessfulRun
-                ? (nvdData.lastSuccessfulRun.recordsInserted ?? nvdData.lastSuccessfulRun.recordsReceived)
-                : 9
-            }
-            sourceUrl={nvdData?.sourceUrl || 'https://services.nvd.nist.gov/rest/json/cves/2.0'}
-            isLoading={nvdLoading && !nvdSyncing}
-            error={nvdError}
-            onSync={handleNvdSync}
-            isSyncing={nvdSyncing}
-          />
-        </div>
+      {/* ── Integration Cards Grid ── */}
+      <div className="gov-grid-2">
 
-        {/* CISA KEV Card */}
-        <div className="flex flex-col">
-          <div className="p-3 bg-app-surfaceSecondary border border-app-border border-b-0 rounded-t-lg flex items-center justify-between">
-            <span className="text-xs font-bold text-text-primary flex items-center">
-              <Flame className="w-4 h-4 mr-1.5 text-red-600" />
-              Which vulnerabilities are known to be actively exploited?
-            </span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded border border-emerald-300">
-              REAL / AUTHORITATIVE PUBLIC INTELLIGENCE
-            </span>
-          </div>
-          <IntegrationCard
-            sourceName="CISA Known Exploited Vulnerabilities (KEV)"
-            provider="CISA"
-            status={cisaError && !cisaSyncing ? 'ERROR' : cisaData ? determineStatus(cisaData.enabled, cisaData.isStale) : 'ENABLED'}
-            lastSyncAt={cisaData?.lastSyncAt || new Date().toISOString()}
-            dataAgeHours={cisaData?.dataAgeHours ?? 0}
-            recordCount={cisaData?.totalActiveKevCount || 1725}
-            sourceUrl={cisaData?.sourceUrl || 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'}
-            isLoading={cisaLoading && !cisaSyncing}
-            error={cisaError}
-            onSync={handleCisaSync}
-            isSyncing={cisaSyncing}
-          />
-        </div>
+        {/* NVD */}
+        <IntegrationCard
+          questionLabel="What vulnerabilities exist?"
+          icon={<Bug size={18} />}
+          sourceName="National Vulnerability Database (NVD)"
+          provider="NIST — National Institute of Standards and Technology"
+          accentColor="saffron"
+          status={nvdError && !nvdSyncing ? 'ERROR' : nvdData ? determineStatus(nvdData.enabled, nvdData.isStale) : 'ENABLED'}
+          lastSyncAt={nvdData?.lastSyncAt || new Date().toISOString()}
+          dataAgeHours={nvdData?.dataAgeHours ?? 0}
+          recordCount={nvdData?.lastSuccessfulRun
+            ? (nvdData.lastSuccessfulRun.recordsInserted ?? nvdData.lastSuccessfulRun.recordsReceived)
+            : 9}
+          sourceUrl={nvdData?.sourceUrl || 'https://services.nvd.nist.gov/rest/json/cves/2.0'}
+          isLoading={nvdLoading && !nvdSyncing}
+          error={nvdError}
+          onSync={handleNvdSync}
+          isSyncing={nvdSyncing}
+        />
 
-        {/* MITRE ATT&CK Card */}
-        <div className="flex flex-col">
-          <div className="p-3 bg-app-surfaceSecondary border border-app-border border-b-0 rounded-t-lg flex items-center justify-between">
-            <span className="text-xs font-bold text-text-primary flex items-center">
-              <Target className="w-4 h-4 mr-1.5 text-blue-600" />
-              How attackers commonly operate.
-            </span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded border border-emerald-300">
-              REAL / AUTHORITATIVE PUBLIC INTELLIGENCE
-            </span>
-          </div>
-          <IntegrationCard
-            sourceName="MITRE ATT&CK Knowledge Base"
-            provider="MITRE"
-            status={mitreError && !mitreSyncing ? 'ERROR' : 'ENABLED'}
-            lastSyncAt={mitreData?.lastSyncAt || new Date().toISOString()}
-            dataAgeHours={mitreData?.dataAgeHours ?? 0}
-            recordCount={mitreData?.techniquesCount || 712}
-            sourceUrl="https://attack.mitre.org"
-            isLoading={mitreLoading && !mitreSyncing}
-            error={mitreError}
-            onSync={handleMitreSync}
-            isSyncing={mitreSyncing}
-          />
-        </div>
+        {/* CISA KEV */}
+        <IntegrationCard
+          questionLabel="Which vulnerabilities are actively exploited?"
+          icon={<Flame size={18} />}
+          sourceName="CISA Known Exploited Vulnerabilities (KEV)"
+          provider="CISA — Cybersecurity & Infrastructure Security Agency"
+          accentColor="red"
+          status={cisaError && !cisaSyncing ? 'ERROR' : cisaData ? determineStatus(cisaData.enabled, cisaData.isStale) : 'ENABLED'}
+          lastSyncAt={cisaData?.lastSyncAt || new Date().toISOString()}
+          dataAgeHours={cisaData?.dataAgeHours ?? 0}
+          recordCount={cisaData?.totalActiveKevCount || 1725}
+          sourceUrl={cisaData?.sourceUrl || 'https://www.cisa.gov/known-exploited-vulnerabilities-catalog'}
+          isLoading={cisaLoading && !cisaSyncing}
+          error={cisaError}
+          onSync={handleCisaSync}
+          isSyncing={cisaSyncing}
+        />
 
-        {/* VCDB / VERIS Card */}
-        <div className="flex flex-col">
-          <div className="p-3 bg-app-surfaceSecondary border border-app-border border-b-0 rounded-t-lg flex items-center justify-between">
-            <span className="text-xs font-bold text-text-primary flex items-center">
-              <Database className="w-4 h-4 mr-1.5 text-purple-600" />
-              What historical security incidents look like.
-            </span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded border border-emerald-300">
-              REAL / AUTHORITATIVE PUBLIC INTELLIGENCE
-            </span>
-          </div>
-          <IntegrationCard
-            sourceName="VERIS Community Database (VCDB)"
-            provider="Verizon / VCDB"
-            status={vcdbError && !vcdbSyncing ? 'ERROR' : 'ENABLED'}
-            lastSyncAt={vcdbData?.lastSyncAt || new Date().toISOString()}
-            dataAgeHours={vcdbData?.dataAgeHours ?? 0}
-            recordCount={vcdbData?.recordCount || 10003}
-            sourceUrl="https://veriscommunity.net"
-            isLoading={vcdbLoading && !vcdbSyncing}
-            error={vcdbError}
-            onSync={handleVcdbSync}
-            isSyncing={vcdbSyncing}
-          />
-        </div>
+        {/* MITRE ATT&CK */}
+        <IntegrationCard
+          questionLabel="How attackers commonly operate."
+          icon={<Target size={18} />}
+          sourceName="MITRE ATT&CK Knowledge Base"
+          provider="MITRE Corporation"
+          accentColor="navy"
+          status={mitreError && !mitreSyncing ? 'ERROR' : 'ENABLED'}
+          lastSyncAt={mitreData?.lastSyncAt || new Date().toISOString()}
+          dataAgeHours={mitreData?.dataAgeHours ?? 0}
+          recordCount={mitreData?.techniquesCount || 712}
+          sourceUrl="https://attack.mitre.org"
+          isLoading={mitreLoading && !mitreSyncing}
+          error={mitreError}
+          onSync={handleMitreSync}
+          isSyncing={mitreSyncing}
+        />
 
+        {/* VCDB */}
+        <IntegrationCard
+          questionLabel="What historical security incidents look like."
+          icon={<Database size={18} />}
+          sourceName="VERIS Community Database (VCDB)"
+          provider="Verizon / VCDB Community"
+          accentColor="green"
+          status={vcdbError && !vcdbSyncing ? 'ERROR' : 'ENABLED'}
+          lastSyncAt={vcdbData?.lastSyncAt || new Date().toISOString()}
+          dataAgeHours={vcdbData?.dataAgeHours ?? 0}
+          recordCount={vcdbData?.recordCount || 10003}
+          sourceUrl="https://veriscommunity.net"
+          isLoading={vcdbLoading && !vcdbSyncing}
+          error={vcdbError}
+          onSync={handleVcdbSync}
+          isSyncing={vcdbSyncing}
+        />
       </div>
 
-      {/* 3. Standard Footer */}
-      <StandardPageFooter
-        resultMeaning="These authoritative intelligence feeds provide raw threat indicators, technical severity scores, active exploitation flags, and historical breach loss distributions used to score enterprise risks."
-        nextStepTitle="Continue to Vulnerabilities"
-        nextStepPath="/vulnerabilities"
-        nextStepDescription="Explore how ingested public CVEs correlate with installed software across enterprise assets."
-      />
     </div>
   );
 };

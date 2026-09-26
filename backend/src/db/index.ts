@@ -77,6 +77,9 @@ export async function initMemoryDb(): Promise<any> {
         const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
         const statements = cleanSqlStatements(sql);
         for (const statement of statements) {
+          if (statement.includes('~')) {
+            continue;
+          }
           try {
             memoryDb.public.none(statement);
           } catch (e: any) {
@@ -108,6 +111,8 @@ export async function initMemoryDb(): Promise<any> {
             const values = keys.map((k) => {
               const val = (row as any)[k];
               if (val && typeof val === 'object') return JSON.stringify(val);
+              if (typeof val === 'string' && val.length > 500000) return val.substring(0, 5000) + '...[truncated]';
+              if (typeof val === 'string') return val.replace(/\\/g, '/');
               return val;
             });
             const sql = `INSERT INTO "${table}" (${cols}) VALUES (${placeholders}) ON CONFLICT DO NOTHING;`;
@@ -161,19 +166,38 @@ export async function initMemoryDb(): Promise<any> {
     const memPool = new pgAdapter.Pool();
 
     const sanitizeParam = (p: any) => {
-      if (typeof p === 'string' && p.length > 500000) {
-        try {
-          const parsed = JSON.parse(p);
-          return JSON.stringify({
-            type: parsed.type,
-            id: parsed.id,
-            spec_version: parsed.spec_version,
-            objects_count: Array.isArray(parsed.objects) ? parsed.objects.length : undefined,
-            _in_memory_note: 'Full payload preserved in production PostgreSQL; trimmed in pg-mem to avoid V8 call stack overflow.',
-          });
-        } catch {
-          return p.substring(0, 10000) + '...[truncated for pg-mem]';
+      if (typeof p === 'string') {
+        let isJson = false;
+        let parsedJson: any = null;
+        
+        if (p.length > 0 && (p.startsWith('{') || p.startsWith('['))) {
+          try {
+            parsedJson = JSON.parse(p);
+            isJson = true;
+          } catch {}
         }
+
+        if (isJson) {
+          if (p.length > 500000) {
+            return JSON.stringify({
+              type: parsedJson?.type,
+              id: parsedJson?.id,
+              spec_version: parsedJson?.spec_version,
+              objects_count: Array.isArray(parsedJson?.objects) ? parsedJson.objects.length : undefined,
+              _in_memory_note: 'Full payload preserved in production PostgreSQL; trimmed in pg-mem to avoid V8 call stack overflow.',
+            });
+          }
+          return p; // Preserve exact valid JSON to avoid breaking JSONB columns
+        }
+
+        if (p.length > 500000) {
+          return p.substring(0, 10000).replace(/\\/g, '/') + '...[truncated for pg-mem]';
+        }
+        
+        // Fix for pg-mem parsing bug: pg-mem internally uses JSON.parse to unescape SQL string literals
+        // during parameter binding. Any stray backslashes (especially before spaces like '\ ') crash it.
+        // We safely replace all backslashes with forward slashes for plain text strings in the test DB.
+        return p.replace(/\\/g, '/');
       }
       return p;
     };
@@ -262,12 +286,18 @@ export async function query<T extends QueryResultRow = any>(
       }
       logger.warn('PostgreSQL server not accessible on localhost:5432. Falling back to in-memory PostgreSQL engine.');
       const mem = await initMemoryDb();
-      // If the query was a migration script, it has already been applied by initMemoryDb()
       if (text.includes('CREATE TABLE IF NOT EXISTS')) {
         return { rows: [] as T[], rowCount: 0 } as any;
       }
       return await mem.query(text, params);
     }
+    
+    logger.error('SQL Query Failed!', {
+      queryText: text,
+      params: params ? params.map(p => typeof p === 'string' && p.length > 1000 ? p.substring(0, 100) + '...' : p) : undefined,
+      errorMessage: err.message
+    });
+    
     throw err;
   }
 }
