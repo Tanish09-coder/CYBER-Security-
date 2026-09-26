@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
+<<<<<<< HEAD
   Radio, Bug, Server, ShieldAlert, Flame, Lock,
   Building2, DollarSign, TrendingUp, CheckCircle2,
   AlertCircle, Sparkles, LayoutDashboard, FileBarChart2,
   GitBranch, Shield, Activity
+=======
+  Radio,
+  Bug,
+  Server,
+  ShieldAlert,
+  Flame,
+  Lock,
+  Building2,
+  DollarSign,
+  TrendingUp,
+  CheckCircle2,
+  AlertCircle
+>>>>>>> harsh/main
 } from 'lucide-react';
+
 import { fetchApi } from '../../api/client';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
@@ -21,6 +36,7 @@ const navSections = [
     items: [
       { to: '/vulnerabilities', label: 'Vulnerabilities', icon: <Bug size={15} /> },
       { to: '/threat-intel', label: 'Threat Intelligence', icon: <Flame size={15} /> },
+      { to: '/breach-containment', label: 'Breach Containment AI', icon: <ShieldAlert size={15} /> },
     ],
   },
   {

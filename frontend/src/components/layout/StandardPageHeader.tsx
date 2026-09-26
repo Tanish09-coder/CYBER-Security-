@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 
+
 export interface StandardPageHeaderProps {
   title: string;
   purpose: string;
