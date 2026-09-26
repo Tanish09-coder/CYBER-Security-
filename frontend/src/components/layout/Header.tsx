@@ -18,6 +18,7 @@ const PAGE_META: Record<string, { title: string; hindi: string }> = {
   'compliance':           { title: 'Compliance Framework Posture', hindi: 'अनुपालन स्थिति' },
   'attack-path':          { title: 'Attack Path Analysis', hindi: 'आक्रमण पथ विश्लेषण' },
   'ai-assistant':         { title: 'AI Explanation Assistant', hindi: 'AI सहायक' },
+  'breach-containment':   { title: 'Active Server Breach Containment AI Agent', hindi: 'सक्रिय सर्वर उल्लंघन नियंत्रण AI' },
 };
 
 export const Header: React.FC = () => {

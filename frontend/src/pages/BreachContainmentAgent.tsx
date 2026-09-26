@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ShieldAlert,
-
   Flame,
   Zap,
   CheckCircle2,
@@ -13,13 +12,15 @@ import {
   DollarSign,
   Server,
   Activity,
-  Lock,
   ArrowRight,
   ShieldCheck,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  Shield
 } from 'lucide-react';
 
 import { fetchApi } from '../api/client';
+import { StandardPageHeader } from '../components/layout/StandardPageHeader';
 
 interface ContainmentAction {
   actionId: string;
@@ -59,7 +60,7 @@ const PRESET_SERVERS = [
 ];
 
 export const BreachContainmentAgent: React.FC = () => {
-  const [selectedServerId, setSelectedServerId] = useState<string>(PRESET_SERVERS[0].id);
+  const [selectedServerId, setSelectedServerId] = useState<string>(PRESET_SERVERS[1].id);
   const [customServerName, setCustomServerName] = useState<string>('');
   const [customIp, setCustomIp] = useState<string>('192.168.1.100');
   const [osEnv, setOsEnv] = useState<string>('Linux (Ubuntu 22.04 LTS)');
@@ -75,6 +76,7 @@ export const BreachContainmentAgent: React.FC = () => {
 
   const [activeScriptTab, setActiveScriptTab] = useState<'bash' | 'powershell'>('bash');
   const [copiedScript, setCopiedScript] = useState<boolean>(false);
+  const [copiedActionId, setCopiedActionId] = useState<string | null>(null);
   const [executedSteps, setExecutedSteps] = useState<Record<string, boolean>>({});
 
   const handleRunContainment = async () => {
@@ -121,10 +123,15 @@ export const BreachContainmentAgent: React.FC = () => {
     setExecutedSteps(prev => ({ ...prev, [actionId]: !prev[actionId] }));
   };
 
-  const handleCopyScript = (scriptText: string) => {
+  const handleCopyScript = (scriptText: string, actionId?: string) => {
     navigator.clipboard.writeText(scriptText);
-    setCopiedScript(true);
-    setTimeout(() => setCopiedScript(false), 2500);
+    if (actionId) {
+      setCopiedActionId(actionId);
+      setTimeout(() => setCopiedActionId(null), 2000);
+    } else {
+      setCopiedScript(true);
+      setTimeout(() => setCopiedScript(false), 2500);
+    }
   };
 
   const formatInrCr = (val: number) => {
@@ -132,277 +139,298 @@ export const BreachContainmentAgent: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-red-950/40 via-app-surface to-brand-primary/10 p-6 rounded-lg border border-red-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/40 flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 animate-pulse" /> Active Breach Response Engine
-            </span>
-            <span className="text-xs text-text-muted font-mono">v1.0.0-breach-containment</span>
-          </div>
-          <h1 className="text-2xl font-bold text-text-primary mt-1 flex items-center gap-2">
-            <ShieldAlert className="w-6 h-6 text-red-400" /> Active Server Breach Containment AI Agent
-          </h1>
-          <p className="text-sm text-text-secondary mt-1 max-w-3xl">
-            Detects ongoing server hacking attacks (Reverse Shells, RCEs, Ransomware, Credential Dumping) and generates real-time, executable zero-trust isolation playbooks with INR (₹) financial loss mitigation.
-          </p>
-        </div>
+    <div className="space-y-6 pb-12 animate-fade-in">
+      {/* Standard Header */}
+      <StandardPageHeader
+        title="Active Server Breach Containment AI Agent"
+        purpose="Automated incident response playbooks for server breach vectors (Reverse Shells, RCEs, Ransomware, Credential Dumping) with quantified INR (₹) loss mitigation."
+        dataOriginBadge="REAL INTELLIGENCE"
+        steps={[
+          "Select target server & detected attack telemetry",
+          "Trigger deterministic zero-trust containment AI agent",
+          "Review quantified financial loss prevented & regulatory timelines",
+          "Execute sequential step-by-step isolation commands or export automated script"
+        ]}
+      />
 
-        <button
-          onClick={handleRunContainment}
-          disabled={loading}
-          className={`px-5 py-3 rounded-md font-semibold text-sm shadow-md transition-all flex items-center space-x-2 ${
-            loading
-              ? 'bg-red-800 text-red-200 cursor-not-allowed'
-              : 'bg-red-600 hover:bg-red-500 text-white shadow-red-900/30 hover:shadow-red-600/40'
-          }`}
-        >
-          {loading ? (
-            <>
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>Analyzing Server Threat Telemetry...</span>
-            </>
-          ) : (
-            <>
-              <Zap className="w-4 h-4 fill-white" />
-              <span>TRIGGER AI CONTAINMENT AGENT</span>
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* Target & Incident Configuration Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Inputs */}
-        <div className="lg:col-span-2 bg-app-surface p-6 rounded-lg border border-app-border space-y-4">
-          <h2 className="text-base font-semibold text-text-primary flex items-center space-x-2 border-b border-app-border pb-3">
-            <Server className="w-4 h-4 text-brand-primary" />
-            <span>Target Server & Incident Configuration</span>
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Target Server Select */}
-            <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">
-                Select Target Server
-              </label>
-              <select
-                value={selectedServerId}
-                onChange={(e) => setSelectedServerId(e.target.value)}
-                className="w-full bg-app-surfaceSecondary border border-app-border text-text-primary text-xs rounded-md p-2.5 focus:outline-none focus:border-brand-primary"
-              >
-                {PRESET_SERVERS.map((srv) => (
-                  <option key={srv.id} value={srv.id}>
-                    {srv.name} ({srv.ip})
-                  </option>
-                ))}
-                <option value="custom">+ Manual / Custom Server Entry</option>
-              </select>
+      {/* Main Trigger & Config Card */}
+      <div className="bg-white rounded-lg border border-[#C8D6E8] shadow-sm overflow-hidden">
+        {/* Banner Header */}
+        <div className="bg-gradient-to-r from-[#06038D] to-[#1A3A8F] p-5 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-[#FF671F] text-white flex items-center gap-1">
+                <Flame size={12} className="animate-pulse" /> Active Breach Response Engine
+              </span>
+              <span className="text-[11px] font-mono text-blue-200">v1.0.0-breach-containment</span>
             </div>
-
-            {/* Attack Incident Type */}
-            <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">
-                Detected Attack Vector
-              </label>
-              <select
-                value={incidentType}
-                onChange={(e) => setIncidentType(e.target.value)}
-                className="w-full bg-app-surfaceSecondary border border-app-border text-text-primary text-xs rounded-md p-2.5 focus:outline-none focus:border-brand-primary font-mono"
-              >
-                <option value="REVERSE_SHELL_ACTIVE">REVERSE_SHELL_ACTIVE (Netcat / Bash C2)</option>
-                <option value="RCE_EXPLOIT">RCE_EXPLOIT (Remote Code Execution)</option>
-                <option value="CREDENTIAL_DUMPING">CREDENTIAL_DUMPING (Mimikatz / LSASS Dump)</option>
-                <option value="RANSOMWARE_ENCRYPTION">RANSOMWARE_ENCRYPTION (Active File Encryption)</option>
-                <option value="LATERAL_MOVEMENT">LATERAL_MOVEMENT (SSH Key / SMB Pivot)</option>
-                <option value="DATA_EXFILTRATION">DATA_EXFILTRATION (High Outbound Bandwidth)</option>
-              </select>
-            </div>
-          </div>
-
-          {selectedServerId === 'custom' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-              <div>
-                <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Server Name</label>
-                <input
-                  type="text"
-                  value={customServerName}
-                  onChange={(e) => setCustomServerName(e.target.value)}
-                  placeholder="e.g. Hyderabad Payment Gateway"
-                  className="w-full bg-app-surfaceSecondary border border-app-border text-text-primary text-xs rounded-md p-2.5"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">IP Address</label>
-                <input
-                  type="text"
-                  value={customIp}
-                  onChange={(e) => setCustomIp(e.target.value)}
-                  className="w-full bg-app-surfaceSecondary border border-app-border text-text-primary text-xs rounded-md p-2.5 font-mono"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">OS Environment</label>
-                <input
-                  type="text"
-                  value={osEnv}
-                  onChange={(e) => setOsEnv(e.target.value)}
-                  className="w-full bg-app-surfaceSecondary border border-app-border text-text-primary text-xs rounded-md p-2.5"
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Threat Severity</label>
-              <select
-                value={threatSeverity}
-                onChange={(e) => setThreatSeverity(e.target.value)}
-                className="w-full bg-app-surfaceSecondary border border-app-border text-text-primary text-xs rounded-md p-2.5 focus:outline-none focus:border-brand-primary font-bold"
-              >
-                <option value="CRITICAL" className="text-red-400">CRITICAL (Active Breach)</option>
-                <option value="HIGH" className="text-orange-400">HIGH (Exploit Attempt)</option>
-                <option value="MEDIUM" className="text-yellow-400">MEDIUM (Suspicious Behavior)</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">
-                Detected Telemetry & Anomaly Indicators
-              </label>
-              <textarea
-                rows={3}
-                value={anomalyText}
-                onChange={(e) => setAnomalyText(e.target.value)}
-                className="w-full bg-app-surfaceSecondary border border-app-border text-text-primary text-xs rounded-md p-2.5 font-mono"
-                placeholder="Enter telemetry indicators (one per line)..."
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Right 1 Col: Quick Status & Enterprise Info */}
-        <div className="bg-app-surface p-6 rounded-lg border border-app-border flex flex-col justify-between space-y-4">
-          <div>
-            <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-brand-primary" /> Target Environment
-            </h3>
-            <div className="bg-app-surfaceSecondary p-3 rounded-md border border-app-border space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Enterprise Org:</span>
-                <span className="font-semibold text-text-primary">Bharat Digital Financial Services</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Sector / Mandate:</span>
-                <span className="font-semibold text-emerald-400">Scheduled Commercial Bank (RBI)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Regulatory Window:</span>
-                <span className="font-semibold text-red-400">6 Hours (RBI CSITE / CERT-In)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Currency Context:</span>
-                <span className="font-semibold text-text-primary">INR (₹ Crore)</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-3 bg-red-950/30 rounded-md border border-red-500/20 text-xs space-y-1">
-            <span className="font-bold text-red-400 flex items-center gap-1">
-              <ShieldAlert className="w-3.5 h-3.5" /> Automated Zero-Trust Containment
-            </span>
-            <p className="text-text-secondary text-[11px]">
-              The AI agent computes server network isolation, malicious process kill trees, token revocation, memory capture, and DR hot-standby failover commands.
+            <h2 className="text-lg font-bold flex items-center gap-2 text-white">
+              <ShieldAlert size={20} className="text-[#FF671F]" /> Rapid Zero-Trust Isolation Engine
+            </h2>
+            <p className="text-xs text-blue-100 max-w-2xl">
+              Generates targeted, non-destructive isolation scripts, terminates malicious process trees, and preserves forensic artifacts.
             </p>
+          </div>
+
+          <button
+            onClick={handleRunContainment}
+            disabled={loading}
+            className={`px-6 py-3 rounded font-bold text-xs shadow-md transition-all flex items-center gap-2 shrink-0 ${
+              loading
+                ? 'bg-amber-600 text-white cursor-not-allowed opacity-90'
+                : 'bg-[#FF671F] hover:bg-[#D4521A] text-white shadow-lg active:scale-95'
+            }`}
+          >
+            {loading ? (
+              <>
+                <RefreshCw size={15} className="animate-spin" />
+                <span>Computing Containment Vector...</span>
+              </>
+            ) : (
+              <>
+                <Zap size={15} className="fill-white" />
+                <span>TRIGGER AI CONTAINMENT AGENT</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Configuration Body */}
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-[#F8FAFD]">
+          {/* Left 2 Cols: Form */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-[#DDE6F0]">
+              <Server size={15} className="text-[#06038D]" />
+              <span className="text-xs font-bold uppercase tracking-wider text-[#0A0A1E]">Target Server & Threat Telemetry</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-bold text-[#5C6E84] uppercase tracking-wide mb-1.5">
+                  Target Asset Server
+                </label>
+                <select
+                  value={selectedServerId}
+                  onChange={(e) => setSelectedServerId(e.target.value)}
+                  className="w-full bg-white border border-[#C8D6E8] text-[#0A0A1E] text-xs rounded p-2.5 font-medium focus:outline-none focus:border-[#06038D] focus:ring-1 focus:ring-[#06038D]"
+                >
+                  {PRESET_SERVERS.map((srv) => (
+                    <option key={srv.id} value={srv.id}>
+                      {srv.name} ({srv.ip})
+                    </option>
+                  ))}
+                  <option value="custom">+ Manual / Custom Server Entry</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#5C6E84] uppercase tracking-wide mb-1.5">
+                  Detected Attack Vector
+                </label>
+                <select
+                  value={incidentType}
+                  onChange={(e) => setIncidentType(e.target.value)}
+                  className="w-full bg-white border border-[#C8D6E8] text-[#0A0A1E] text-xs rounded p-2.5 font-mono font-semibold focus:outline-none focus:border-[#06038D] focus:ring-1 focus:ring-[#06038D]"
+                >
+                  <option value="REVERSE_SHELL_ACTIVE">REVERSE_SHELL_ACTIVE (Netcat / Bash C2)</option>
+                  <option value="RCE_EXPLOIT">RCE_EXPLOIT (Remote Code Execution)</option>
+                  <option value="CREDENTIAL_DUMPING">CREDENTIAL_DUMPING (Mimikatz / LSASS Dump)</option>
+                  <option value="RANSOMWARE_ENCRYPTION">RANSOMWARE_ENCRYPTION (Active File Encryption)</option>
+                  <option value="LATERAL_MOVEMENT">LATERAL_MOVEMENT (SSH Key / SMB Pivot)</option>
+                  <option value="DATA_EXFILTRATION">DATA_EXFILTRATION (High Outbound Bandwidth)</option>
+                </select>
+              </div>
+            </div>
+
+            {selectedServerId === 'custom' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-white rounded border border-[#C8D6E8]">
+                <div>
+                  <label className="block text-[10px] font-bold text-[#5C6E84] uppercase mb-1">Server Name</label>
+                  <input
+                    type="text"
+                    value={customServerName}
+                    onChange={(e) => setCustomServerName(e.target.value)}
+                    placeholder="e.g. UPI Switch Delta"
+                    className="w-full bg-white border border-[#C8D6E8] text-xs rounded p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-[#5C6E84] uppercase mb-1">IP Address</label>
+                  <input
+                    type="text"
+                    value={customIp}
+                    onChange={(e) => setCustomIp(e.target.value)}
+                    className="w-full bg-white border border-[#C8D6E8] text-xs rounded p-2 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-[#5C6E84] uppercase mb-1">OS Environment</label>
+                  <input
+                    type="text"
+                    value={osEnv}
+                    onChange={(e) => setOsEnv(e.target.value)}
+                    className="w-full bg-white border border-[#C8D6E8] text-xs rounded p-2"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[11px] font-bold text-[#5C6E84] uppercase tracking-wide mb-1.5">
+                  Threat Severity
+                </label>
+                <select
+                  value={threatSeverity}
+                  onChange={(e) => setThreatSeverity(e.target.value)}
+                  className="w-full bg-white border border-[#C8D6E8] text-[#C0392B] font-bold text-xs rounded p-2.5 focus:outline-none focus:border-[#06038D]"
+                >
+                  <option value="CRITICAL">🔴 CRITICAL (Active Breach)</option>
+                  <option value="HIGH">🟠 HIGH (Exploit Attempt)</option>
+                  <option value="MEDIUM">🟡 MEDIUM (Suspicious Behavior)</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-[11px] font-bold text-[#5C6E84] uppercase tracking-wide mb-1.5">
+                  Detected Telemetry & Anomaly Indicators
+                </label>
+                <textarea
+                  rows={2}
+                  value={anomalyText}
+                  onChange={(e) => setAnomalyText(e.target.value)}
+                  className="w-full bg-white border border-[#C8D6E8] text-[#0A0A1E] text-xs rounded p-2 font-mono leading-relaxed focus:outline-none focus:border-[#06038D]"
+                  placeholder="Enter telemetry indicators..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right 1 Col: Environment Details */}
+          <div className="bg-white p-4 rounded border border-[#C8D6E8] flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center gap-1.5 pb-2 border-b border-[#DDE6F0] mb-3">
+                <Building2 size={14} className="text-[#06038D]" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0A0A1E]">Target Environment Posture</span>
+              </div>
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#5C6E84]">Enterprise Org:</span>
+                  <span className="font-bold text-[#0A0A1E]">Bharat Digital Financial</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#5C6E84]">Regulated Mandate:</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E6F4EC] text-[#046A38] border border-[#046A38]/30">
+                    Scheduled Bank (RBI)
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#5C6E84]">Reporting Window:</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FEE2E2] text-[#C0392B] border border-[#C0392B]/30 flex items-center gap-1">
+                    <Clock size={10} /> 6 Hours (CERT-In)
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#5C6E84]">Currency Context:</span>
+                  <span className="font-bold text-[#0A0A1E]">INR (₹ Crore)</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 bg-[#EBF0FA] rounded border border-[#C8D6E8] text-[11px] space-y-1">
+              <span className="font-bold text-[#06038D] flex items-center gap-1">
+                <ShieldCheck size={13} /> Zero-Trust Containment Guardrail
+              </span>
+              <p className="text-[#2C3A50] text-[10.5px] leading-relaxed">
+                Commands isolate network ingress/egress while strictly maintaining administrative SSH/RDP session continuity for incident responders.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-900/30 border border-red-500/50 rounded-lg text-red-200 text-xs flex items-center space-x-2">
-          <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
-          <span>{error}</span>
+        <div className="p-4 bg-[#FEE2E2] border-l-4 border-[#C0392B] rounded text-[#C0392B] text-xs flex items-center gap-2">
+          <AlertTriangle size={16} className="shrink-0" />
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
-      {/* Results View */}
+      {/* Results Section */}
       {result && (
         <div className="space-y-6">
           {/* Key Metrics Header Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Metric 1: Financial Saved */}
-            <div className="bg-emerald-950/30 border border-emerald-500/30 p-4 rounded-lg">
-              <div className="flex justify-between items-center text-xs text-emerald-400 font-semibold mb-1">
-                <span>ESTIMATED LOSS SAVED</span>
-                <DollarSign className="w-4 h-4" />
+            <div className="bg-white border-2 border-[#046A38] p-4 rounded-lg shadow-sm">
+              <div className="flex justify-between items-center text-[11px] text-[#046A38] font-bold tracking-wider uppercase mb-1">
+                <span>Estimated Loss Saved</span>
+                <DollarSign size={16} />
               </div>
-              <div className="text-2xl font-bold text-emerald-300">
+              <div className="text-2xl font-black text-[#046A38]">
                 ₹{formatInrCr(result.estimatedFinancialSavedInr)} Cr
               </div>
-              <p className="text-[11px] text-text-secondary mt-1">Mitigated by immediate containment</p>
+              <p className="text-[11px] text-[#5C6E84] mt-1 font-medium">Mitigated by immediate containment</p>
             </div>
 
             {/* Metric 2: Unchecked Loss */}
-            <div className="bg-red-950/30 border border-red-500/30 p-4 rounded-lg">
-              <div className="flex justify-between items-center text-xs text-red-400 font-semibold mb-1">
-                <span>UNCHECKED BREACH LOSS</span>
-                <AlertTriangle className="w-4 h-4" />
+            <div className="bg-white border-2 border-[#C0392B] p-4 rounded-lg shadow-sm">
+              <div className="flex justify-between items-center text-[11px] text-[#C0392B] font-bold tracking-wider uppercase mb-1">
+                <span>Unchecked Breach Loss</span>
+                <AlertTriangle size={16} />
               </div>
-              <div className="text-2xl font-bold text-red-300">
+              <div className="text-2xl font-black text-[#C0392B]">
                 ₹{formatInrCr(result.uncheckedLossInr)} Cr
               </div>
-              <p className="text-[11px] text-text-secondary mt-1">Full exfiltration / ransomware cost</p>
+              <p className="text-[11px] text-[#5C6E84] mt-1 font-medium">Full exfiltration / ransomware cost</p>
             </div>
 
             {/* Metric 3: Contained Loss */}
-            <div className="bg-app-surface border border-app-border p-4 rounded-lg">
-              <div className="flex justify-between items-center text-xs text-text-muted font-semibold mb-1">
-                <span>CONTAINED INCIDENT COST</span>
-                <Activity className="w-4 h-4 text-brand-primary" />
+            <div className="bg-white border border-[#C8D6E8] p-4 rounded-lg shadow-sm">
+              <div className="flex justify-between items-center text-[11px] text-[#5C6E84] font-bold tracking-wider uppercase mb-1">
+                <span>Contained Incident Cost</span>
+                <Activity size={16} className="text-[#06038D]" />
               </div>
-              <div className="text-2xl font-bold text-text-primary">
+              <div className="text-2xl font-black text-[#0A0A1E]">
                 ₹{(result.containedLossInr / 100000).toFixed(1)} Lakhs
               </div>
-              <p className="text-[11px] text-text-secondary mt-1">Forensics & minimal downtime</p>
+              <p className="text-[11px] text-[#5C6E84] mt-1 font-medium">Forensics & minimal downtime</p>
             </div>
 
             {/* Metric 4: Playbook Status */}
-            <div className="bg-app-surface border border-app-border p-4 rounded-lg">
-              <div className="flex justify-between items-center text-xs text-text-muted font-semibold mb-1">
-                <span>CONTAINMENT PLAYBOOK</span>
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <div className="bg-white border border-[#C8D6E8] p-4 rounded-lg shadow-sm">
+              <div className="flex justify-between items-center text-[11px] text-[#5C6E84] font-bold tracking-wider uppercase mb-1">
+                <span>Containment Playbook</span>
+                <ShieldCheck size={16} className="text-[#046A38]" />
               </div>
-              <div className="text-lg font-bold text-emerald-400 flex items-center gap-1.5 mt-1">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <div className="text-base font-black text-[#046A38] flex items-center gap-1.5 mt-1.5">
+                <CheckCircle2 size={18} className="text-[#046A38]" />
                 <span>{result.containmentStatus}</span>
               </div>
-              <p className="text-[11px] text-text-secondary mt-1">5 Actionable steps ready</p>
+              <p className="text-[11px] text-[#5C6E84] mt-1 font-medium">5 Actionable steps generated</p>
             </div>
           </div>
 
-          {/* AI Mitigation Summary Banner */}
-          <div className="bg-app-surface p-4 rounded-lg border border-app-border flex items-start space-x-3">
-            <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+          {/* AI Strategy Summary Card */}
+          <div className="bg-white p-4 rounded-lg border-l-4 border-[#06038D] border-t border-r border-b border-[#C8D6E8] shadow-sm flex items-start gap-3">
+            <ShieldAlert size={20} className="text-[#06038D] shrink-0 mt-0.5" />
             <div className="text-xs space-y-1">
-              <span className="font-bold text-text-primary">AI Containment Agent Strategy Summary:</span>
-              <p className="text-text-secondary leading-relaxed">{result.mitigationSummary}</p>
+              <div className="font-bold text-[#0A0A1E]">AI Containment Agent Strategy Summary</div>
+              <p className="text-[#2C3A50] leading-relaxed">{result.mitigationSummary}</p>
             </div>
           </div>
 
-          {/* Main Containment Steps & Scripts Grid */}
+          {/* Main Containment Steps & Automation Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left 7 Cols: Step-by-Step Playbook */}
-            <div className="lg:col-span-7 bg-app-surface p-6 rounded-lg border border-app-border space-y-4">
-              <div className="flex justify-between items-center border-b border-app-border pb-3">
-                <h3 className="text-sm font-semibold text-text-primary flex items-center space-x-2">
-                  <Terminal className="w-4 h-4 text-brand-primary" />
+            <div className="lg:col-span-7 bg-white p-5 rounded-lg border border-[#C8D6E8] shadow-sm space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-[#DDE6F0]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0A0A1E] flex items-center gap-2">
+                  <Terminal size={16} className="text-[#06038D]" />
                   <span>5-Stage Zero-Trust Isolation Playbook</span>
                 </h3>
-                <span className="text-xs text-text-muted font-mono">
-                  {Object.keys(executedSteps).length} / {result.actions.length} Steps Executed
+                <span className="text-[11px] font-bold text-[#06038D] bg-[#EBF0FA] px-2.5 py-1 rounded">
+                  {Object.keys(executedSteps).length} of {result.actions.length} Executed
                 </span>
               </div>
 
@@ -412,70 +440,70 @@ export const BreachContainmentAgent: React.FC = () => {
                   return (
                     <div
                       key={act.actionId}
-                      className={`p-4 rounded-lg border transition-all ${
+                      className={`p-4 rounded border transition-all ${
                         isDone
-                          ? 'bg-emerald-950/20 border-emerald-500/40'
-                          : 'bg-app-surfaceSecondary border-app-border hover:border-app-borderHover'
+                          ? 'bg-[#E6F4EC] border-[#046A38]'
+                          : 'bg-white border-[#C8D6E8] hover:border-[#06038D]'
                       }`}
                     >
                       <div className="flex justify-between items-start">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2.5">
                           <span
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                              isDone ? 'bg-emerald-500 text-white' : 'bg-brand-primary/20 text-brand-primary'
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
+                              isDone ? 'bg-[#046A38] text-white' : 'bg-[#06038D] text-white'
                             }`}
                           >
                             {act.stepNumber}
                           </span>
-                          <h4 className="text-xs font-bold text-text-primary">{act.title}</h4>
+                          <h4 className="text-xs font-bold text-[#0A0A1E]">{act.title}</h4>
                         </div>
                         <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded uppercase tracking-wide ${
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${
                             act.executionType === 'AUTOMATED_CLI'
-                              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                              : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              ? 'bg-[#EBF0FA] text-[#06038D] border border-[#06038D]/30'
+                              : 'bg-[#FEF3C7] text-[#D97706] border border-[#D97706]/30'
                           }`}
                         >
                           {act.executionType}
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">
-                        <strong className="text-text-primary">Impact:</strong> {act.impactAssessment}
+                      <p className="text-xs text-[#2C3A50] mt-2 leading-relaxed">
+                        <strong className="text-[#0A0A1E]">Impact:</strong> {act.impactAssessment}
                       </p>
 
-                      {/* Command snippet */}
-                      <div className="mt-2.5 bg-black/60 p-2.5 rounded border border-gray-800 font-mono text-[11px] text-emerald-400 overflow-x-auto flex justify-between items-center group">
-                        <code>{act.command}</code>
+                      {/* Command box */}
+                      <div className="mt-3 bg-[#0A0A1E] p-3 rounded border border-gray-700 font-mono text-xs text-[#34D399] overflow-x-auto flex justify-between items-center group">
+                        <code className="select-all">{act.command}</code>
                         <button
-                          onClick={() => handleCopyScript(act.command)}
-                          className="opacity-60 group-hover:opacity-100 hover:text-white text-gray-400 ml-2"
+                          onClick={() => handleCopyScript(act.command, act.actionId)}
+                          className="text-gray-400 hover:text-white ml-2 p-1 rounded hover:bg-gray-800 transition-colors shrink-0"
                           title="Copy command"
                         >
-                          <Copy className="w-3.5 h-3.5" />
+                          {copiedActionId === act.actionId ? <Check size={14} className="text-[#34D399]" /> : <Copy size={14} />}
                         </button>
                       </div>
 
-                      <div className="mt-2.5 flex justify-between items-center pt-2 border-t border-app-border/40 text-[10px]">
-                        <span className="text-text-muted">
+                      <div className="mt-3 flex justify-between items-center pt-2.5 border-t border-[#DDE6F0] text-[11px]">
+                        <span className="text-[#5C6E84]">
                           <strong>Verification:</strong> {act.verificationCheck}
                         </span>
                         <button
                           onClick={() => toggleExecuteStep(act.actionId)}
-                          className={`px-2.5 py-1 rounded font-semibold transition-all flex items-center space-x-1 ${
+                          className={`px-3 py-1 rounded text-xs font-bold transition-all flex items-center gap-1.5 ${
                             isDone
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-app-surface text-text-primary hover:bg-brand-primary hover:text-white border border-app-border'
+                              ? 'bg-[#046A38] text-white'
+                              : 'bg-[#06038D] hover:bg-[#1A3A8F] text-white'
                           }`}
                         >
                           {isDone ? (
                             <>
-                              <Check className="w-3 h-3" />
-                              <span>Step Executed</span>
+                              <Check size={12} />
+                              <span>Executed</span>
                             </>
                           ) : (
                             <>
-                              <ArrowRight className="w-3 h-3" />
+                              <ArrowRight size={12} />
                               <span>Execute Step</span>
                             </>
                           )}
@@ -489,30 +517,37 @@ export const BreachContainmentAgent: React.FC = () => {
 
             {/* Right 5 Cols: Regulatory Compliance & Consolidated Scripts */}
             <div className="lg:col-span-5 space-y-6">
-              {/* Automated Scripts Block */}
-              <div className="bg-app-surface p-6 rounded-lg border border-app-border space-y-4">
-                <div className="flex justify-between items-center border-b border-app-border pb-3">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setActiveScriptTab('bash')}
-                      className={`px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
-                        activeScriptTab === 'bash'
-                          ? 'bg-brand-primary text-white'
-                          : 'text-text-secondary hover:bg-app-surfaceSecondary'
-                      }`}
-                    >
-                      Linux Bash (.sh)
-                    </button>
-                    <button
-                      onClick={() => setActiveScriptTab('powershell')}
-                      className={`px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
-                        activeScriptTab === 'powershell'
-                          ? 'bg-brand-primary text-white'
-                          : 'text-text-secondary hover:bg-app-surfaceSecondary'
-                      }`}
-                    >
-                      PowerShell (.ps1)
-                    </button>
+              {/* Consolidated Automation Terminal */}
+              <div className="bg-white rounded-lg border border-[#C8D6E8] shadow-sm overflow-hidden">
+                <div className="bg-[#0A0A1E] px-4 py-3 flex justify-between items-center border-b border-gray-800">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+                    </div>
+                    <div className="flex gap-1 ml-3">
+                      <button
+                        onClick={() => setActiveScriptTab('bash')}
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-colors ${
+                          activeScriptTab === 'bash'
+                            ? 'bg-[#FF671F] text-white'
+                            : 'bg-gray-800 text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        Linux Bash (.sh)
+                      </button>
+                      <button
+                        onClick={() => setActiveScriptTab('powershell')}
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-colors ${
+                          activeScriptTab === 'powershell'
+                            ? 'bg-[#06038D] text-white'
+                            : 'bg-gray-800 text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        PowerShell (.ps1)
+                      </button>
+                    </div>
                   </div>
 
                   <button
@@ -523,44 +558,51 @@ export const BreachContainmentAgent: React.FC = () => {
                           : result.automatedScriptPowershell
                       )
                     }
-                    className="px-2.5 py-1 rounded bg-app-surfaceSecondary border border-app-border hover:border-brand-primary text-text-primary text-xs font-semibold flex items-center space-x-1"
+                    className="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px] font-semibold flex items-center gap-1.5 transition-colors"
                   >
-                    {copiedScript ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 text-text-secondary" />
-                        <span>Copy Script</span>
-                      </>
-                    )}
+                    {copiedScript ? <Check size={12} className="text-[#34D399]" /> : <Copy size={12} />}
+                    <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
                   </button>
                 </div>
 
-                <pre className="bg-black/80 p-3.5 rounded border border-gray-800 text-[11px] font-mono text-emerald-400 max-h-[300px] overflow-y-auto scrollbar-thin">
-                  {activeScriptTab === 'bash' ? result.automatedScriptBash : result.automatedScriptPowershell}
-                </pre>
+                <div className="p-4 bg-[#0A0A1E] overflow-x-auto max-h-[340px]">
+                  <pre className="font-mono text-xs text-[#34D399] leading-relaxed whitespace-pre">
+                    {activeScriptTab === 'bash'
+                      ? result.automatedScriptBash
+                      : result.automatedScriptPowershell}
+                  </pre>
+                </div>
               </div>
 
               {/* Regulatory Directives Card */}
-              <div className="bg-app-surface p-6 rounded-lg border border-app-border space-y-4">
-                <h3 className="text-sm font-semibold text-text-primary flex items-center space-x-2 border-b border-app-border pb-3">
-                  <Lock className="w-4 h-4 text-brand-primary" />
-                  <span>Regulatory Incident Disclosure Directives</span>
-                </h3>
+              <div className="bg-white p-5 rounded-lg border border-[#C8D6E8] shadow-sm space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b border-[#DDE6F0]">
+                  <Shield size={16} className="text-[#FF671F]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#0A0A1E]">
+                    Mandatory Regulatory Incident Disclosures
+                  </span>
+                </div>
 
                 <div className="space-y-2.5">
-                  {result.complianceMandates.map((mandate, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 bg-app-surfaceSecondary rounded border border-app-border text-xs flex items-start space-x-2.5"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span className="text-text-primary leading-relaxed">{mandate}</span>
+                  <div className="p-3 bg-[#EBF0FA] rounded border border-[#C8D6E8] text-xs flex items-start gap-2.5">
+                    <CheckCircle2 size={16} className="text-[#06038D] shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[#06038D]">RBI Cyber Security Framework</span>
+                      <p className="text-[#2C3A50] text-[11px] mt-0.5">
+                        Mandatory 6-hour baseline notification window to RBI CSITE with root cause analysis within 24 hours.
+                      </p>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="p-3 bg-[#EBF0FA] rounded border border-[#C8D6E8] text-xs flex items-start gap-2.5">
+                    <CheckCircle2 size={16} className="text-[#06038D] shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[#06038D]">CERT-In Direction 20(3)/2022-CERT-In</span>
+                      <p className="text-[#2C3A50] text-[11px] mt-0.5">
+                        Statutory reporting within 6 hours of noticing cyber incidents under Annexure I categories.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -570,5 +612,3 @@ export const BreachContainmentAgent: React.FC = () => {
     </div>
   );
 };
-
-export default BreachContainmentAgent;
