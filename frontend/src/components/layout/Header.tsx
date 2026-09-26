@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { HelpCircle, RefreshCw, Building2, Shield, Wifi, WifiOff } from 'lucide-react';
+import { HelpCircle, RefreshCw, Building2, Shield } from 'lucide-react';
 import { fetchApi } from '../../api/client';
 import { useWorkspace } from '../../context/WorkspaceContext';
 

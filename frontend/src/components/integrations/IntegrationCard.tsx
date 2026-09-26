@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, CheckCircle2, Clock, RefreshCw, ExternalLink, Database, Wifi, WifiOff } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, RefreshCw, ExternalLink, Database, WifiOff } from 'lucide-react';
 
 export type IntegrationStatus = 'ENABLED' | 'STALE' | 'SYNCING' | 'ERROR' | 'DISABLED';
 

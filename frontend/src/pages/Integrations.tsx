@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { IntegrationCard, type IntegrationStatus } from '../components/integrations/IntegrationCard';
 import { integrationApi } from '../api/integrations';
 import type { NvdStatusResponse, CisaKevStatusResponse } from '../types/api';
-import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
+import { StandardPageHeader } from '../components/layout/StandardPageHeader';
 import { Bug, Flame, Target, Database, RefreshCw } from 'lucide-react';
 
 export const Integrations: React.FC = () => {

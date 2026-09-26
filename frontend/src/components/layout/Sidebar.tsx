@@ -1,24 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-<<<<<<< HEAD
-  Radio, Bug, Server, ShieldAlert, Flame, Lock,
-  Building2, DollarSign, TrendingUp, CheckCircle2,
-  AlertCircle, Sparkles, LayoutDashboard, FileBarChart2,
+  Radio, Bug, Server, ShieldAlert, Flame,
+  Building2, DollarSign, TrendingUp,
+  Sparkles, LayoutDashboard, FileBarChart2,
   GitBranch, Shield, Activity
-=======
-  Radio,
-  Bug,
-  Server,
-  ShieldAlert,
-  Flame,
-  Lock,
-  Building2,
-  DollarSign,
-  TrendingUp,
-  CheckCircle2,
-  AlertCircle
->>>>>>> harsh/main
 } from 'lucide-react';
 
 import { fetchApi } from '../../api/client';
