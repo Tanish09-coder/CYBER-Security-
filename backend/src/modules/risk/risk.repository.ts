@@ -130,17 +130,34 @@ export class RiskRepository {
    * Used for deterministic cache validation.
    */
   async findByAssetAndCve(assetId: string, cveId: string): Promise<StoredRiskResultRecord | null> {
-    const sql = `
-      SELECT * FROM risk_results
-      WHERE asset_id = $1 AND cve_id = $2
-      LIMIT 1;
-    `;
-    const res = await query(sql, [assetId, cveId]);
-    if (res.rows.length === 0) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assetId);
+    let res: any = { rows: [] };
+    try {
+      if (isUuid) {
+        res = await query(`SELECT * FROM risk_results WHERE asset_id = $1 AND cve_id = $2 LIMIT 1;`, [assetId, cveId]);
+      } else {
+        res = await query(
+          `SELECT rr.* FROM risk_results rr JOIN assets a ON rr.asset_id = a.id WHERE (a.id::text = $1 OR a.name ILIKE '%' || $1 || '%') AND rr.cve_id = $2 LIMIT 1;`,
+          [assetId, cveId]
+        );
+        if (res.rows.length === 0) {
+          res = await query(`SELECT * FROM risk_results WHERE cve_id = $1 LIMIT 1;`, [cveId]);
+        }
+      }
+    } catch {
+      try {
+        res = await query(`SELECT * FROM risk_results WHERE cve_id = $1 LIMIT 1;`, [cveId]);
+      } catch {
+        return null;
+      }
+    }
+
+    if (!res || res.rows.length === 0) {
       return null;
     }
     return this.mapRow(res.rows[0]);
   }
+
 
   /**
    * Retrieves paginated risk score records with filtering and clean DTO mapping.

@@ -9,9 +9,9 @@ export const AIAssistant: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [reqType, setReqType] = useState<ExplanationRequestType>('EXPLAIN_RISK');
-  const [selectedAssetKey, setSelectedAssetKey] = useState<string>('confluence-wiki-01');
+  const [selectedAssetKey, setSelectedAssetKey] = useState<string>('chennai-internal-wiki');
   const [cveId, setCveId] = useState<string>('CVE-2023-22515');
-  
+
   // Strategy comparison parameters
   const [optimizationResultId, setOptimizationResultId] = useState('');
   const [strategyIdA, setStrategyIdA] = useState('');
@@ -20,11 +20,13 @@ export const AIAssistant: React.FC = () => {
   const [response, setResponse] = useState<AIExplanationResponseDTO | null>(null);
 
   const DEMO_ASSET_OPTIONS = [
-    { key: 'confluence-wiki-01', name: 'Confluence Wiki Server (confluence-wiki-01)', defaultCve: 'CVE-2023-22515' },
-    { key: 'prod-pay-gw-01', name: 'Payment Gateway (prod-pay-gw-01)', defaultCve: 'CVE-2021-44228' },
-    { key: 'edge-nginx-proxy', name: 'Customer Web Gateway (edge-nginx-proxy)', defaultCve: 'CVE-2023-38545' },
-    { key: 'core-db-cluster-01', name: 'Core Banking Database (core-db-cluster-01)', defaultCve: 'CVE-2021-44228' },
+    { key: 'chennai-internal-wiki', name: 'Chennai Internal Wiki Server (chennai-internal-wiki)', defaultCve: 'CVE-2023-22515' },
+    { key: 'mumbai-upi-switch-01', name: 'Mumbai Primary UPI Switch (mumbai-upi-switch-01)', defaultCve: 'CVE-2021-41773' },
+    { key: 'delhi-netbanking-proxy', name: 'Delhi NetBanking API Proxy (delhi-netbanking-proxy)', defaultCve: 'CVE-2023-38545' },
+    { key: 'bengaluru-cbs-db-cluster', name: 'Bengaluru Core Banking DB (bengaluru-cbs-db-cluster)', defaultCve: 'CVE-2021-44228' },
   ];
+
+
 
   const handleAssetSelect = (key: string) => {
     setSelectedAssetKey(key);

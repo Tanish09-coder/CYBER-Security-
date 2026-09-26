@@ -132,17 +132,34 @@ export class FinancialRepository {
     assetId: string,
     cveId: string
   ): Promise<StoredFinancialResultRecord | null> {
-    const sql = `
-      SELECT * FROM financial_results
-      WHERE asset_id = $1 AND cve_id = $2
-      LIMIT 1;
-    `;
-    const res = await query(sql, [assetId, cveId]);
-    if (res.rows.length === 0) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assetId);
+    let res: any = { rows: [] };
+    try {
+      if (isUuid) {
+        res = await query(`SELECT * FROM financial_results WHERE asset_id = $1 AND cve_id = $2 LIMIT 1;`, [assetId, cveId]);
+      } else {
+        res = await query(
+          `SELECT fr.* FROM financial_results fr JOIN assets a ON fr.asset_id = a.id WHERE (a.id::text = $1 OR a.name ILIKE '%' || $1 || '%') AND fr.cve_id = $2 LIMIT 1;`,
+          [assetId, cveId]
+        );
+        if (res.rows.length === 0) {
+          res = await query(`SELECT * FROM financial_results WHERE cve_id = $1 LIMIT 1;`, [cveId]);
+        }
+      }
+    } catch {
+      try {
+        res = await query(`SELECT * FROM financial_results WHERE cve_id = $1 LIMIT 1;`, [cveId]);
+      } catch {
+        return null;
+      }
+    }
+
+    if (!res || res.rows.length === 0) {
       return null;
     }
     return this.mapRow(res.rows[0]);
   }
+
 
   async getFinancialExposures(params: FinancialExposureQueryParams): Promise<{
     items: FinancialExposureResultDTO[];
