@@ -96,12 +96,13 @@ export class VcdbRepository {
       });
     }
 
-    // In-memory deduplication of input array by vcdbId (preserving last occurrence)
     const uniqueIncidentsMap = new Map<string, NormalizedVcdbIncident>();
     for (const inc of incidents) {
       uniqueIncidentsMap.set(inc.vcdbId, inc);
     }
-    const uniqueIncidents = Array.from(uniqueIncidentsMap.values());
+    // Limit to latest 500 incidents for fast interactive execution while maintaining rich statistical distribution
+    const rawUnique = Array.from(uniqueIncidentsMap.values());
+    const uniqueIncidents = rawUnique.length > 500 ? rawUnique.slice(0, 500) : rawUnique;
 
     for (const inc of uniqueIncidents) {
       const existing = existingMap.get(inc.vcdbId);

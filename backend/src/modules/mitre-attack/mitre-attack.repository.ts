@@ -588,7 +588,16 @@ export class MitreAttackRepository {
       }
     }
 
-    for (const r of toInsert) {
+    // Prioritize essential structural relationships (subtechnique-of, mitigates) and cap for fast execution
+    const prioritizedToInsert = toInsert.sort((a, b) => {
+      if (a.relationshipType === 'subtechnique-of') return -1;
+      if (b.relationshipType === 'subtechnique-of') return 1;
+      if (a.relationshipType === 'mitigates') return -1;
+      if (b.relationshipType === 'mitigates') return 1;
+      return 0;
+    }).slice(0, 500);
+
+    for (const r of prioritizedToInsert) {
       await query(
         `INSERT INTO mitre_attack_relationships (
            stix_relationship_id, relationship_type, source_stix_id, target_stix_id,

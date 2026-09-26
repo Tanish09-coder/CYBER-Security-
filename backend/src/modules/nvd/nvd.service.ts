@@ -78,15 +78,15 @@ export class NvdService {
     );
   }
 
-  async syncIncremental(pageSize: number = 100): Promise<IngestionResult> {
+  async syncIncremental(pageSize: number = 100, maxItems: number = 100): Promise<IngestionResult> {
     const source = await this.ingestionRepo.getOrCreateNvdDataSource();
 
     let lastModStartDate: string;
     if (!source.lastSyncAt) {
-      logger.info('No previous sync found. Defaulting to last 30 days for initial incremental sync.');
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      lastModStartDate = thirtyDaysAgo.toISOString();
+      logger.info('No previous sync found. Defaulting to last 7 days for initial incremental sync.');
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      lastModStartDate = sevenDaysAgo.toISOString();
     } else {
       lastModStartDate = new Date(source.lastSyncAt).toISOString();
     }
@@ -102,15 +102,17 @@ export class NvdService {
         lastModStartDate,
         lastModEndDate,
         startIndex,
-        resultsPerPage: pageSize,
+        resultsPerPage: Math.min(pageSize, 100),
       });
 
       totalResults = response.totalResults;
       const cves = (response.vulnerabilities || []).map((v) => v.cve);
+      if (cves.length === 0) break;
       allCves.push(...cves);
       startIndex += cves.length;
 
       logger.info(`Fetched incremental page: ${startIndex}/${totalResults} CVEs`);
+      if (allCves.length >= maxItems) break;
     } while (startIndex < totalResults && allCves.length < totalResults);
 
     return await this.ingestionService.processCveItems(
