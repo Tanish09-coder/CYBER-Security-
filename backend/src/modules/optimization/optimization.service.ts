@@ -141,7 +141,21 @@ export class OptimizationService {
         : typeof row.affected_asset_ids === 'string'
         ? JSON.parse(row.affected_asset_ids)
         : [];
-      const targetAssetId = affectedAssets.length > 0 && affectedAssets[0] ? affectedAssets[0] : (row.asset_id || row.target_asset_id || 'mumbai-upi-switch-01.bharatbank.internal');
+      const rawTarget = affectedAssets.length > 0 && affectedAssets[0] ? affectedAssets[0] : (row.asset_id || row.target_asset_id);
+      let targetAssetId: string | null = null;
+      
+      if (rawTarget) {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawTarget);
+        if (isUuid) {
+          targetAssetId = rawTarget;
+        } else {
+          const assetLookup = await query<{ id: string }>(
+            `SELECT id FROM assets WHERE (hostname = $1 OR name ILIKE $2) AND organization_id = $3 LIMIT 1`,
+            [rawTarget, `%${rawTarget}%`, organizationId]
+          );
+          targetAssetId = assetLookup.rows[0]?.id || null;
+        }
+      }
 
       const targetCveId = row.target_cve_id || null;
       const controlCode = row.target_control_code || null;
