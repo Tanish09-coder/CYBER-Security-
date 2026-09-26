@@ -107,7 +107,7 @@ export class VcdbRepository {
       const existing = existingMap.get(inc.vcdbId);
 
       if (!existing) {
-        // Insert new incident
+        // Insert or update incident atomically
         const incRes = await query(
           `INSERT INTO vcdb_incidents (
              vcdb_id, source_record_id, source_file_path, incident_year, security_incident,
@@ -116,6 +116,24 @@ export class VcdbRepository {
              is_current, first_seen_at, last_seen_at
            )
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+           ON CONFLICT (vcdb_id) DO UPDATE SET
+             source_record_id = EXCLUDED.source_record_id,
+             source_file_path = EXCLUDED.source_file_path,
+             incident_year = EXCLUDED.incident_year,
+             security_incident = EXCLUDED.security_incident,
+             confidence = EXCLUDED.confidence,
+             summary = EXCLUDED.summary,
+             victim_country = EXCLUDED.victim_country,
+             victim_industry = EXCLUDED.victim_industry,
+             employee_count = EXCLUDED.employee_count,
+             data_disclosure = EXCLUDED.data_disclosure,
+             discovery_method = EXCLUDED.discovery_method,
+             schema_version = EXCLUDED.schema_version,
+             raw_record = EXCLUDED.raw_record,
+             payload_hash = EXCLUDED.payload_hash,
+             last_seen_at = CURRENT_TIMESTAMP,
+             is_current = TRUE,
+             updated_at = CURRENT_TIMESTAMP
            RETURNING id`,
           [
             inc.vcdbId,
@@ -137,6 +155,14 @@ export class VcdbRepository {
         );
 
         const incidentId = incRes.rows[0].id;
+        // Clean dimensions before re-inserting
+        await query(`DELETE FROM vcdb_incident_actors WHERE incident_id = $1`, [incidentId]);
+        await query(`DELETE FROM vcdb_incident_actions WHERE incident_id = $1`, [incidentId]);
+        await query(`DELETE FROM vcdb_incident_assets WHERE incident_id = $1`, [incidentId]);
+        await query(`DELETE FROM vcdb_incident_attributes WHERE incident_id = $1`, [incidentId]);
+        await query(`DELETE FROM vcdb_incident_timeline WHERE incident_id = $1`, [incidentId]);
+        await query(`DELETE FROM vcdb_incident_cves WHERE incident_id = $1`, [incidentId]);
+
         await this.insertDimensions(incidentId, inc);
         existingMap.set(inc.vcdbId, { id: incidentId, payloadHash: inc.payloadHash, isCurrent: true });
         inserted++;
