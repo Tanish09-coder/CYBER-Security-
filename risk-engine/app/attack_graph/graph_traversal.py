@@ -99,10 +99,10 @@ class AttackGraphTraversalEngine:
                                 critical_cves=cves,
                             )
                         )
-                    else:
-                        visited_nodes.add(next_node_id)
-                        dfs(next_node_id, visited_nodes, new_nodes, new_edges)
-                        visited_nodes.remove(next_node_id)
+                    
+                    visited_nodes.add(next_node_id)
+                    dfs(next_node_id, visited_nodes, new_nodes, new_edges)
+                    visited_nodes.remove(next_node_id)
 
             visited = {entry_id}
             dfs(entry_id, visited, [entry_id], [])

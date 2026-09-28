@@ -33,7 +33,7 @@ class AttackGraphEngine:
         if payload.target_asset_ids:
             target_count = len(set(payload.target_asset_ids).intersection(nodes_map.keys()))
         else:
-            target_count = sum(1 for n in payload.nodes if n.criticality_tier == 1)
+            target_count = sum(1 for n in payload.nodes if n.criticality_tier and (n.criticality_tier >= 4 or n.criticality_tier == 1))
 
         # 1. Discover acyclic attack paths
         paths = AttackGraphTraversalEngine.discover_paths(payload)
