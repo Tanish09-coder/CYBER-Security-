@@ -282,13 +282,13 @@ export const BreachContainmentAgent: React.FC = () => {
         <div className="bg-gradient-to-r from-[#06038D] to-[#1A3A8F] p-5 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-[#FF671F] text-white flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-[#0284C7] text-white flex items-center gap-1">
                 <Flame size={12} className="animate-pulse" /> Active Breach Response Engine
               </span>
               <span className="text-[11px] font-mono text-blue-200">v1.0.0-breach-containment</span>
             </div>
             <h2 className="text-lg font-bold flex items-center gap-2 text-white">
-              <ShieldAlert size={20} className="text-[#FF671F]" /> Rapid Zero-Trust Isolation Engine
+              <ShieldAlert size={20} className="text-[#38BDF8]" /> Rapid Zero-Trust Isolation Engine
             </h2>
             <p className="text-xs text-blue-100 max-w-2xl">
               Generates targeted, non-destructive isolation scripts, terminates malicious process trees, and streams live real-time execution logs.
@@ -300,8 +300,8 @@ export const BreachContainmentAgent: React.FC = () => {
             disabled={loading}
             className={`px-6 py-3 rounded font-bold text-xs shadow-md transition-all flex items-center gap-2 shrink-0 ${
               loading
-                ? 'bg-amber-600 text-white cursor-not-allowed opacity-90'
-                : 'bg-[#FF671F] hover:bg-[#D4521A] text-white shadow-lg active:scale-95'
+                ? 'bg-blue-800 text-white cursor-not-allowed opacity-90'
+                : 'bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-lg active:scale-95'
             }`}
           >
             {loading ? (

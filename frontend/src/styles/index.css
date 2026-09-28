@@ -579,13 +579,14 @@
 }
 
 .gov-btn-primary {
-  background: linear-gradient(135deg, var(--saffron) 0%, #E85C12 100%);
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
   color: #FFFFFF;
-  box-shadow: 0 3px 10px rgba(255,103,31,0.35);
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.25);
 }
 .gov-btn-primary:hover {
-  background: linear-gradient(135deg, #E85C12 0%, #C74F0F 100%);
-  box-shadow: 0 5px 16px rgba(255,103,31,0.45);
+  background: linear-gradient(135deg, #0369A1 0%, #075985 100%);
+  box-shadow: 0 5px 16px rgba(2, 132, 199, 0.35);
   transform: translateY(-1px);
 }
 
