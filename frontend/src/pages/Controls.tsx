@@ -143,17 +143,23 @@ export const Controls: React.FC = () => {
                       <p className="text-xs font-mono text-text-secondary mt-1">{control.code} • {control.category}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-bold text-text-primary">{control.coveragePercentage}%</span>
+                      <span className={`text-2xl font-bold ${
+                        control.coveragePercentage >= 75 ? 'text-emerald-600' :
+                        control.coveragePercentage >= 50 ? 'text-amber-600' : 'text-red-600'
+                      }`}>{control.coveragePercentage}%</span>
                       <p className="text-xs text-text-muted uppercase tracking-wider font-bold">Assessed Coverage</p>
                     </div>
                   </div>
                   
                   {/* Progress Bar */}
                   <div className="mt-4 relative z-10">
-                    <div className="w-full bg-app-surfaceSecondary rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200 shadow-inner">
                       <div 
-                        className="bg-brand-primary h-2.5 rounded-full" 
-                        style={{ width: `${control.coveragePercentage}%` }}
+                        className="h-2 rounded-full transition-all duration-500" 
+                        style={{ 
+                          width: `${control.coveragePercentage}%`,
+                          background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%)'
+                        }}
                       ></div>
                     </div>
                   </div>
