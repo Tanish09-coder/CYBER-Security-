@@ -61,11 +61,11 @@ export const Controls: React.FC = () => {
             <span className="text-emerald-800 text-[11px]">Verified present and fully operational on the asset.</span>
           </div>
 
-          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-amber-900">
+          <div className="p-2.5 bg-sky-50 border border-sky-200 rounded text-sky-900">
             <span className="font-bold block flex items-center">
-              <Shield className="w-3.5 h-3.5 text-amber-600 mr-1" /> PARTIAL
+              <Shield className="w-3.5 h-3.5 text-sky-600 mr-1" /> PARTIAL
             </span>
-            <span className="text-amber-800 text-[11px]">Only partly implemented or partially effective.</span>
+            <span className="text-sky-800 text-[11px]">Only partly implemented or partially effective.</span>
           </div>
 
           <div className="p-2.5 bg-red-50 border border-red-200 rounded text-red-900">

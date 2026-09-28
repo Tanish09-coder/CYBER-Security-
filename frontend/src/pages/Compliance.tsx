@@ -177,10 +177,10 @@ export const Compliance: React.FC = () => {
       />
 
       {/* Mandatory Certification Disclaimer */}
-      <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-lg text-xs text-amber-950 flex items-start space-x-2.5 shadow-2xs">
-        <Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+      <div className="bg-sky-500/10 border border-sky-500/30 p-3.5 rounded-lg text-xs text-sky-950 flex items-start space-x-2.5 shadow-2xs">
+        <Info className="w-4 h-4 text-sky-600 mt-0.5 flex-shrink-0" />
         <div>
-          <span className="font-bold text-amber-900 block mb-0.5">Compliance Posture Mapping Disclaimer:</span>
+          <span className="font-bold text-sky-900 block mb-0.5">Compliance Posture Mapping Disclaimer:</span>
           <span>This page displays <strong>internal compliance posture mapping</strong> based on technical control assessments. It does <strong>NOT</strong> constitute official third-party compliance certification or audit accreditation.</span>
         </div>
       </div>
@@ -215,7 +215,7 @@ export const Compliance: React.FC = () => {
       ) : isZeroDenominator ? (
         /* Section 15 Fix: Honest 0/0 state handling */
         <div className="bg-app-surface border border-app-border rounded-lg p-12 text-center shadow-2xs space-y-3">
-          <AlertCircle className="w-10 h-10 text-amber-500 mx-auto opacity-80" />
+          <AlertCircle className="w-10 h-10 text-sky-500 mx-auto opacity-80" />
           <h3 className="text-base font-bold text-text-primary">Compliance assessment unavailable.</h3>
           <p className="text-xs text-text-secondary max-w-md mx-auto">
             No mapped controls are available for this organization/framework combination. Coverage cannot be calculated without a valid control denominator (0/0 controls).
@@ -231,7 +231,7 @@ export const Compliance: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-2xs">
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">Calculated Coverage</span>
-              <p className="text-3xl font-extrabold text-brand-primary">
+              <p className="text-3xl font-extrabold text-[#0A0A1E]">
                 {coverage ? `${coverage.coveragePercentage.toFixed(1)}%` : '0.0%'}
               </p>
               <span className="text-[10px] text-text-muted mt-1 block">
@@ -241,13 +241,13 @@ export const Compliance: React.FC = () => {
 
             <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-2xs">
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">Implemented</span>
-              <p className="text-3xl font-bold text-emerald-600">{coverage?.implementedControls ?? 0}</p>
+              <p className="text-3xl font-bold text-[#0A0A1E]">{coverage?.implementedControls ?? 0}</p>
               <span className="text-[10px] text-text-muted mt-1 block">Verified present</span>
             </div>
 
             <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-2xs">
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">Partial</span>
-              <p className="text-3xl font-bold text-amber-600">{coverage?.partialControls ?? 0}</p>
+              <p className="text-3xl font-bold text-red-600">{coverage?.partialControls ?? 0}</p>
               <span className="text-[10px] text-text-muted mt-1 block">Partly implemented</span>
             </div>
 
@@ -262,7 +262,7 @@ export const Compliance: React.FC = () => {
           <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
             <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary flex items-center justify-between">
               <h3 className="text-sm font-semibold text-text-primary flex items-center">
-                <AlertTriangle className="w-4 h-4 mr-2 text-amber-600" />
+                <AlertTriangle className="w-4 h-4 mr-2 text-sky-600" />
                 Identified Compliance Gaps ({gaps.length})
               </h3>
             </div>
@@ -287,7 +287,7 @@ export const Compliance: React.FC = () => {
                   <tbody className="bg-white divide-y divide-app-border">
                     {gaps.map((gap, idx) => (
                       <tr key={`${gap.controlCode}-${idx}`} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-4 py-3.5 font-bold font-mono text-brand-primary">{gap.controlCode}</td>
+                        <td className="px-4 py-3.5 font-bold font-mono text-black">{gap.controlCode}</td>
                         <td className="px-4 py-3.5 font-medium text-text-primary">{gap.controlTitle}</td>
                         <td className="px-4 py-3.5 text-center font-bold text-text-secondary">{gap.unprotectedAssetsCount} System(s)</td>
                         <td className="px-4 py-3.5 text-right font-bold text-red-600">{gap.severity}</td>

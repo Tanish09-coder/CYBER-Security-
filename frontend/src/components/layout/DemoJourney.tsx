@@ -74,10 +74,10 @@ export const DemoJourney: React.FC = () => {
       <div className="flex items-center space-x-2">
         <button
           onClick={() => navigate('/demo')}
-          className="flex items-center text-[11px] font-bold text-amber-400 hover:text-amber-300 px-2 py-1 rounded bg-amber-950/40 border border-amber-500/30 hover:bg-amber-900/50 transition-colors mr-1"
+          className="flex items-center text-[11px] font-bold text-sky-400 hover:text-sky-300 px-2 py-1 rounded bg-sky-950/40 border border-sky-500/30 hover:bg-sky-900/50 transition-colors mr-1"
           title="Open Flagship WOW Judge Story"
         >
-          <Compass className="w-3.5 h-3.5 mr-1 text-amber-400" />
+          <Compass className="w-3.5 h-3.5 mr-1 text-sky-400" />
           <span>Flagship Story</span>
         </button>
 

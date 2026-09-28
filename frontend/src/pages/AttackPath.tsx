@@ -73,7 +73,7 @@ export const AttackPath: React.FC = () => {
               <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${
                 hasRun
                   ? 'bg-sky-100 text-sky-800 border-sky-300'
-                  : 'bg-amber-100 text-amber-800 border-amber-300'
+                  : 'bg-sky-100 text-sky-800 border-sky-300'
               }`}>
                 {hasRun ? 'MULTI-HOP TOPOLOGY' : 'READY FOR TRAVERSAL'}
               </span>
@@ -82,7 +82,7 @@ export const AttackPath: React.FC = () => {
               {hasRun ? (
                 <>Identified Choke Points: <span className="font-semibold text-text-primary">{graphData?.chokePoints?.length || 0}</span> • Last computed: <span className="font-semibold text-text-primary">{lastUpdated}</span></>
               ) : (
-                <span className="text-amber-700 font-medium">Status: Click "Run Graph Engine Traversal Live" to calculate attack paths</span>
+                <span className="text-sky-700 font-medium">Status: Click "Run Graph Engine Traversal Live" to calculate attack paths</span>
               )}
             </p>
           </div>
@@ -111,8 +111,8 @@ export const AttackPath: React.FC = () => {
       <div className="bg-app-surface border border-app-border rounded-lg p-4 shadow-2xs">
         <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-2.5">Graph Topology Legend:</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div className="flex items-center space-x-2 p-2 bg-amber-50 border border-amber-200 rounded text-amber-900">
-            <Globe className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <div className="flex items-center space-x-2 p-2 bg-sky-50 border border-sky-200 rounded text-sky-900">
+            <Globe className="w-4 h-4 text-sky-600 flex-shrink-0" />
             <span className="font-bold">Internet Perimeter Gateway</span>
           </div>
 
@@ -183,9 +183,9 @@ export const AttackPath: React.FC = () => {
               <span className="text-3xl font-extrabold text-rose-600">{graphData.maxPathRisk.toFixed(1)}</span>
             </div>
 
-            <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-2xs text-center hover:border-amber-300 transition-colors">
+            <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-2xs text-center hover:border-sky-300 transition-colors">
               <span className="text-[10px] font-bold text-text-muted uppercase block mb-1">Perimeter Entry Points</span>
-              <span className="text-3xl font-extrabold text-amber-600">{graphData.entryPointsCount}</span>
+              <span className="text-3xl font-extrabold text-sky-600">{graphData.entryPointsCount}</span>
             </div>
 
             <div className="bg-app-surface border border-app-border p-5 rounded-lg shadow-2xs text-center hover:border-purple-300 transition-colors">
@@ -255,7 +255,7 @@ export const AttackPath: React.FC = () => {
                           <tr className="hover:bg-gray-50/50">
                             <td className="px-4 py-3 font-bold text-text-primary">
                               <div className="flex items-center space-x-1">
-                                <span className="text-amber-700">{formatEntityName(p.entryAssetId)}</span>
+                                <span className="text-sky-700">{formatEntityName(p.entryAssetId)}</span>
                                 <span className="text-gray-400">→</span>
                                 <span className="text-purple-700">{formatEntityName(p.targetAssetId)}</span>
                               </div>
@@ -297,8 +297,8 @@ export const AttackPath: React.FC = () => {
                                   </div>
                                   
                                   <div className="space-y-2">
-                                    <div className="flex items-center space-x-2 text-amber-300">
-                                      <span className="px-2 py-0.5 bg-amber-900/50 rounded border border-amber-500/30 text-[10px] font-bold">HOP 1 (Entry)</span>
+                                    <div className="flex items-center space-x-2 text-sky-300">
+                                      <span className="px-2 py-0.5 bg-sky-900/50 rounded border border-sky-500/30 text-[10px] font-bold">HOP 1 (Entry)</span>
                                       <span className="font-bold">{formatEntityName(p.entryAssetId)}</span>
                                       <span className="text-slate-400 text-[11px]">(Internet Edge Gateway • CVE-2023-22515)</span>
                                     </div>

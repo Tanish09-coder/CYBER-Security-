@@ -122,7 +122,7 @@ export const FinancialExposure: React.FC = () => {
               <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${
                 hasCalculated
                   ? 'bg-sky-100 text-sky-800 border-sky-300'
-                  : 'bg-amber-100 text-amber-800 border-amber-300'
+                  : 'bg-sky-100 text-sky-800 border-sky-300'
               }`}>
                 {hasCalculated ? 'FAIR & VERIS MODEL' : 'READY FOR CALCULATION'}
               </span>
@@ -131,7 +131,7 @@ export const FinancialExposure: React.FC = () => {
               Authoritative Currency: <span className="font-semibold text-text-primary">INR (₹)</span> • {hasCalculated ? (
                 <>Last calculated: <span className="font-semibold text-text-primary">{lastUpdated}</span></>
               ) : (
-                <span className="text-amber-700 font-medium">Status: Click "Calculate Exposure Live" to compute</span>
+                <span className="text-sky-700 font-medium">Status: Click "Calculate Exposure Live" to compute</span>
               )}
             </p>
           </div>

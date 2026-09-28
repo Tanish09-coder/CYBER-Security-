@@ -15,12 +15,12 @@ export const Assets: React.FC = () => {
   const [assets, setAssets] = useState<AssetResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Pagination / Filter State
   const [page, setPage] = useState(1);
   const [limit] = useState(25);
   const [total, setTotal] = useState(0);
-  
+
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [assetTypeFilter, setAssetTypeFilter] = useState('');
@@ -40,12 +40,12 @@ export const Assets: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params: GetAssetsParams = {
         page,
         limit,
       };
-      
+
       if (debouncedSearch) params.search = debouncedSearch;
       if (activeOrg?.id) params.organizationId = activeOrg.id;
 
@@ -55,7 +55,7 @@ export const Assets: React.FC = () => {
       if (internetFacingFilter === 'false') params.isInternetFacing = false;
 
       const res = await assetApi.getAssets(params);
-      
+
       setAssets(res.data);
       setTotal(res.total);
     } catch (err: any) {
@@ -102,11 +102,11 @@ export const Assets: React.FC = () => {
           Bharat Digital Financial Services (Demo)
         </span>
       </div>
-      
+
       {/* Toolbar */}
       <div className="bg-app-surface border border-app-border rounded-lg p-4 shadow-2xs">
         <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
-          
+
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-text-muted" />
@@ -119,7 +119,7 @@ export const Assets: React.FC = () => {
               className="block w-full pl-10 pr-3 py-2 border border-app-border rounded-md leading-5 bg-app-surface text-text-primary placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-brand-primary sm:text-sm transition-colors"
             />
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-text-secondary" />
@@ -136,7 +136,7 @@ export const Assets: React.FC = () => {
                 <option value="cloud_instance">Cloud Instance</option>
               </select>
             </div>
-            
+
             <select
               value={criticalityFilter}
               onChange={(e) => { setCriticalityFilter(e.target.value); setPage(1); }}
@@ -243,8 +243,8 @@ export const Assets: React.FC = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-1.5 text-xs text-brand-primary font-semibold">
-                      <ShieldAlert className="w-3.5 h-3.5 text-risk-critical" />
+                    <div className="flex items-center space-x-1.5 text-xs text-black font-semibold">
+                      <ShieldAlert className="w-3.5 h-3.5 text-black" />
                       <span>Evaluated Match</span>
                     </div>
                   </TableCell>
@@ -253,7 +253,7 @@ export const Assets: React.FC = () => {
             </TableBody>
           </Table>
         )}
-        
+
         {/* Pagination */}
         {!loading && !error && assets.length > 0 && (
           <div className="px-6 py-4 border-t border-app-border bg-app-surfaceSecondary flex items-center justify-between mt-auto">
@@ -261,15 +261,15 @@ export const Assets: React.FC = () => {
               Showing <span className="font-medium text-text-primary">{(page - 1) * limit + 1}</span> to <span className="font-medium text-text-primary">{Math.min(page * limit, total)}</span> of <span className="font-medium text-text-primary">{total}</span> results
             </div>
             <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}
               >
                 Previous
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setPage(p => p + 1)}
                 disabled={page >= totalPages}
               >

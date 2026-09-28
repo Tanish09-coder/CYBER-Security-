@@ -109,10 +109,10 @@ export const ThreatIntel: React.FC = () => {
       />
 
       {/* Mandatory Disclaimer Box */}
-      <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-lg text-xs text-amber-950 flex items-start space-x-2.5">
-        <Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+      <div className="bg-sky-500/10 border border-sky-500/30 p-3.5 rounded-lg text-xs text-sky-950 flex items-start space-x-2.5">
+        <Info className="w-4 h-4 text-sky-600 mt-0.5 flex-shrink-0" />
         <div>
-          <span className="font-bold text-amber-900 block mb-0.5">Important Threat Intelligence Context:</span>
+          <span className="font-bold text-sky-900 block mb-0.5">Important Threat Intelligence Context:</span>
           <span>A CISA KEV listing proves that a vulnerability has been actively exploited globally in real-world attacks. It does <strong>NOT</strong> constitute proof or evidence that your specific enterprise asset has experienced a breach.</span>
         </div>
       </div>

@@ -87,7 +87,7 @@ export const ExecutiveDashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-baseline space-x-2 mt-2">
-                  <span className="text-3xl font-extrabold text-text-primary">
+                  <span className="text-3xl font-extrabold text-black">
                     {posture?.overallRiskScore ? posture.overallRiskScore.toFixed(1) : '78.5'}
                   </span>
                   <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded uppercase">
@@ -97,7 +97,7 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
               <button
                 onClick={() => navigate('/risk-overview')}
-                className="mt-4 flex items-center justify-between text-xs font-bold text-brand-primary hover:underline pt-2 border-t border-app-border"
+                className="mt-4 flex items-center justify-between text-xs font-bold text-black hover:underline pt-2 border-t border-app-border"
               >
                 Drill Down: Risk Overview <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </button>
@@ -116,7 +116,7 @@ export const ExecutiveDashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className="text-2xl font-extrabold text-purple-700">
+                  <span className="text-2xl font-extrabold text-red-600">
                     {formatCurrency(financial?.totalModeledEal || 443750, authoritativeCurrency)}
                   </span>
                   <span className="text-[10px] text-text-muted block mt-0.5">Annualized Expected Loss</span>
@@ -124,7 +124,7 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
               <button
                 onClick={() => navigate('/financial-exposure')}
-                className="mt-4 flex items-center justify-between text-xs font-bold text-purple-700 hover:underline pt-2 border-t border-app-border"
+                className="mt-4 flex items-center justify-between text-xs font-bold text-black hover:underline pt-2 border-t border-app-border"
               >
                 Drill Down: Financial Exposure <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </button>
@@ -151,7 +151,7 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
               <button
                 onClick={() => navigate('/threat-intel')}
-                className="mt-4 flex items-center justify-between text-xs font-bold text-red-600 hover:underline pt-2 border-t border-app-border"
+                className="mt-4 flex items-center justify-between text-xs font-bold text-black hover:underline pt-2 border-t border-app-border"
               >
                 Drill Down: Threat Intel <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </button>
@@ -170,13 +170,13 @@ export const ExecutiveDashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className="text-3xl font-extrabold text-emerald-600">80.0%</span>
+                  <span className="text-3xl font-extrabold text-black">80.0%</span>
                   <span className="text-[10px] text-text-muted block mt-0.5">Verified Asset Safeguards</span>
                 </div>
               </div>
               <button
                 onClick={() => navigate('/controls')}
-                className="mt-4 flex items-center justify-between text-xs font-bold text-emerald-700 hover:underline pt-2 border-t border-app-border"
+                className="mt-4 flex items-center justify-between text-xs font-bold text-black hover:underline pt-2 border-t border-app-border"
               >
                 Drill Down: Security Controls <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </button>
@@ -191,7 +191,7 @@ export const ExecutiveDashboard: React.FC = () => {
             <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
               <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary flex justify-between items-center">
                 <h3 className="text-sm font-bold text-text-primary">Top Assets at Risk</h3>
-                <button onClick={() => navigate('/assets')} className="text-xs text-brand-primary font-bold hover:underline">
+                <button onClick={() => navigate('/assets')} className="text-xs text-[#0284C7] font-bold hover:underline">
                   View All Assets
                 </button>
               </div>
@@ -213,7 +213,7 @@ export const ExecutiveDashboard: React.FC = () => {
                     ]).map(r => (
                       <tr key={r.assetId} className="hover:bg-gray-50/50">
                         <td className="px-4 py-3 font-bold text-text-primary">{formatEntityName(r.assetName, r.assetId)}</td>
-                        <td className="px-4 py-3 font-mono text-brand-primary">{r.cveId}</td>
+                        <td className="px-4 py-3 font-mono text-black">{r.cveId}</td>
                         <td className="px-4 py-3 text-right font-extrabold text-red-600">{r.riskScore.toFixed(1)}</td>
                       </tr>
                     ))}
@@ -226,7 +226,7 @@ export const ExecutiveDashboard: React.FC = () => {
             <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
               <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary flex justify-between items-center">
                 <h3 className="text-sm font-bold text-text-primary">Priority Remediation Opportunities</h3>
-                <button onClick={() => navigate('/investment-optimizer')} className="text-xs text-brand-primary font-bold hover:underline">
+                <button onClick={() => navigate('/investment-optimizer')} className="text-xs text-[#0284C7] font-bold hover:underline">
                   Open Investment Optimizer
                 </button>
               </div>

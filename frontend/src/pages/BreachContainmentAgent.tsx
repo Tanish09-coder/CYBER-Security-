@@ -279,18 +279,18 @@ export const BreachContainmentAgent: React.FC = () => {
       {/* Main Trigger & Config Card */}
       <div className="bg-white rounded-lg border border-[#C8D6E8] shadow-sm overflow-hidden">
         {/* Banner Header */}
-        <div className="bg-gradient-to-r from-[#06038D] to-[#1A3A8F] p-5 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-white border-b border-[#C8D6E8] p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-[#0284C7] text-white flex items-center gap-1">
                 <Flame size={12} className="animate-pulse" /> Active Breach Response Engine
               </span>
-              <span className="text-[11px] font-mono text-blue-200">v1.0.0-breach-containment</span>
+              <span className="text-[11px] font-mono text-slate-400">v1.0.0-breach-containment</span>
             </div>
-            <h2 className="text-lg font-bold flex items-center gap-2 text-white">
-              <ShieldAlert size={20} className="text-[#38BDF8]" /> Rapid Zero-Trust Isolation Engine
+            <h2 className="text-lg font-bold flex items-center gap-2 text-[#0A0A1E]">
+              <ShieldAlert size={20} className="text-[#0284C7]" /> Rapid Zero-Trust Isolation Engine
             </h2>
-            <p className="text-xs text-blue-100 max-w-2xl">
+            <p className="text-xs text-slate-500 max-w-2xl">
               Generates targeted, non-destructive isolation scripts, terminates malicious process trees, and streams live real-time execution logs.
             </p>
           </div>
@@ -298,11 +298,10 @@ export const BreachContainmentAgent: React.FC = () => {
           <button
             onClick={handleRunContainment}
             disabled={loading}
-            className={`px-6 py-3 rounded font-bold text-xs shadow-md transition-all flex items-center gap-2 shrink-0 ${
-              loading
+            className={`px-6 py-3 rounded font-bold text-xs shadow-md transition-all flex items-center gap-2 shrink-0 ${loading
                 ? 'bg-blue-800 text-white cursor-not-allowed opacity-90'
                 : 'bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-lg active:scale-95'
-            }`}
+              }`}
           >
             {loading ? (
               <>
@@ -495,15 +494,14 @@ export const BreachContainmentAgent: React.FC = () => {
                 <span>REAL-TIME INCIDENT CONTAINMENT LOG STREAM</span>
               </span>
 
-              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                agentPhase === 'ANALYZING' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' :
-                agentPhase === 'STREAMING_LOGS' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse' :
-                agentPhase === 'CONTAINED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' :
-                'bg-gray-800 text-gray-400'
-              }`}>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${agentPhase === 'ANALYZING' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40' :
+                  agentPhase === 'STREAMING_LOGS' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse' :
+                    agentPhase === 'CONTAINED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' :
+                      'bg-gray-800 text-gray-400'
+                }`}>
                 {agentPhase === 'ANALYZING' ? '⚡ ANALYZING THREAT VECTOR' :
-                 agentPhase === 'STREAMING_LOGS' ? '📡 ISOLATING & EXECUTING' :
-                 agentPhase === 'CONTAINED' ? '🟢 CONTAINED & PROTECTED' : 'IDLE'}
+                  agentPhase === 'STREAMING_LOGS' ? '📡 ISOLATING & EXECUTING' :
+                    agentPhase === 'CONTAINED' ? '🟢 CONTAINED & PROTECTED' : 'IDLE'}
               </span>
             </div>
 
@@ -528,9 +526,8 @@ export const BreachContainmentAgent: React.FC = () => {
 
               <button
                 onClick={() => setAutoScroll(!autoScroll)}
-                className={`px-2.5 py-1 rounded text-[10px] font-bold transition-colors ${
-                  autoScroll ? 'bg-blue-600/30 text-blue-300 border border-blue-500/40' : 'bg-gray-800 text-gray-400'
-                }`}
+                className={`px-2.5 py-1 rounded text-[10px] font-bold transition-colors ${autoScroll ? 'bg-blue-600/30 text-blue-300 border border-blue-500/40' : 'bg-gray-800 text-gray-400'
+                  }`}
               >
                 {autoScroll ? 'AUTO-SCROLL ON' : 'AUTO-SCROLL PAUSED'}
               </button>
@@ -561,7 +558,7 @@ export const BreachContainmentAgent: React.FC = () => {
           <div className="p-4 space-y-2 max-h-[380px] overflow-y-auto leading-relaxed bg-[#050510]">
             {filteredLogs.map((log) => {
               let levelColor = 'text-blue-400';
-              if (log.level === 'TELEMETRY' || log.level === 'ANALYSIS') levelColor = 'text-amber-400';
+              if (log.level === 'TELEMETRY' || log.level === 'ANALYSIS') levelColor = 'text-sky-400';
               if (log.level === 'FIREWALL') levelColor = 'text-cyan-400';
               if (log.level === 'PROCESS_KILL') levelColor = 'text-red-400';
               if (log.level === 'AUTH_REVOKE') levelColor = 'text-purple-400';
@@ -577,7 +574,7 @@ export const BreachContainmentAgent: React.FC = () => {
                     <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0 bg-gray-900 ${levelColor}`}>
                       [{log.level}]
                     </span>
-                    <span className={`text-xs ${log.status === 'success' ? 'text-emerald-300' : log.status === 'warn' ? 'text-amber-300' : 'text-gray-200'}`}>
+                    <span className={`text-xs ${log.status === 'success' ? 'text-emerald-300' : log.status === 'warn' ? 'text-sky-300' : 'text-gray-200'}`}>
                       {log.message}
                     </span>
                   </div>
@@ -689,31 +686,28 @@ export const BreachContainmentAgent: React.FC = () => {
                   return (
                     <div
                       key={act.actionId}
-                      className={`p-4 rounded border transition-all ${
-                        isDone
+                      className={`p-4 rounded border transition-all ${isDone
                           ? 'bg-[#E6F4EC] border-[#046A38]'
                           : isRunning
-                          ? 'bg-amber-50 border-amber-500 shadow-md'
-                          : 'bg-white border-[#C8D6E8] hover:border-[#06038D]'
-                      }`}
+                            ? 'bg-sky-50 border-sky-500 shadow-md'
+                            : 'bg-white border-[#C8D6E8] hover:border-[#06038D]'
+                        }`}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2.5">
                           <span
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
-                              isDone ? 'bg-[#046A38] text-white' : isRunning ? 'bg-amber-600 text-white animate-pulse' : 'bg-[#06038D] text-white'
-                            }`}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${isDone ? 'bg-[#046A38] text-white' : isRunning ? 'bg-sky-600 text-white animate-pulse' : 'bg-[#06038D] text-white'
+                              }`}
                           >
                             {act.stepNumber}
                           </span>
                           <h4 className="text-xs font-bold text-[#0A0A1E]">{act.title}</h4>
                         </div>
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${
-                            act.executionType === 'AUTOMATED_CLI'
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${act.executionType === 'AUTOMATED_CLI'
                               ? 'bg-[#EBF0FA] text-[#06038D] border border-[#06038D]/30'
                               : 'bg-[#FEF3C7] text-[#D97706] border border-[#D97706]/30'
-                          }`}
+                            }`}
                         >
                           {act.executionType}
                         </span>
@@ -742,13 +736,12 @@ export const BreachContainmentAgent: React.FC = () => {
                         <button
                           onClick={() => handleExecuteSingleStep(act)}
                           disabled={isRunning}
-                          className={`px-3 py-1 rounded text-xs font-bold transition-all flex items-center gap-1.5 ${
-                            isDone
+                          className={`px-3 py-1 rounded text-xs font-bold transition-all flex items-center gap-1.5 ${isDone
                               ? 'bg-[#046A38] text-white'
                               : isRunning
-                              ? 'bg-amber-600 text-white cursor-not-allowed'
-                              : 'bg-[#06038D] hover:bg-[#1A3A8F] text-white'
-                          }`}
+                                ? 'bg-sky-600 text-white cursor-not-allowed'
+                                : 'bg-[#06038D] hover:bg-[#1A3A8F] text-white'
+                            }`}
                         >
                           {isDone ? (
                             <>

@@ -100,10 +100,10 @@ export const RiskOverview: React.FC = () => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [generatingRows, setGeneratingRows] = useState<Record<string, boolean>>({});
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  
+
   // Interactive Sector Modal State
   const [selectedSectorModal, setSelectedSectorModal] = useState<SectorInfo | null>(null);
-  
+
   // Sector Filter State
   const [selectedSectorFilter, setSelectedSectorFilter] = useState<string>('ALL');
 
@@ -202,11 +202,10 @@ export const RiskOverview: React.FC = () => {
               <span className="text-xs font-bold text-text-primary uppercase tracking-wider">
                 {hasCalculated ? 'Live Risk Engine Active' : 'Risk Engine Standby'}
               </span>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${
-                hasCalculated
-                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                  : 'bg-amber-100 text-amber-800 border-amber-300'
-              }`}>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${hasCalculated
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                : 'bg-sky-100 text-sky-800 border-sky-300'
+                }`}>
                 {hasCalculated ? 'REAL-TIME INFERENCE' : 'READY FOR CALCULATION'}
               </span>
             </div>
@@ -214,7 +213,7 @@ export const RiskOverview: React.FC = () => {
               Engine Version v{items[0]?.modelVersion || '1.0.0'} • {hasCalculated ? (
                 <>Last calculated: <span className="font-semibold text-text-primary">{lastUpdated}</span></>
               ) : (
-                <span className="text-amber-700 font-medium">Status: Click "Calculate Model Live" to run evaluation</span>
+                <span className="text-sky-700 font-medium">Status: Click "Calculate Model Live" to run evaluation</span>
               )}
             </p>
           </div>
@@ -235,7 +234,7 @@ export const RiskOverview: React.FC = () => {
           <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-3" />
           <h3 className="text-sm font-bold text-red-900 mb-1">Unable to Load Risk Overview</h3>
           <p className="text-xs text-red-700 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => fetchRiskData(true)}
             className="px-4 py-2 bg-red-600 text-white rounded-md text-xs font-bold hover:bg-red-700 transition-colors"
           >
@@ -340,7 +339,7 @@ export const RiskOverview: React.FC = () => {
               </div>
               <span className="text-xs text-text-muted font-mono">Real-Time Risk Engine v{items[0]?.modelVersion || '1.0.0'}</span>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-app-border text-xs">
                 <thead className="bg-app-surface">
@@ -371,13 +370,13 @@ export const RiskOverview: React.FC = () => {
                             <div>{formatEntityName(item.assetName, item.assetId)}</div>
                             <div className="text-[10px] text-text-muted font-normal mt-0.5">{sector.location}</div>
                           </td>
-                          <td className="px-4 py-3.5 font-mono text-brand-primary font-semibold">
+                          <td className="px-4 py-3.5 font-mono text-black font-semibold">
                             {item.cveId}
                           </td>
                           <td className="px-4 py-3.5 text-center font-semibold">
                             {item.baseCvss != null ? item.baseCvss.toFixed(1) : '—'}
                           </td>
-                          
+
                           {/* BUSINESS CRITICALITY CELL */}
                           <td className="px-4 py-3.5 text-center">
                             <button
@@ -385,31 +384,36 @@ export const RiskOverview: React.FC = () => {
                               className="group inline-flex flex-col items-center justify-center p-1.5 rounded-md hover:bg-brand-primary/10 transition-colors border border-transparent hover:border-brand-primary/30 cursor-pointer"
                               title="Click to inspect Sector details and Criticality rationale"
                             >
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-900 border border-blue-300 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#F0F9FF] text-blue-900 border border-sky-200 group-hover:bg-brand-primary group-hover:text-white transition-colors">
                                 <Building2 className="w-3 h-3 mr-1" />
                                 {sector.criticalityLevel}
                               </span>
-                              <span className="text-[10px] text-brand-primary font-bold mt-1 group-hover:underline flex items-center">
+                              <span className="text-[10px] text-black font-bold mt-1 group-hover:underline flex items-center">
                                 {sector.sectorName}
                                 <ArrowRight className="w-2.5 h-2.5 ml-0.5 inline opacity-70" />
                               </span>
                             </button>
                           </td>
 
-                          <td className="px-4 py-3.5 text-right font-extrabold text-sm text-brand-primary">
+                          <td className={`px-4 py-3.5 text-right font-extrabold text-sm ${
+                            scoreVal == null ? 'text-gray-400' :
+                            scoreVal >= 90 ? 'text-red-600' :
+                            scoreVal >= 75 ? 'text-orange-500' :
+                            scoreVal >= 60 ? 'text-yellow-500' :
+                            'text-emerald-600'
+                          }`}>
                             {scoreVal != null ? scoreVal.toFixed(1) : 'N/A'}
                           </td>
                           <td className="px-4 py-3.5 text-center">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              levelVal === 'CRITICAL' ? 'bg-red-100 text-red-800 border border-red-300' :
-                              levelVal === 'HIGH' ? 'bg-orange-100 text-orange-800 border border-orange-300' :
-                              levelVal === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                              'bg-green-100 text-green-800 border border-green-300'
-                            }`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${levelVal === 'CRITICAL' ? 'bg-red-100 text-red-800 border border-red-300' :
+                              levelVal === 'HIGH' ? 'bg-sky-100 text-sky-800 border border-sky-300' :
+                                levelVal === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                                  'bg-green-100 text-green-800 border border-green-300'
+                              }`}>
                               {levelVal}
                             </span>
                           </td>
-                          
+
                           {/* DYNAMIC EXPANDABLE BUTTON */}
                           <td className="px-4 py-3.5 text-center">
                             <button
@@ -510,7 +514,7 @@ export const RiskOverview: React.FC = () => {
 
                                   <div className="p-3 bg-sky-50 rounded-lg border border-sky-200">
                                     <span className="text-[10px] font-bold text-sky-800 uppercase block">Engine Verification Proof</span>
-                                    <span className="font-mono text-xs font-bold text-sky-950 block">0x{Math.abs(rowKey.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)).toString(16)}8f2d</span>
+                                    <span className="font-mono text-xs font-bold text-sky-950 block">0x{Math.abs(rowKey.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)).toString(16)}8f2d</span>
                                     <span className="text-sky-700 text-[11px] block mt-0.5">Verified SHA-256 computation signature.</span>
                                   </div>
                                 </div>

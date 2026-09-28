@@ -212,7 +212,7 @@ export const JudgeDemoExperience: React.FC = () => {
         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-950/80 text-blue-300 border border-blue-500/30">
           DEMO ENTERPRISE (APEX FINANCIAL)
         </span>
-        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30">
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950/80 text-sky-300 border border-sky-500/30">
           MODELED QUANTIFICATION
         </span>
       </div>
@@ -317,7 +317,7 @@ export const JudgeDemoExperience: React.FC = () => {
                   </div>
                   <div className="p-3 rounded-lg bg-app-surfaceSecondary border border-app-border flex items-center justify-between text-xs">
                     <span className="font-semibold text-text-primary">Internet Exposure</span>
-                    <span className="font-bold text-amber-500">Publicly Reachable</span>
+                    <span className="font-bold text-sky-500">Publicly Reachable</span>
                   </div>
                   <div className="p-3 rounded-lg bg-app-surfaceSecondary border border-app-border flex items-center justify-between text-xs">
                     <span className="font-semibold text-text-primary">Active Threat Evidence</span>
@@ -404,7 +404,7 @@ export const JudgeDemoExperience: React.FC = () => {
 
               <div className="p-5 rounded-xl bg-app-surfaceSecondary border border-app-border space-y-2">
                 <div className="text-xs font-semibold text-text-secondary">Single Incident Loss</div>
-                <div className="text-2xl font-bold text-amber-500">₹{heroData.singleIncidentLoss.toLocaleString('en-IN')}</div>
+                <div className="text-2xl font-bold text-sky-500">₹{heroData.singleIncidentLoss.toLocaleString('en-IN')}</div>
                 <div className="text-[11px] text-text-muted">₹50 Lakhs Downtime + ₹40 Lakhs Recovery</div>
               </div>
 
@@ -453,11 +453,11 @@ export const JudgeDemoExperience: React.FC = () => {
 
               <ArrowRight className="w-6 h-6 text-slate-600 hidden md:block" />
 
-              <div className="flex flex-col items-center p-4 rounded-xl bg-amber-950/40 border border-amber-500/50 min-w-[200px] text-center ring-2 ring-amber-500/40">
-                <Server className="w-8 h-8 text-amber-400 mb-2" />
-                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">VULNERABLE ASSET</span>
+              <div className="flex flex-col items-center p-4 rounded-xl bg-sky-950/40 border border-sky-500/50 min-w-[200px] text-center ring-2 ring-sky-500/40">
+                <Server className="w-8 h-8 text-sky-400 mb-2" />
+                <span className="text-[10px] font-bold text-sky-300 uppercase tracking-wider">VULNERABLE ASSET</span>
                 <span className="text-xs font-bold text-white mt-1">{heroData.systemName}</span>
-                <span className="text-[10px] text-amber-400 mt-0.5">Atlassian Confluence (CVE-2023-22515)</span>
+                <span className="text-[10px] text-sky-400 mt-0.5">Atlassian Confluence (CVE-2023-22515)</span>
               </div>
 
               <ArrowRight className="w-6 h-6 text-slate-600 hidden md:block" />
@@ -694,7 +694,7 @@ export const JudgeDemoExperience: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Residual Annual Exposure:</span>
-                    <span className="font-bold text-amber-400">₹8.5 Lakhs / yr</span>
+                    <span className="font-bold text-sky-400">₹8.5 Lakhs / yr</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Modeled ROSI:</span>
@@ -726,7 +726,7 @@ export const JudgeDemoExperience: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Modeled ROSI:</span>
-                    <span className="font-bold text-amber-400">110% Return</span>
+                    <span className="font-bold text-sky-400">110% Return</span>
                   </div>
                 </div>
               </div>
@@ -769,7 +769,7 @@ export const JudgeDemoExperience: React.FC = () => {
             <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs text-center overflow-x-auto">
               <div className="font-bold text-red-400">DETECT (Signal)</div>
               <ArrowRight className="w-4 h-4 text-slate-600" />
-              <div className="font-bold text-amber-400">QUANTIFY (₹22.5L)</div>
+              <div className="font-bold text-sky-400">QUANTIFY (₹22.5L)</div>
               <ArrowRight className="w-4 h-4 text-slate-600" />
               <div className="font-bold text-purple-400">SIMULATE (What-If)</div>
               <ArrowRight className="w-4 h-4 text-slate-600" />
