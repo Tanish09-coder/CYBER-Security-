@@ -84,8 +84,6 @@ export const BreachContainmentAgent: React.FC = () => {
   const [result, setResult] = useState<ContainmentResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeScriptTab, setActiveScriptTab] = useState<'bash' | 'powershell'>('bash');
-  const [copiedScript, setCopiedScript] = useState<boolean>(false);
   const [copiedActionId, setCopiedActionId] = useState<string | null>(null);
   const [executedSteps, setExecutedSteps] = useState<Record<string, boolean>>({});
   const [executingStepId, setExecutingStepId] = useState<string | null>(null);
@@ -250,9 +248,6 @@ export const BreachContainmentAgent: React.FC = () => {
     if (actionId) {
       setCopiedActionId(actionId);
       setTimeout(() => setCopiedActionId(null), 2000);
-    } else {
-      setCopiedScript(true);
-      setTimeout(() => setCopiedScript(false), 2500);
     }
   };
 
@@ -779,65 +774,8 @@ export const BreachContainmentAgent: React.FC = () => {
               </div>
             </div>
 
-            {/* Right 5 Cols: Regulatory Compliance & Consolidated Scripts */}
+            {/* Right 5 Cols: Regulatory Compliance */}
             <div className="lg:col-span-5 space-y-6">
-              {/* Consolidated Automation Terminal */}
-              <div className="bg-white rounded-lg border border-[#C8D6E8] shadow-sm overflow-hidden">
-                <div className="bg-[#0A0A1E] px-4 py-3 flex justify-between items-center border-b border-gray-800">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
-                    </div>
-                    <div className="flex gap-1 ml-3">
-                      <button
-                        onClick={() => setActiveScriptTab('bash')}
-                        className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-colors ${
-                          activeScriptTab === 'bash'
-                            ? 'bg-[#FF671F] text-white'
-                            : 'bg-gray-800 text-gray-400 hover:text-white'
-                        }`}
-                      >
-                        Linux Bash (.sh)
-                      </button>
-                      <button
-                        onClick={() => setActiveScriptTab('powershell')}
-                        className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-colors ${
-                          activeScriptTab === 'powershell'
-                            ? 'bg-[#06038D] text-white'
-                            : 'bg-gray-800 text-gray-400 hover:text-white'
-                        }`}
-                      >
-                        PowerShell (.ps1)
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      handleCopyScript(
-                        activeScriptTab === 'bash'
-                          ? result.automatedScriptBash
-                          : result.automatedScriptPowershell
-                      )
-                    }
-                    className="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px] font-semibold flex items-center gap-1.5 transition-colors"
-                  >
-                    {copiedScript ? <Check size={12} className="text-[#34D399]" /> : <Copy size={12} />}
-                    <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
-                  </button>
-                </div>
-
-                <div className="p-4 bg-[#0A0A1E] overflow-x-auto max-h-[340px]">
-                  <pre className="font-mono text-xs text-[#34D399] leading-relaxed whitespace-pre">
-                    {activeScriptTab === 'bash'
-                      ? result.automatedScriptBash
-                      : result.automatedScriptPowershell}
-                  </pre>
-                </div>
-              </div>
-
               {/* Regulatory Directives Card */}
               <div className="bg-white p-5 rounded-lg border border-[#C8D6E8] shadow-sm space-y-3">
                 <div className="flex items-center gap-2 pb-2 border-b border-[#DDE6F0]">
