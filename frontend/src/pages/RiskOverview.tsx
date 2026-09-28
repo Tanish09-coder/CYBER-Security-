@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, Loader2, ChevronDown, ChevronUp, ShieldAlert, Building2, Filter, X, Landmark, ArrowRight, RefreshCw, Zap, Code, Check } from 'lucide-react';
 import { RiskCalculationResponse } from '../types/risk';
 import { riskApi } from '../api/risk';
@@ -92,9 +92,10 @@ const getSectorForAsset = (assetName?: string, assetId?: string): SectorInfo => 
 
 export const RiskOverview: React.FC = () => {
   const [data, setData] = useState<RiskCalculationResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [hasCalculated, setHasCalculated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [recalculating, setRecalculating] = useState<boolean>(false);
-  const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString());
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [generatingRows, setGeneratingRows] = useState<Record<string, boolean>>({});
@@ -113,6 +114,7 @@ export const RiskOverview: React.FC = () => {
 
       const response = await riskApi.getRiskScores({ limit: 100 });
       setData(response);
+      setHasCalculated(true);
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err: any) {
       setError(err.message || "Failed to load risk overview.");
@@ -122,9 +124,7 @@ export const RiskOverview: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchRiskData();
-  }, []);
+  // Standby initial state: calculation results only appear after clicking Recalculate Model Live
 
   const toggleRow = (key: string) => {
     if (expandedRows[key]) {
@@ -195,17 +195,27 @@ export const RiskOverview: React.FC = () => {
       <div className="bg-app-surface border border-app-border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
         <div className="flex items-center space-x-3">
           <div className="p-2 rounded-lg bg-sky-50 border border-sky-200">
-            <Zap className="w-5 h-5 text-sky-600 animate-pulse" />
+            <Zap className={`w-5 h-5 ${hasCalculated ? 'text-sky-600 animate-pulse' : 'text-slate-400'}`} />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold text-text-primary uppercase tracking-wider">Live Risk Engine Active</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                REAL-TIME INFERENCE
+              <span className="text-xs font-bold text-text-primary uppercase tracking-wider">
+                {hasCalculated ? 'Live Risk Engine Active' : 'Risk Engine Standby'}
+              </span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${
+                hasCalculated
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                  : 'bg-amber-100 text-amber-800 border-amber-300'
+              }`}>
+                {hasCalculated ? 'REAL-TIME INFERENCE' : 'READY FOR CALCULATION'}
               </span>
             </div>
             <p className="text-[11px] text-text-muted mt-0.5">
-              Engine Version v{items[0]?.modelVersion || '1.0.0'} • Last calculated: <span className="font-semibold text-text-primary">{lastUpdated}</span>
+              Engine Version v{items[0]?.modelVersion || '1.0.0'} • {hasCalculated ? (
+                <>Last calculated: <span className="font-semibold text-text-primary">{lastUpdated}</span></>
+              ) : (
+                <span className="text-amber-700 font-medium">Status: Click "Calculate Model Live" to run evaluation</span>
+              )}
             </p>
           </div>
         </div>
@@ -216,7 +226,7 @@ export const RiskOverview: React.FC = () => {
           className="inline-flex items-center space-x-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${recalculating ? 'animate-spin' : ''}`} />
-          <span>{recalculating ? 'Running Model Inference...' : 'Recalculate Model Live'}</span>
+          <span>{recalculating ? 'Running Model Inference...' : 'Calculate Model Live'}</span>
         </button>
       </div>
 
@@ -226,10 +236,35 @@ export const RiskOverview: React.FC = () => {
           <h3 className="text-sm font-bold text-red-900 mb-1">Unable to Load Risk Overview</h3>
           <p className="text-xs text-red-700 mb-4">{error}</p>
           <button 
-            onClick={() => fetchRiskData()}
+            onClick={() => fetchRiskData(true)}
             className="px-4 py-2 bg-red-600 text-white rounded-md text-xs font-bold hover:bg-red-700 transition-colors"
           >
-            Retry Connection
+            Retry Calculation
+          </button>
+        </div>
+      ) : recalculating ? (
+        <div className="bg-app-surface border border-sky-200 rounded-lg p-12 text-center shadow-2xs flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+          <h4 className="text-sm font-bold text-text-primary">Quantifying Multi-Factor Risk Model v1.0.0...</h4>
+          <p className="text-xs text-text-secondary">Evaluating CVSS 3.1 base metrics, CISA KEV exploitation flags, and asset business criticality live...</p>
+        </div>
+      ) : !hasCalculated ? (
+        <div className="bg-app-surface border border-dashed border-sky-300 rounded-lg p-10 text-center shadow-2xs space-y-4">
+          <div className="w-12 h-12 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center mx-auto text-sky-600">
+            <Zap className="w-6 h-6" />
+          </div>
+          <div className="max-w-md mx-auto space-y-1">
+            <h3 className="text-sm font-bold text-text-primary">Deterministic Cyber Risk Quantification Engine</h3>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Calculation results are hidden until initiated. Click <strong>"Calculate Model Live"</strong> to trigger real-time multi-factor risk quantification across all enterprise assets.
+            </p>
+          </div>
+          <button
+            onClick={() => fetchRiskData(true)}
+            className="inline-flex items-center space-x-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4 mr-1" />
+            <span>Calculate Model Live</span>
           </button>
         </div>
       ) : allItems.length === 0 ? (

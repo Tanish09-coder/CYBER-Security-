@@ -18,6 +18,7 @@ export const InvestmentOptimizer: React.FC = () => {
   
   const [loadingContext, setLoadingContext] = useState<boolean>(true);
   const [data, setData] = useState<OptimizerResponse | null>(null);
+  const [hasOptimized, setHasOptimized] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -121,6 +122,7 @@ export const InvestmentOptimizer: React.FC = () => {
       const res = await riskApi.optimizeBudget(requestPayload);
       const unwrapped = (res as any)?.data ? (res as any).data : res;
       setData(unwrapped);
+      setHasOptimized(true);
     } catch (err: any) {
       setError(err.message || "Failed to execute optimization.");
     } finally {
@@ -265,9 +267,11 @@ export const InvestmentOptimizer: React.FC = () => {
                           <span className="text-[11px] text-text-secondary block mt-0.5">
                             Target System: <strong>{item.targetAssetId}</strong> {item.targetCveId ? `• ${item.targetCveId}` : ''}
                           </span>
-                          <span className="text-[10px] text-sky-700 font-semibold block mt-1">
-                            Est. Risk Reduction: -{item.estimatedRiskReduction.toFixed(1)} Pts | EAL Saved: {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)}
-                          </span>
+                          {hasOptimized && (
+                            <span className="text-[10px] text-sky-700 font-semibold block mt-1">
+                              Est. Risk Reduction: -{item.estimatedRiskReduction.toFixed(1)} Pts | EAL Saved: {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)}
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -278,40 +282,52 @@ export const InvestmentOptimizer: React.FC = () => {
                     </div>
 
                     {/* EXPANDABLE ROSI PROOF BUTTON */}
-                    <div className="pt-1 flex items-center justify-between border-t border-slate-100">
-                      <button
-                        onClick={(e) => toggleActionProof(item.actionId, e)}
-                        disabled={isGenerating}
-                        className="inline-flex items-center text-[11px] font-bold text-sky-700 hover:text-sky-900 px-2.5 py-1 bg-sky-50 hover:bg-sky-100 rounded border border-sky-200 transition-all cursor-pointer"
-                      >
-                        {isGenerating ? (
-                          <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin text-sky-600" />
-                            <span>Calculating ROSI...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="w-3 h-3 mr-1 text-sky-600" />
-                            <span>{isExpanded ? 'Hide Formula' : 'Inspect ROSI Formula Proof'}</span>
-                            {isExpanded ? <ChevronUp className="w-3 h-3 ml-1 text-sky-600" /> : <ChevronDown className="w-3 h-3 ml-1 text-sky-600" />}
-                          </>
-                        )}
-                      </button>
-                      <span className="text-[11px] font-extrabold text-emerald-600">
-                        {rosiEstimate > 0 ? `+${rosiEstimate}% Est. ROSI` : `${rosiEstimate}% ROSI`}
-                      </span>
-                    </div>
+                    {hasOptimized ? (
+                      <>
+                        <div className="pt-1 flex items-center justify-between border-t border-slate-100">
+                          <button
+                            onClick={(e) => toggleActionProof(item.actionId, e)}
+                            disabled={isGenerating}
+                            className="inline-flex items-center text-[11px] font-bold text-sky-700 hover:text-sky-900 px-2.5 py-1 bg-sky-50 hover:bg-sky-100 rounded border border-sky-200 transition-all cursor-pointer"
+                          >
+                            {isGenerating ? (
+                              <>
+                                <Loader2 className="w-3 h-3 mr-1 animate-spin text-sky-600" />
+                                <span>Calculating ROSI...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Zap className="w-3 h-3 mr-1 text-sky-600" />
+                                <span>{isExpanded ? 'Hide Formula' : 'Inspect ROSI Formula Proof'}</span>
+                                {isExpanded ? <ChevronUp className="w-3 h-3 ml-1 text-sky-600" /> : <ChevronDown className="w-3 h-3 ml-1 text-sky-600" />}
+                              </>
+                            )}
+                          </button>
+                          <span className="text-[11px] font-extrabold text-emerald-600">
+                            {rosiEstimate > 0 ? `+${rosiEstimate}% Est. ROSI` : `${rosiEstimate}% ROSI`}
+                          </span>
+                        </div>
 
-                    {/* EXPANDED ROSI PROOF */}
-                    {isExpanded && (
-                      <div className="p-3 bg-slate-900 text-white rounded-md text-xs space-y-1.5 font-mono animate-in fade-in duration-150">
-                        <div className="text-sky-300 font-bold uppercase text-[10px]">ROSI Formula Evaluation:</div>
-                        <div className="text-emerald-400 font-bold text-[11px]">
-                          ROSI (%) = [ (EAL Benefit {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)} - Cost {formatCurrency(item.cost, authoritativeCurrency)}) / Cost ] × 100
-                        </div>
-                        <div className="text-slate-300 text-[10px]">
-                          = Net Return of {formatCurrency(item.estimatedEalReduction - item.cost, authoritativeCurrency)} ({rosiEstimate}% ROSI)
-                        </div>
+                        {/* EXPANDED ROSI PROOF */}
+                        {isExpanded && (
+                          <div className="p-3 bg-slate-900 text-white rounded-md text-xs space-y-1.5 font-mono animate-in fade-in duration-150">
+                            <div className="text-sky-300 font-bold uppercase text-[10px]">ROSI Formula Evaluation:</div>
+                            <div className="text-emerald-400 font-bold text-[11px]">
+                              ROSI (%) = [ (EAL Benefit {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)} - Cost {formatCurrency(item.cost, authoritativeCurrency)}) / Cost ] × 100
+                            </div>
+                            <div className="text-slate-300 text-[10px]">
+                              = Net Return of {formatCurrency(item.estimatedEalReduction - item.cost, authoritativeCurrency)} ({rosiEstimate}% ROSI)
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="pt-1 flex items-center justify-between border-t border-slate-100 text-[10px] text-text-muted">
+                        <span className="flex items-center text-slate-500">
+                          <Zap className="w-3 h-3 mr-1 text-slate-400" />
+                          ROSI Yield: Pending Optimization Run
+                        </span>
+                        <span className="font-semibold text-slate-400">Click Run Optimizer</span>
                       </div>
                     )}
                   </div>
@@ -331,7 +347,37 @@ export const InvestmentOptimizer: React.FC = () => {
         </div>
       )}
 
-      {data && !loading && (
+      {loading && (
+        <div className="bg-app-surface border border-sky-200 rounded-lg p-12 text-center shadow-2xs flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+          <h4 className="text-sm font-bold text-text-primary">Solving Investment Optimization Matrix...</h4>
+          <p className="text-xs text-text-secondary">Evaluating candidate initiatives, knapsack constraints, and ROSI trade-offs across budget limits...</p>
+        </div>
+      )}
+
+      {!hasOptimized && !loading && !error && (
+        <div className="bg-app-surface border border-dashed border-sky-300 rounded-lg p-8 text-center shadow-2xs space-y-3">
+          <div className="w-12 h-12 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center mx-auto text-sky-600">
+            <Play className="w-5 h-5 ml-0.5" />
+          </div>
+          <div className="max-w-md mx-auto space-y-1">
+            <h3 className="text-sm font-bold text-text-primary">Portfolio Knapsack Optimization Standby</h3>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Optimization results and strategy comparisons are hidden until initiated. Select candidate projects and budget limit above, then click <strong>"Run Investment Optimizer Live"</strong> to compute optimal remediation allocations and compare strategies.
+            </p>
+          </div>
+          <button
+            onClick={handleOptimize}
+            disabled={selectedInitiatives.size === 0 || budget <= 0}
+            className="inline-flex items-center space-x-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-40"
+          >
+            <Play className="w-4 h-4 mr-1" />
+            <span>Run Investment Optimizer Live</span>
+          </button>
+        </div>
+      )}
+
+      {hasOptimized && data && !loading && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-text-primary flex items-center">

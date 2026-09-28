@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, Loader2, Info, Calculator, Landmark, Zap, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { FinancialExposureResponse } from '../types/risk';
 import { riskApi } from '../api/risk';
@@ -10,32 +10,29 @@ import { useWorkspace } from '../context/WorkspaceContext';
 export const FinancialExposure: React.FC = () => {
   const { activeOrg } = useWorkspace();
   const [data, setData] = useState<FinancialExposureResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [hasCalculated, setHasCalculated] = useState<boolean>(false);
   const [recalculating, setRecalculating] = useState<boolean>(false);
-  const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString());
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [generatingRows, setGeneratingRows] = useState<Record<string, boolean>>({});
 
-  const fetchData = async (isManualRecalc = false) => {
+  const fetchData = async (_isManual?: boolean) => {
     try {
-      if (isManualRecalc) setRecalculating(true);
-      else setLoading(true);
+      setRecalculating(true);
 
       const response = await riskApi.getFinancialExposure({ limit: 100 });
       setData(response);
+      setHasCalculated(true);
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err: any) {
       setError(err.message || "Failed to load financial exposure.");
     } finally {
-      setLoading(false);
       setRecalculating(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Financial calculations are hidden until initiated by clicking the recalculate button
 
   const toggleRow = (key: string) => {
     if (expandedRows[key]) {
@@ -48,15 +45,6 @@ export const FinancialExposure: React.FC = () => {
       }, 350);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full space-y-4 min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
-        <p className="text-sm font-medium text-text-secondary">Quantifying modeled financial exposure metrics live in INR (₹)...</p>
-      </div>
-    );
-  }
 
   const FALLBACK_ITEMS = [
     {
@@ -124,17 +112,27 @@ export const FinancialExposure: React.FC = () => {
       <div className="bg-app-surface border border-app-border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
         <div className="flex items-center space-x-3">
           <div className="p-2 rounded-lg bg-sky-50 border border-sky-200">
-            <Calculator className="w-5 h-5 text-sky-600" />
+            <Calculator className={`w-5 h-5 ${hasCalculated ? 'text-sky-600' : 'text-slate-400'}`} />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold text-text-primary uppercase tracking-wider">Financial Loss Model Active</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-sky-100 text-sky-800 border border-sky-300">
-                FAIR & VERIS MODEL
+              <span className="text-xs font-bold text-text-primary uppercase tracking-wider">
+                {hasCalculated ? 'Financial Loss Model Active' : 'Financial Loss Model Standby'}
+              </span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${
+                hasCalculated
+                  ? 'bg-sky-100 text-sky-800 border-sky-300'
+                  : 'bg-amber-100 text-amber-800 border-amber-300'
+              }`}>
+                {hasCalculated ? 'FAIR & VERIS MODEL' : 'READY FOR CALCULATION'}
               </span>
             </div>
             <p className="text-[11px] text-text-muted mt-0.5">
-              Authoritative Currency: <span className="font-semibold text-text-primary">INR (₹)</span> • Last recalculated: <span className="font-semibold text-text-primary">{lastUpdated}</span>
+              Authoritative Currency: <span className="font-semibold text-text-primary">INR (₹)</span> • {hasCalculated ? (
+                <>Last calculated: <span className="font-semibold text-text-primary">{lastUpdated}</span></>
+              ) : (
+                <span className="text-amber-700 font-medium">Status: Click "Calculate Exposure Live" to compute</span>
+              )}
             </p>
           </div>
         </div>
@@ -145,7 +143,7 @@ export const FinancialExposure: React.FC = () => {
           className="inline-flex items-center space-x-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${recalculating ? 'animate-spin' : ''}`} />
-          <span>{recalculating ? 'Calculating Financial Loss Matrix...' : 'Recalculate Exposure Live'}</span>
+          <span>{recalculating ? 'Calculating Financial Loss Matrix...' : 'Calculate Exposure Live'}</span>
         </button>
       </div>
 
@@ -204,6 +202,31 @@ export const FinancialExposure: React.FC = () => {
           <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-3" />
           <h3 className="text-sm font-bold text-red-900 mb-1">Exposure Calculation Blocked</h3>
           <p className="text-xs text-red-700 mb-4">{error}</p>
+        </div>
+      ) : recalculating ? (
+        <div className="bg-app-surface border border-sky-200 rounded-lg p-12 text-center shadow-2xs flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+          <h4 className="text-sm font-bold text-text-primary">Calculating Financial Loss Matrix & EAL...</h4>
+          <p className="text-xs text-text-secondary">Simulating annualized financial losses calibrated against Indian enterprise downtime and recovery costs...</p>
+        </div>
+      ) : !hasCalculated ? (
+        <div className="bg-app-surface border border-dashed border-sky-300 rounded-lg p-10 text-center shadow-2xs space-y-4">
+          <div className="w-12 h-12 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center mx-auto text-sky-600">
+            <Calculator className="w-6 h-6" />
+          </div>
+          <div className="max-w-md mx-auto space-y-1">
+            <h3 className="text-sm font-bold text-text-primary">FAIR & VERIS Quantitative Financial Model</h3>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Financial exposure calculations are hidden until initiated. Click <strong>"Calculate Exposure Live"</strong> to compute Single Loss Expectancy (SLE) and Annualized Loss Expectancy (EAL) in Indian Rupees (₹).
+            </p>
+          </div>
+          <button
+            onClick={() => fetchData(true)}
+            className="inline-flex items-center space-x-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4 mr-1" />
+            <span>Calculate Exposure Live</span>
+          </button>
         </div>
       ) : items.length === 0 ? (
         <div className="bg-app-surface border border-app-border p-12 rounded-lg text-center shadow-2xs">
