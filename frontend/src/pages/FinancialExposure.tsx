@@ -91,10 +91,10 @@ export const FinancialExposure: React.FC = () => {
     <div className="space-y-6">
       {/* 1. Standard Header */}
       <StandardPageHeader
-        title="Financial Exposure Analysis (INR ₹)"
-        purpose="Translate Indian cyber incident scenarios into modeled monetary financial exposure in Indian Rupees (₹)."
+        title="Financial Loss Exposure Analysis (INR ₹)"
+        purpose="Translate cyber incident scenarios into modeled monetary financial exposure in Indian Rupees (₹)."
         steps={[
-          'Review Indian enterprise financial parameters (downtime cost in ₹ Lakhs, breach penalties in ₹ Crore)',
+          'Review enterprise financial parameters (downtime cost in ₹ Lakhs, breach penalties in ₹ Crore)',
           'Inspect Single Loss Expectancy (SLE in ₹) and Annualized Loss Expectancy (EAL in ₹) per asset',
           'Validate loss component breakdown across primary downtime loss and secondary incident recovery costs'
         ]}
@@ -102,23 +102,23 @@ export const FinancialExposure: React.FC = () => {
       />
 
       {/* Demo Assumptions Disclaimer */}
-      <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg text-xs text-purple-950 space-y-2 shadow-2xs">
-        <div className="flex items-center space-x-2 font-bold text-purple-900 text-sm">
-          <Info className="w-4 h-4 text-purple-600" />
-          <span>Bharat Digital Financial Services (Demo) — Indian Financial Loss Parameters</span>
-          <span className="bg-purple-200 text-purple-900 px-2 py-0.5 rounded text-[10px] uppercase font-extrabold ml-2">
+      <div className="bg-sky-50 border border-sky-200 p-4 rounded-lg text-xs text-sky-950 space-y-2 shadow-2xs">
+        <div className="flex items-center space-x-2 font-bold text-sky-900 text-sm">
+          <Info className="w-4 h-4 text-sky-600" />
+          <span>Apex Enterprise Financial Services — Quantitative Risk Parameters</span>
+          <span className="bg-sky-200 text-sky-900 px-2 py-0.5 rounded text-[10px] uppercase font-extrabold ml-2">
             INR (₹) PARAMETERS
           </span>
         </div>
-        <p className="text-purple-900/90 leading-relaxed">
-          These financial exposure numbers are <strong>modeled loss estimates in Indian Rupees (₹)</strong> calibrated against Indian digital banking revenue rates, RBI regulatory breach penalty baselines, and CERT-In recovery costs.
+        <p className="text-sky-900/90 leading-relaxed">
+          These financial exposure numbers are <strong>modeled loss estimates in Indian Rupees (₹)</strong> calibrated against digital banking revenue rates, regulatory breach penalty baselines, and incident recovery costs.
         </p>
       </div>
 
-      {/* Assumptions Grid — 100% INDIAN INR (₹) */}
+      {/* Assumptions Grid — 100% INR (₹) */}
       <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-2xs">
         <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-3 flex items-center">
-          <Calculator className="w-4 h-4 mr-1.5 text-brand-primary" /> Indian Enterprise Baseline Financial Assumptions (₹ INR)
+          <Calculator className="w-4 h-4 mr-1.5 text-brand-primary" /> Enterprise Baseline Financial Assumptions (₹ INR)
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
@@ -126,7 +126,7 @@ export const FinancialExposure: React.FC = () => {
             <span className="text-lg font-bold text-text-primary">
               {formatCurrency(1250000, authoritativeCurrency)} / hr
             </span>
-            <span className="text-text-secondary text-[11px] block mt-0.5">₹12.5 Lakhs/hr (Bharat Bank UPI & CBS rate)</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">₹12.5 Lakhs/hr (Core Payment Switch rate)</span>
           </div>
 
           <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">

@@ -27,7 +27,7 @@ export const InvestmentOptimizer: React.FC = () => {
       actionId: 'act-edr-mumbai-upi-01',
       title: 'Upgrade EDR Sensor to Active Blocking Mode on Mumbai UPI Gateway',
       actionType: 'IMPLEMENT_CONTROL',
-      targetAssetId: 'mumbai-upi-switch-01.bharatbank.internal',
+      targetAssetId: 'mumbai-upi-switch-01.apexbank.internal',
       controlCode: 'EDR_ACTIVE',
       cost: 1500000, // ₹15 Lakhs
       estimatedRiskReduction: 38.5,
@@ -37,7 +37,7 @@ export const InvestmentOptimizer: React.FC = () => {
       actionId: 'act-patch-log4j-cbs-01',
       title: 'Patch Critical Apache Log4j (CVE-2021-44228) on Bengaluru Core Banking DB',
       actionType: 'PATCH_VULNERABILITY',
-      targetAssetId: 'bengaluru-cbs-db-cluster.bharatbank.internal',
+      targetAssetId: 'bengaluru-cbs-db-cluster.apexbank.internal',
       targetCveId: 'CVE-2021-44228',
       cost: 2500000, // ₹25 Lakhs
       estimatedRiskReduction: 42.0,
@@ -47,7 +47,7 @@ export const InvestmentOptimizer: React.FC = () => {
       actionId: 'act-segment-delhi-hq-01',
       title: 'Micro-segment Network Path between Delhi Edge Proxy and Hyderabad DC',
       actionType: 'ISOLATE_ASSET',
-      targetAssetId: 'delhi-netbanking-proxy.bharatbank.internal',
+      targetAssetId: 'delhi-netbanking-proxy.apexbank.internal',
       controlCode: 'SEGMENTATION',
       cost: 3500000, // ₹35 Lakhs
       estimatedRiskReduction: 28.0,

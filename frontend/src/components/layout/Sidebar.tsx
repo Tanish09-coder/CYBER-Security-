@@ -4,7 +4,7 @@ import {
   Radio, Bug, Server, ShieldAlert, Flame,
   Building2, DollarSign, TrendingUp,
   Sparkles, LayoutDashboard, FileBarChart2,
-  GitBranch, Shield, Activity
+  GitBranch, Shield, Activity, ShieldCheck
 } from 'lucide-react';
 
 import { fetchApi } from '../../api/client';
@@ -42,11 +42,11 @@ const navSections = [
     ],
   },
   {
-    title: 'Reporting',
+    title: 'Reporting & AI',
     items: [
       { to: '/executive-dashboard', label: 'Executive Dashboard', icon: <LayoutDashboard size={15} /> },
       { to: '/compliance', label: 'Compliance', icon: <FileBarChart2 size={15} /> },
-      { to: '/attack-path', label: 'Attack Path', icon: <Shield size={15} /> },
+      { to: '/attack-path', label: 'Attack Path Topology', icon: <Shield size={15} /> },
       { to: '/ai-assistant', label: 'AI Assistant', icon: <Sparkles size={15} /> },
     ],
   },
@@ -71,37 +71,29 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="gov-sidebar">
-      {/* Tiranga bar */}
-      <div className="tiranga-bar" />
-
       {/* Brand */}
-      <div className="gov-brand">
-        {/* Ashoka Chakra–style emblem */}
-        <div className="gov-emblem">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1.5" opacity="0.4"/>
-            <circle cx="12" cy="12" r="4" fill="white" opacity="0.9"/>
-            {/* Spokes */}
-            {Array.from({ length: 24 }).map((_, i) => {
-              const angle = (i * 15 * Math.PI) / 180;
-              const x1 = 12 + 5 * Math.cos(angle);
-              const y1 = 12 + 5 * Math.sin(angle);
-              const x2 = 12 + 9.5 * Math.cos(angle);
-              const y2 = 12 + 9.5 * Math.sin(angle);
-              return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth="0.7" opacity="0.7"/>;
-            })}
-          </svg>
+      <div className="gov-brand" style={{ padding: '18px 18px 16px' }}>
+        {/* Sleek Enterprise Cyber Shield Emblem */}
+        <div style={{
+          width: 40, height: 40, borderRadius: 8,
+          background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(2,132,199,0.35)',
+          border: '1px solid rgba(255,255,255,0.2)'
+        }}>
+          <ShieldCheck size={22} color="#FFFFFF" />
         </div>
 
         <div className="gov-brand-text">
           <h1>CyberRiskOS</h1>
-          <div className="tagline">Cyber Risk Intelligence</div>
-          <div className="hindi">भारत सरकार · Govt. of India</div>
+          <div className="tagline" style={{ color: '#38BDF8', letterSpacing: '0.1em' }}>
+            Enterprise Defense
+          </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="scrollbar-hide" style={{ flex: 1, overflowY: 'auto', padding: '6px 0' }}>
+      <nav className="scrollbar-hide" style={{ flex: 1, overflowY: 'auto', padding: '10px 0' }}>
         {navSections.map((section) => (
           <div key={section.title}>
             <div className="gov-nav-section">{section.title}</div>
@@ -111,7 +103,7 @@ export const Sidebar: React.FC = () => {
                 to={item.to}
                 className={({ isActive }) => `gov-nav-item${isActive ? ' active' : ''}`}
               >
-                <span className="nav-icon" style={{ opacity: 0.75, lineHeight: 0 }}>{item.icon}</span>
+                <span className="nav-icon" style={{ opacity: 0.8, lineHeight: 0 }}>{item.icon}</span>
                 <span>{item.label}</span>
               </NavLink>
             ))}
@@ -136,17 +128,17 @@ export const Sidebar: React.FC = () => {
         {/* Org */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{
-            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 4, padding: 6, lineHeight: 0
+            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 6, padding: 6, lineHeight: 0
           }}>
-            <Building2 size={13} color="rgba(253,186,116,0.85)" />
+            <Building2 size={14} color="#38BDF8" />
           </div>
           <div style={{ overflow: 'hidden' }}>
             <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {activeOrg.name}
             </div>
             <div style={{ fontSize: 9.5, color: 'rgba(147,197,253,0.7)', marginTop: 1 }}>
-              CISO / Risk Officer
+              Enterprise Operations
             </div>
           </div>
         </div>

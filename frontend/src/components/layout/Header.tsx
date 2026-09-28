@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { HelpCircle, RefreshCw, Building2, Shield } from 'lucide-react';
+import { HelpCircle, RefreshCw, Building2, ShieldCheck } from 'lucide-react';
 import { fetchApi } from '../../api/client';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
-const PAGE_META: Record<string, { title: string; hindi: string }> = {
-  'integrations':         { title: 'Public Cyber Intelligence Integrations', hindi: 'साइबर सूचना एकीकरण' },
-  'vulnerabilities':      { title: 'Vulnerability Intelligence', hindi: 'भेद्यता सूचना' },
-  'assets':               { title: 'Enterprise Assets', hindi: 'उद्यम संपत्तियाँ' },
-  'controls':             { title: 'Security Control Posture', hindi: 'सुरक्षा नियंत्रण' },
-  'threat-intel':         { title: 'Threat Intelligence', hindi: 'साइबर खतरा विश्लेषण' },
-  'risk-overview':        { title: 'Enterprise Risk Overview', hindi: 'जोखिम अवलोकन' },
-  'financial-exposure':   { title: 'Financial Exposure', hindi: 'वित्तीय जोखिम' },
-  'what-if-simulator':    { title: 'Scenario Simulator', hindi: 'परिदृश्य सिमुलेटर' },
-  'investment-optimizer': { title: 'Investment Optimizer', hindi: 'निवेश अनुकूलक' },
-  'executive-dashboard':  { title: 'Executive Risk & Financial Summary', hindi: 'कार्यकारी डैशबोर्ड' },
-  'compliance':           { title: 'Compliance Framework Posture', hindi: 'अनुपालन स्थिति' },
-  'attack-path':          { title: 'Attack Path Analysis', hindi: 'आक्रमण पथ विश्लेषण' },
-  'ai-assistant':         { title: 'AI Explanation Assistant', hindi: 'AI सहायक' },
-  'breach-containment':   { title: 'Active Server Breach Containment AI Agent', hindi: 'सक्रिय सर्वर उल्लंघन नियंत्रण AI' },
+const PAGE_META: Record<string, { title: string }> = {
+  'integrations':         { title: 'Public Cyber Intelligence Integrations' },
+  'vulnerabilities':      { title: 'Vulnerability Intelligence' },
+  'assets':               { title: 'Enterprise Assets & Attack Surface' },
+  'controls':             { title: 'Security Control Posture' },
+  'threat-intel':         { title: 'Threat Intelligence & Outage Records' },
+  'risk-overview':        { title: 'Enterprise Risk Overview' },
+  'financial-exposure':   { title: 'Financial Loss Exposure' },
+  'what-if-simulator':    { title: 'Scenario Risk Simulator' },
+  'investment-optimizer': { title: 'Security Investment Optimizer' },
+  'executive-dashboard':  { title: 'Executive Risk & Financial Summary' },
+  'compliance':           { title: 'Compliance Framework Posture' },
+  'attack-path':          { title: 'Attack Path Topology & Choke Points' },
+  'ai-assistant':         { title: 'CyberRiskOS AI Explanation Assistant' },
+  'breach-containment':   { title: 'Active Breach Containment AI Agent' },
 };
 
 export const Header: React.FC = () => {
   const location = useLocation();
   const seg = location.pathname.split('/')[1] || '';
-  const meta = PAGE_META[seg] ?? { title: seg.replace(/-/g, ' '), hindi: '' };
+  const meta = PAGE_META[seg] ?? { title: seg.replace(/-/g, ' ') };
   const { activeOrg, setShowFirstTimeTour } = useWorkspace();
 
   const [status, setStatus] = useState<'HEALTHY' | 'DEGRADED' | 'DISCONNECTED'>('HEALTHY');
@@ -49,21 +49,18 @@ export const Header: React.FC = () => {
 
   return (
     <header className="gov-header">
-      {/* ── MeitY Ministry Utility Bar ── */}
+      {/* ── Enterprise Top Utility Bar ── */}
       <div className="gov-ministry-bar">
         <div className="gov-ministry-left">
-          {/* MeitY shield icon */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Shield size={13} color="rgba(253,186,116,0.9)" />
-            <span style={{ fontWeight: 600 }}>
-              Ministry of Electronics &amp; Information Technology
+            <ShieldCheck size={14} color="#38BDF8" />
+            <span style={{ fontWeight: 700, letterSpacing: '0.04em' }}>
+              CyberRiskOS Enterprise Platform
             </span>
           </div>
           <div className="gov-ministry-divider" />
-          <span style={{ color: 'rgba(147,197,253,0.8)', fontWeight: 500 }}>भारत सरकार</span>
-          <div className="gov-ministry-divider" />
-          <span style={{ color: 'rgba(147,197,253,0.6)', fontWeight: 400 }}>
-            National Cyber Risk Intelligence Platform
+          <span style={{ color: 'rgba(147,197,253,0.85)', fontWeight: 500 }}>
+            Real-Time Cyber Defense & Risk Quantification Engine
           </span>
         </div>
 
@@ -81,7 +78,7 @@ export const Header: React.FC = () => {
                   <span className="gov-status-dot online" />
                 </span>
                 <span style={{ color: 'rgba(134,239,172,0.95)', fontWeight: 700, fontSize: 11 }}>
-                  CONNECTED
+                  ENGINE ONLINE
                 </span>
               </>
             ) : (
@@ -108,30 +105,29 @@ export const Header: React.FC = () => {
           <button
             onClick={() => setShowFirstTimeTour(true)}
             title="Help & Product Tour"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, lineHeight: 0, color: 'rgba(147,197,253,0.7)' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, lineHeight: 0, color: 'rgba(147,197,253,0.8)' }}
           >
-            <HelpCircle size={14} />
+            <HelpCircle size={15} />
           </button>
         </div>
       </div>
 
-      {/* ── Tiranga Stripe ── */}
-      <div className="tiranga-bar" />
+      {/* ── Subtle Accent Border ── */}
+      <div style={{ height: '2px', background: 'linear-gradient(90deg, #0284C7 0%, #38BDF8 50%, #6366F1 100%)' }} />
 
       {/* ── Page Title Bar ── */}
       <div className="gov-page-bar">
         <div className="gov-page-title">
           <h2>{meta.title}</h2>
-          {meta.hindi && <div className="page-hindi">{meta.hindi}</div>}
         </div>
 
         {/* Org context badge */}
         <div className="gov-org-badge">
-          <Building2 size={14} color="var(--navy)" />
+          <Building2 size={14} color="#0F172A" />
           <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: 12 }}>
             {activeOrg.name}
           </span>
-          <span className="currency-tag">
+          <span className="currency-tag" style={{ background: '#0284C7' }}>
             {activeOrg.currency || 'INR'} ₹
           </span>
         </div>

@@ -15,7 +15,7 @@ export const WhatIfSimulator: React.FC = () => {
   
   // Action builder state
   const [actionType, setActionType] = useState<'PATCH_VULNERABILITY' | 'IMPLEMENT_CONTROL' | 'ISOLATE_ASSET' | 'DECOMMISSION_ASSET'>('PATCH_VULNERABILITY');
-  const [targetAssetId, setTargetAssetId] = useState('mumbai-upi-switch-01.bharatbank.internal');
+  const [targetAssetId, setTargetAssetId] = useState('mumbai-upi-switch-01.apexbank.internal');
   const [targetCveId, setTargetCveId] = useState('CVE-2021-44228');
   const [controlCode, setControlCode] = useState('EDR');
 
@@ -23,13 +23,13 @@ export const WhatIfSimulator: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Authoritative Indian Enterprise Datacenter Asset Options
+  // Authoritative Enterprise Datacenter Asset Options
   const DEMO_ASSET_OPTIONS = [
-    { id: 'mumbai-upi-switch-01.bharatbank.internal', label: 'Mumbai UPI & IMPS Payment Switch (mumbai-upi-switch-01)', defaultCve: 'CVE-2021-41773' },
-    { id: 'bengaluru-cbs-db-cluster.bharatbank.internal', label: 'Bengaluru CBS Core Banking DB (bengaluru-cbs-db-cluster)', defaultCve: 'CVE-2021-44228' },
-    { id: 'delhi-netbanking-proxy.bharatbank.internal', label: 'Delhi NetBanking & Mobile Proxy (delhi-netbanking-proxy)', defaultCve: 'CVE-2023-38545' },
-    { id: 'hyderabad-hq-dc01.bharatbank.internal', label: 'Hyderabad HQ Active Directory (hyderabad-hq-dc01)', defaultCve: 'CVE-2023-20198' },
-    { id: 'chennai-internal-wiki.bharatbank.internal', label: 'Chennai Internal Wiki Server (chennai-internal-wiki)', defaultCve: 'CVE-2023-22515' },
+    { id: 'mumbai-upi-switch-01.apexbank.internal', label: 'Mumbai UPI & Payment Switch (mumbai-upi-switch-01)', defaultCve: 'CVE-2021-41773' },
+    { id: 'bengaluru-cbs-db-cluster.apexbank.internal', label: 'Bengaluru Core Banking DB Cluster (bengaluru-cbs-db)', defaultCve: 'CVE-2021-44228' },
+    { id: 'delhi-netbanking-proxy.apexbank.internal', label: 'Delhi Edge NetBanking Proxy (delhi-netbanking-proxy)', defaultCve: 'CVE-2023-38545' },
+    { id: 'hyderabad-hq-dc01.apexbank.internal', label: 'Hyderabad HQ Active Directory (hyderabad-hq-dc01)', defaultCve: 'CVE-2023-20198' },
+    { id: 'chennai-internal-wiki.apexbank.internal', label: 'Chennai Internal Knowledge Portal (chennai-internal-wiki)', defaultCve: 'CVE-2023-22515' },
   ];
 
   const handleAssetSelectChange = (assetId: string) => {
@@ -67,7 +67,7 @@ export const WhatIfSimulator: React.FC = () => {
       setData(null);
 
       const request: WhatIfSimulationRequest = {
-        scenarioName: 'Indian Enterprise Hypothetical Security Sandbox',
+        scenarioName: 'Enterprise Security Posture Sandbox',
         actions: actions
       };
 
@@ -92,9 +92,9 @@ export const WhatIfSimulator: React.FC = () => {
       {/* 1. Standard Header */}
       <StandardPageHeader
         title="What-If Risk Simulator (INR ₹)"
-        purpose="Test hypothetical Indian security posture changes in a sandbox environment without altering baseline enterprise data."
+        purpose="Test hypothetical security posture changes in a sandbox environment without altering baseline enterprise data."
         steps={[
-          'Select an Indian enterprise asset (Mumbai UPI Switch, Bengaluru CBS DB) and target vulnerability',
+          'Select an enterprise asset (Mumbai UPI Switch, Bengaluru CBS DB) and target vulnerability',
           'Choose a hypothetical action (Patch Log4j, upgrade EDR control, segment network path)',
           'Run simulation to compare CURRENT baseline vs HYPOTHETICAL scenario outcomes in INR (₹)'
         ]}

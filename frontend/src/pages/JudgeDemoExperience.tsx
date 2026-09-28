@@ -93,7 +93,7 @@ export const JudgeDemoExperience: React.FC = () => {
   // Hero Scenario Constants (Grounded in Apex Financial Enterprises Demo)
   const heroData = {
     systemName: 'UPI Switch Gateway Proxy',
-    hostname: 'mumbai-upi-switch-01.bharatbank.internal',
+    hostname: 'mumbai-upi-switch-01.apexbank.internal',
     software: 'Atlassian Confluence / UPI Gateway 8.5.0',
     cve: 'CVE-2023-22515',
     cvss: 10.0,

@@ -206,10 +206,10 @@ export const ExecutiveDashboard: React.FC = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-app-border">
                     {(topRisks.length > 0 ? topRisks : [
-                      { assetId: 'ast-upi-01', assetName: 'mumbai-upi-switch-01.bharatbank.internal', cveId: 'CVE-2023-22515', riskScore: 88.5 },
-                      { assetId: 'ast-cbs-01', assetName: 'bengaluru-cbs-db-cluster.bharatbank.internal', cveId: 'CVE-2021-44228', riskScore: 84.2 },
-                      { assetId: 'ast-net-01', assetName: 'delhi-netbanking-proxy.bharatbank.internal', cveId: 'CVE-2022-30190', riskScore: 76.9 },
-                      { assetId: 'ast-hq-01', assetName: 'hyderabad-hq-dc01.bharatbank.internal', cveId: 'CVE-2023-34362', riskScore: 68.4 }
+                      { assetId: 'ast-upi-01', assetName: 'mumbai-upi-switch-01.apexbank.internal', cveId: 'CVE-2023-22515', riskScore: 88.5 },
+                      { assetId: 'ast-cbs-01', assetName: 'bengaluru-cbs-db-cluster.apexbank.internal', cveId: 'CVE-2021-44228', riskScore: 84.2 },
+                      { assetId: 'ast-net-01', assetName: 'delhi-netbanking-proxy.apexbank.internal', cveId: 'CVE-2022-30190', riskScore: 76.9 },
+                      { assetId: 'ast-hq-01', assetName: 'hyderabad-hq-dc01.apexbank.internal', cveId: 'CVE-2023-34362', riskScore: 68.4 }
                     ]).map(r => (
                       <tr key={r.assetId} className="hover:bg-gray-50/50">
                         <td className="px-4 py-3 font-bold text-text-primary">{formatEntityName(r.assetName, r.assetId)}</td>

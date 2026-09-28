@@ -5,46 +5,46 @@
 @tailwind utilities;
 
 /* ================================================================
-   CYBERRISKOS — PREMIUM INDIA GOVERNMENT DESIGN SYSTEM
-   Inspired by: MeitY / CERT-In / NIC / India.gov.in / DRDO portals
+   CYBERRISKOS — ENTERPRISE CYBER DEFENSE DESIGN SYSTEM
+   Modern Enterprise Cybersecurity SaaS Theme
    ================================================================ */
 
 :root {
-  /* Tiranga Core */
-  --saffron:        #FF671F;
-  --saffron-dark:   #D4521A;
-  --saffron-light:  #FFF2EB;
-  --navy:           #06038D;
-  --navy-dark:      #03006B;
-  --navy-mid:       #1A3A8F;
-  --navy-light:     #2751A3;
-  --india-green:    #046A38;
-  --india-green-dk: #024D28;
-  --india-green-lt: #E6F4EC;
+  /* Brand Core */
+  --saffron:        #0284C7;
+  --saffron-dark:   #0369A1;
+  --saffron-light:  #F0F9FF;
+  --navy:           #0F172A;
+  --navy-dark:      #020617;
+  --navy-mid:       #1E293B;
+  --navy-light:     #334155;
+  --india-green:    #10B981;
+  --india-green-dk: #047857;
+  --india-green-lt: #ECFDF5;
 
   /* Background */
-  --bg-page:        #F2F5FA;
+  --bg-page:        #F8FAFC;
   --bg-white:       #FFFFFF;
-  --bg-light-blue:  #EBF0FA;
-  --bg-sidebar:     #06038D;
+  --bg-light-blue:  #F1F5F9;
+  --bg-sidebar:     #0F172A;
 
   /* Text */
-  --text-dark:      #0A0A1E;
-  --text-body:      #2C3A50;
-  --text-muted:     #5C6E84;
-  --text-faint:     #96A5B8;
+  --text-dark:      #0F172A;
+  --text-body:      #334155;
+  --text-muted:     #64748B;
+  --text-faint:     #94A3B8;
 
   /* Borders */
-  --border:         #C8D6E8;
-  --border-light:   #DDE6F0;
+  --border:         #E2E8F0;
+  --border-light:   #F1F5F9;
 
   /* Status */
-  --red:            #C0392B;
-  --red-lt:         #FEE2E2;
+  --red:            #E11D48;
+  --red-lt:         #FFE4E6;
   --amber:          #D97706;
   --amber-lt:       #FEF3C7;
-  --green:          #046A38;
-  --green-lt:       #DCFCE7;
+  --green:          #10B981;
+  --green-lt:       #D1FAE5;
 }
 
 /* ======================== BASE ======================== */
@@ -61,20 +61,16 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  ::selection { background: var(--saffron); color: #fff; }
+  ::selection { background: #0284C7; color: #fff; }
 
-  a { color: var(--navy); text-decoration: none; }
-  a:hover { color: var(--navy-light); }
+  a { color: #0284C7; text-decoration: none; }
+  a:hover { color: #0369A1; }
 }
 
-/* ====================== TIRANGA BAR ====================== */
+/* ====================== SUBTLE ACCENT BAR ====================== */
 .tiranga-bar {
-  height: 6px;
-  background: linear-gradient(to right,
-    var(--saffron) 33.33%,
-    #FFFFFF       33.33% 66.66%,
-    var(--india-green) 66.66%
-  );
+  height: 2px;
+  background: linear-gradient(90deg, #0284C7 0%, #38BDF8 50%, #6366F1 100%);
   flex-shrink: 0;
 }
 
@@ -91,28 +87,18 @@
 .gov-sidebar {
   width: 256px;
   min-height: 100vh;
-  background: linear-gradient(180deg, #03006B 0%, #06038D 40%, #071BA0 100%);
+  background: linear-gradient(180deg, #090D16 0%, #0F172A 60%, #172554 100%);
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 20;
-  box-shadow: 4px 0 20px rgba(6,3,141,0.35);
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.25);
   flex-shrink: 0;
 }
 
-/* Ashoka Chakra SVG watermark */
+/* Sidebar decorative background */
 .gov-sidebar::before {
-  content: '';
-  position: absolute;
-  bottom: 120px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 180px;
-  height: 180px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='6' fill='rgba(255,255,255,0.05)'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  pointer-events: none;
+  display: none;
 }
 
 /* Brand header inside sidebar */
@@ -268,8 +254,8 @@
 /* Main page title bar */
 .gov-page-bar {
   background: #FFFFFF;
-  border-bottom: 2px solid var(--saffron);
-  padding: 10px 24px;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -277,7 +263,7 @@
 }
 
 .gov-page-title h2 {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--text-dark);
   margin: 0;
@@ -286,28 +272,27 @@
 }
 
 .gov-page-title .page-hindi {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 1px;
-  font-weight: 400;
+  display: none;
 }
 
 .gov-org-badge {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--bg-light-blue);
-  border: 1px solid var(--border);
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
   padding: 6px 12px;
   font-size: 12px;
 }
 
 .gov-org-badge .currency-tag {
-  background: var(--saffron);
+  background: #0284C7;
   color: #fff;
   font-size: 10px;
   font-weight: 800;
   padding: 2px 7px;
+  border-radius: 4px;
   letter-spacing: 0.05em;
 }
 
@@ -322,7 +307,7 @@
 /* ======================== SECTION HEADER ======================== */
 .gov-section-header {
   padding-bottom: 14px;
-  border-bottom: 2px solid var(--saffron);
+  border-bottom: 1px solid #E2E8F0;
   margin-bottom: 20px;
 }
 
@@ -348,31 +333,32 @@
 /* ======================== BADGES ======================== */
 .gov-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 3px 9px;
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-radius: 2px;
+  border-radius: 4px;
   white-space: nowrap;
 }
-.gov-badge-real    { background:#E6F4EC; color:#024D28; border:1px solid #046A38; }
-.gov-badge-demo    { background:#FFF2EB; color:#C45011; border:1px solid #FF671F; }
-.gov-badge-modeled { background:#EDE9FE; color:#4C1D95; border:1px solid #7C3AED; }
-.gov-badge-hypo    { background:#EBF0FA; color:#1E3A8A; border:1px solid #06038D; }
-.gov-badge-critical { background:#FEE2E2; color:#991B1B; border:1px solid #FECACA; }
-.gov-badge-high    { background:#FFEDD5; color:#7C2D12; border:1px solid #FED7AA; }
-.gov-badge-medium  { background:#FEF9C3; color:#713F12; border:1px solid #FDE047; }
-.gov-badge-low     { background:#DCFCE7; color:#14532D; border:1px solid #BBF7D0; }
-.gov-badge-enabled { background:#E6F4EC; color:#024D28; border:1px solid #046A38; }
-.gov-badge-stale   { background:#FFF2EB; color:#92400E; border:1px solid #FED7AA; }
-.gov-badge-info    { background:#DBEAFE; color:#1E3A8A; border:1px solid #BFDBFE; }
+.gov-badge-real    { background:#ECFDF5; color:#047857; border:1px solid #10B981; }
+.gov-badge-demo    { background:#F0F9FF; color:#0369A1; border:1px solid #0284C7; }
+.gov-badge-modeled { background:#F5F3FF; color:#6D28D9; border:1px solid #8B5CF6; }
+.gov-badge-hypo    { background:#F1F5F9; color:#1E293B; border:1px solid #64748B; }
+.gov-badge-critical { background:#FFE4E6; color:#9F1239; border:1px solid #FDA4AF; }
+.gov-badge-high    { background:#FFEDD5; color:#9A3412; border:1px solid #FDBA74; }
+.gov-badge-medium  { background:#FEF9C3; color:#854D0E; border:1px solid #FDE047; }
+.gov-badge-low     { background:#D1FAE5; color:#065F46; border:1px solid #6EE7B7; }
+.gov-badge-enabled { background:#ECFDF5; color:#047857; border:1px solid #10B981; }
+.gov-badge-stale   { background:#FFF7ED; color:#9A3412; border:1px solid #FDBA74; }
+.gov-badge-info    { background:#E0F2FE; color:#0369A1; border:1px solid #7DD3FC; }
 
 /* ======================== INSTRUCTION BOX ======================== */
 .gov-instruction-box {
-  background: linear-gradient(135deg, #EBF0FA 0%, #F5F8FE 100%);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--navy);
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-left: 4px solid #0284C7;
+  border-radius: 6px;
   padding: 14px 18px;
   margin-bottom: 20px;
 }
@@ -400,7 +386,8 @@
   align-items: flex-start;
   gap: 10px;
   background: #FFFFFF;
-  border: 1px solid var(--border-light);
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
   padding: 10px 12px;
 }
 
@@ -408,14 +395,14 @@
   width: 22px;
   height: 22px;
   min-width: 22px;
-  background: var(--saffron);
+  background: #0284C7;
   color: #FFFFFF;
   font-size: 11px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px;
+  border-radius: 50%;
   margin-top: 1px;
 }
 
