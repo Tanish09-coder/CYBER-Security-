@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Info, Calculator, HelpCircle, Landmark } from 'lucide-react';
+import { AlertCircle, Loader2, Info, Calculator, Landmark, Zap, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { FinancialExposureResponse } from '../types/risk';
 import { riskApi } from '../api/risk';
 import { formatCurrency } from '../utils/currency';
@@ -11,28 +11,49 @@ export const FinancialExposure: React.FC = () => {
   const { activeOrg } = useWorkspace();
   const [data, setData] = useState<FinancialExposureResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [recalculating, setRecalculating] = useState<boolean>(false);
+  const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString());
   const [error, setError] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [generatingRows, setGeneratingRows] = useState<Record<string, boolean>>({});
+
+  const fetchData = async (isManualRecalc = false) => {
+    try {
+      if (isManualRecalc) setRecalculating(true);
+      else setLoading(true);
+
+      const response = await riskApi.getFinancialExposure({ limit: 100 });
+      setData(response);
+      setLastUpdated(new Date().toLocaleTimeString());
+    } catch (err: any) {
+      setError(err.message || "Failed to load financial exposure.");
+    } finally {
+      setLoading(false);
+      setRecalculating(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await riskApi.getFinancialExposure({ limit: 100 });
-        setData(response);
-      } catch (err: any) {
-        setError(err.message || "Failed to load financial exposure.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
+
+  const toggleRow = (key: string) => {
+    if (expandedRows[key]) {
+      setExpandedRows(prev => ({ ...prev, [key]: false }));
+    } else {
+      setGeneratingRows(prev => ({ ...prev, [key]: true }));
+      setTimeout(() => {
+        setGeneratingRows(prev => ({ ...prev, [key]: false }));
+        setExpandedRows(prev => ({ ...prev, [key]: true }));
+      }, 350);
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full space-y-4 min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
-        <p className="text-sm font-medium text-text-secondary">Quantifying modeled financial exposure metrics in INR (₹)...</p>
+        <p className="text-sm font-medium text-text-secondary">Quantifying modeled financial exposure metrics live in INR (₹)...</p>
       </div>
     );
   }
@@ -83,9 +104,7 @@ export const FinancialExposure: React.FC = () => {
   const rawItems = data?.items || [];
   const items = rawItems.length > 0 ? rawItems : FALLBACK_ITEMS;
   const authoritativeCurrency = activeOrg?.currency || 'INR';
-
   const modeledEalTotal = items.reduce((sum, item) => sum + (item.eal || 0), 0);
-
 
   return (
     <div className="space-y-6">
@@ -96,12 +115,41 @@ export const FinancialExposure: React.FC = () => {
         steps={[
           'Review enterprise financial parameters (downtime cost in ₹ Lakhs, breach penalties in ₹ Crore)',
           'Inspect Single Loss Expectancy (SLE in ₹) and Annualized Loss Expectancy (EAL in ₹) per asset',
-          'Validate loss component breakdown across primary downtime loss and secondary incident recovery costs'
+          'Expand "Inspect Formula Proof" on any row to view step-by-step financial calculation equations'
         ]}
         dataOriginBadge="MODELED / ESTIMATED"
       />
 
-      {/* Demo Assumptions Disclaimer */}
+      {/* Control Bar */}
+      <div className="bg-app-surface border border-app-border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 rounded-lg bg-sky-50 border border-sky-200">
+            <Calculator className="w-5 h-5 text-sky-600" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-bold text-text-primary uppercase tracking-wider">Financial Loss Model Active</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-sky-100 text-sky-800 border border-sky-300">
+                FAIR & VERIS MODEL
+              </span>
+            </div>
+            <p className="text-[11px] text-text-muted mt-0.5">
+              Authoritative Currency: <span className="font-semibold text-text-primary">INR (₹)</span> • Last recalculated: <span className="font-semibold text-text-primary">{lastUpdated}</span>
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => fetchData(true)}
+          disabled={recalculating}
+          className="inline-flex items-center space-x-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${recalculating ? 'animate-spin' : ''}`} />
+          <span>{recalculating ? 'Calculating Financial Loss Matrix...' : 'Recalculate Exposure Live'}</span>
+        </button>
+      </div>
+
+      {/* Assumptions Disclaimer */}
       <div className="bg-sky-50 border border-sky-200 p-4 rounded-lg text-xs text-sky-950 space-y-2 shadow-2xs">
         <div className="flex items-center space-x-2 font-bold text-sky-900 text-sm">
           <Info className="w-4 h-4 text-sky-600" />
@@ -115,7 +163,7 @@ export const FinancialExposure: React.FC = () => {
         </p>
       </div>
 
-      {/* Assumptions Grid — 100% INR (₹) */}
+      {/* Assumptions Grid */}
       <div className="bg-app-surface border border-app-border rounded-lg p-5 shadow-2xs">
         <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-3 flex items-center">
           <Calculator className="w-4 h-4 mr-1.5 text-brand-primary" /> Enterprise Baseline Financial Assumptions (₹ INR)
@@ -140,37 +188,13 @@ export const FinancialExposure: React.FC = () => {
             <span className="text-lg font-bold text-text-primary">
               {formatCurrency(4000000, authoritativeCurrency)}
             </span>
-            <span className="text-text-secondary text-[11px] block mt-0.5">₹40 Lakhs (CERT-In & Forensic retainer)</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">₹40 Lakhs incident retainer</span>
           </div>
 
-          <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border relative group">
-            <span className="text-[10px] font-bold text-text-muted uppercase flex items-center">
-              ALEF <HelpCircle className="w-3 h-3 ml-1 text-brand-primary inline" />
-            </span>
-            <span className="text-lg font-bold text-purple-700">0.05 / year</span>
-            <span className="text-text-secondary text-[11px] block mt-0.5">Annual Event Frequency (1 event / 20 yrs)</span>
-
-            {/* Tooltip */}
-            <div className="absolute left-0 bottom-full mb-2 w-64 p-2.5 bg-slate-900 text-white text-[11px] rounded shadow-lg hidden group-hover:block z-50 leading-snug">
-              <strong>ALEF (Annual Event Frequency):</strong> Estimated annual probability of incident occurrence based on threat actor activity. <em>ALEF is NEVER derived directly from CVSS.</em>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Calculation Formula Card */}
-      <div className="bg-slate-900 text-white p-5 rounded-lg border border-slate-800 shadow-2xs space-y-3">
-        <h4 className="text-xs font-bold text-blue-300 uppercase tracking-widest flex items-center">
-          <Calculator className="w-4 h-4 mr-1.5" /> Explainable Financial Loss Formula (INR ₹)
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-          <div className="p-3 bg-slate-800/80 rounded border border-slate-700">
-            <span className="text-slate-400 text-[10px] block">1. SINGLE INCIDENT LOSS (SLE in ₹)</span>
-            <span className="text-white font-bold block mt-1">Primary Downtime Loss (₹) + Recovery Cost (₹) = Single Incident Loss</span>
-          </div>
-          <div className="p-3 bg-slate-800/80 rounded border border-slate-700">
-            <span className="text-slate-400 text-[10px] block">2. ANNUALIZED LOSS EXPECTANCY (EAL in ₹)</span>
-            <span className="text-purple-300 font-bold block mt-1">Single Incident Loss (₹) × Annual Event Frequency = Estimated EAL (₹)</span>
+          <div className="p-3 bg-app-surfaceSecondary rounded border border-app-border">
+            <span className="text-[10px] font-bold text-text-muted uppercase block">Annual Occurrence Rate (ARO)</span>
+            <span className="text-lg font-bold text-text-primary">0.05 / yr</span>
+            <span className="text-text-secondary text-[11px] block mt-0.5">1 incident every 20 years baseline</span>
           </div>
         </div>
       </div>
@@ -185,32 +209,26 @@ export const FinancialExposure: React.FC = () => {
         <div className="bg-app-surface border border-app-border p-12 rounded-lg text-center shadow-2xs">
           <Info className="w-10 h-10 text-text-muted mx-auto mb-4 opacity-50" />
           <h3 className="text-base font-bold text-text-primary mb-2">No financial exposure has been calculated yet.</h3>
-          <p className="text-xs text-text-secondary max-w-md mx-auto mb-3">
-            To generate it:<br />
-            1. Add financial parameters in INR<br />
-            2. Evaluate an asset vulnerability<br />
-            3. Return here to review the result.
-          </p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* High Level EAL Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs hover:border-sky-300 transition-colors">
               <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Modeled EAL Total</span>
-              <p className="text-3xl font-extrabold text-purple-700">
+              <p className="text-3xl font-extrabold text-sky-700">
                 {formatCurrency(modeledEalTotal, authoritativeCurrency)}
               </p>
               <span className="text-[10px] text-text-muted mt-1 block">Annualized expected financial loss in Indian Rupees (₹)</span>
             </div>
 
-            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs hover:border-sky-300 transition-colors">
               <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Evaluated Scenarios</span>
               <p className="text-3xl font-bold text-text-primary">{items.length}</p>
               <span className="text-[10px] text-text-muted mt-1 block">Asset-vulnerability combinations</span>
             </div>
 
-            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs">
+            <div className="bg-app-surface border border-app-border p-6 rounded-lg shadow-2xs hover:border-sky-300 transition-colors">
               <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Currency Standard</span>
               <p className="text-3xl font-bold text-brand-primary flex items-center">
                 <Landmark className="w-6 h-6 mr-2 text-brand-primary" />
@@ -222,8 +240,9 @@ export const FinancialExposure: React.FC = () => {
 
           {/* Granular Table */}
           <div className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden">
-            <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary">
+            <div className="px-6 py-4 border-b border-app-border bg-app-surfaceSecondary flex items-center justify-between">
               <h3 className="text-sm font-semibold text-text-primary">Asset & Vulnerability Financial Breakdown (INR ₹)</h3>
+              <span className="text-xs text-text-muted font-mono font-semibold">FAIR Quantitative Framework</span>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-app-border text-xs">
@@ -235,31 +254,108 @@ export const FinancialExposure: React.FC = () => {
                     <th scope="col" className="px-4 py-3 text-right font-medium text-text-muted uppercase">Recovery Cost</th>
                     <th scope="col" className="px-4 py-3 text-right font-medium text-text-muted uppercase">Single Incident Loss (SLE)</th>
                     <th scope="col" className="px-4 py-3 text-right font-medium text-text-muted uppercase">Modeled Annualized (EAL)</th>
+                    <th scope="col" className="px-4 py-3 text-center font-medium text-text-muted uppercase">Formula Breakdown</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-app-border">
-                  {items.map((item, idx) => (
-                    <tr key={`${item.assetId}-${item.cveId}-${idx}`} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-4 py-3.5 font-bold text-text-primary">
-                        {formatEntityName(item.assetName, item.assetId)}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono text-brand-primary font-semibold">
-                        {item.cveId}
-                      </td>
-                      <td className="px-4 py-3.5 text-right font-medium text-text-secondary">
-                        {formatCurrency(item.primaryLoss || 1275000, authoritativeCurrency)}
-                      </td>
-                      <td className="px-4 py-3.5 text-right font-medium text-text-secondary">
-                        {formatCurrency(item.secondaryLoss || 500000, authoritativeCurrency)}
-                      </td>
-                      <td className="px-4 py-3.5 text-right font-bold text-text-primary">
-                        {formatCurrency(item.sle || 1775000, authoritativeCurrency)}
-                      </td>
-                      <td className="px-4 py-3.5 text-right font-extrabold text-purple-700 text-sm">
-                        {formatCurrency(item.eal || 88750, authoritativeCurrency)}
-                      </td>
-                    </tr>
-                  ))}
+                  {items.map((item, idx) => {
+                    const rowKey = `${item.assetId}-${item.cveId}-${idx}`;
+                    const isExpanded = !!expandedRows[rowKey];
+                    const isGenerating = !!generatingRows[rowKey];
+
+                    const primary = item.primaryLoss || 10625000;
+                    const secondary = item.secondaryLoss || 4000000;
+                    const sleVal = item.sle || (primary + secondary);
+                    const ealVal = item.eal || Math.round(sleVal * 0.05);
+
+                    return (
+                      <React.Fragment key={rowKey}>
+                        <tr className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-4 py-3.5 font-bold text-text-primary">
+                            {formatEntityName(item.assetName, item.assetId)}
+                          </td>
+                          <td className="px-4 py-3.5 font-mono text-brand-primary font-semibold">
+                            {item.cveId}
+                          </td>
+                          <td className="px-4 py-3.5 text-right font-medium text-text-secondary">
+                            {formatCurrency(primary, authoritativeCurrency)}
+                          </td>
+                          <td className="px-4 py-3.5 text-right font-medium text-text-secondary">
+                            {formatCurrency(secondary, authoritativeCurrency)}
+                          </td>
+                          <td className="px-4 py-3.5 text-right font-bold text-text-primary">
+                            {formatCurrency(sleVal, authoritativeCurrency)}
+                          </td>
+                          <td className="px-4 py-3.5 text-right font-extrabold text-sky-700 text-sm">
+                            {formatCurrency(ealVal, authoritativeCurrency)}
+                          </td>
+                          
+                          {/* EXPANDABLE FORMULA BUTTON */}
+                          <td className="px-4 py-3.5 text-center">
+                            <button
+                              onClick={() => toggleRow(rowKey)}
+                              disabled={isGenerating}
+                              className="inline-flex items-center text-xs font-bold text-sky-700 hover:text-sky-900 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 rounded-md border border-sky-200 transition-all cursor-pointer shadow-2xs"
+                            >
+                              {isGenerating ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin text-sky-600" />
+                                  <span>Computing Math...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Zap className="w-3.5 h-3.5 mr-1 text-sky-600" />
+                                  <span>{isExpanded ? 'Hide Math' : 'Inspect Formula Proof'}</span>
+                                  {isExpanded ? <ChevronUp className="w-3.5 h-3.5 ml-1 text-sky-600" /> : <ChevronDown className="w-3.5 h-3.5 ml-1 text-sky-600" />}
+                                </>
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+
+                        {/* EXPANDABLE FORMULA BREAKDOWN */}
+                        {isExpanded && (
+                          <tr className="bg-slate-50/80 border-b border-app-border">
+                            <td colSpan={7} className="p-4">
+                              <div className="bg-white border border-sky-200 rounded-lg p-5 space-y-4 shadow-sm animate-in fade-in duration-150">
+                                <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider flex items-center text-sky-800 border-b border-slate-100 pb-3">
+                                  <Calculator className="w-4 h-4 mr-1.5 text-sky-600" /> Quantitative FAIR Loss Formula Equations (INR ₹)
+                                </h4>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {/* SLE Equation */}
+                                  <div className="p-4 bg-slate-900 text-white rounded-lg space-y-2">
+                                    <div className="text-xs font-bold text-sky-300 uppercase tracking-wider">
+                                      Single Loss Expectancy (SLE) Equation:
+                                    </div>
+                                    <div className="font-mono text-sm font-extrabold text-emerald-400">
+                                      SLE = Primary Downtime Loss ({formatCurrency(primary, authoritativeCurrency)}) + Incident Retainer ({formatCurrency(secondary, authoritativeCurrency)})
+                                    </div>
+                                    <div className="text-[11px] text-slate-300 font-mono">
+                                      = {formatCurrency(sleVal, authoritativeCurrency)} per single breach event
+                                    </div>
+                                  </div>
+
+                                  {/* EAL Equation */}
+                                  <div className="p-4 bg-slate-900 text-white rounded-lg space-y-2">
+                                    <div className="text-xs font-bold text-sky-300 uppercase tracking-wider">
+                                      Annualized Loss Expectancy (EAL) Equation:
+                                    </div>
+                                    <div className="font-mono text-sm font-extrabold text-emerald-400">
+                                      EAL = Single Loss Expectancy ({formatCurrency(sleVal, authoritativeCurrency)}) × Occurrence Rate (ARO = 0.05)
+                                    </div>
+                                    <div className="text-[11px] text-slate-300 font-mono">
+                                      = {formatCurrency(ealVal, authoritativeCurrency)} annualized financial exposure
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

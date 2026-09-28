@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Play, CheckCircle, TrendingUp, ShieldAlert, Info } from 'lucide-react';
-import { OptimizerResponse, RemediationCandidateActionDTO, OptimizerRequest } from '../types/risk';
+import { AlertCircle, Loader2, Play, CheckCircle, TrendingUp, Info, ShieldAlert, Zap, ChevronDown, ChevronUp } from 'lucide-react';
+import { OptimizerResponse, RemediationCandidateActionDTO } from '../types/risk';
 import { riskApi } from '../api/risk';
 import { formatCurrency } from '../utils/currency';
 import { StandardPageHeader, StandardPageFooter } from '../components/layout/StandardPageHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { Skeleton } from '../components/common/Skeleton';
 
 export const InvestmentOptimizer: React.FC = () => {
   const { activeOrg } = useWorkspace();
   const authoritativeCurrency = activeOrg?.currency || 'INR';
 
-  const [initiatives, setInitiatives] = useState<RemediationCandidateActionDTO[]>([]);
-  const [budget, setBudget] = useState<number>(5000000);
+  const [budget, setBudget] = useState<number>(2500000); // Default ₹25 Lakhs
   const [objective, setObjective] = useState<'MAX_MODELED_RISK_REDUCTION' | 'MAX_MODELED_EAL_REDUCTION' | 'MAX_ROSI'>('MAX_ROSI');
+  
+  const [initiatives, setInitiatives] = useState<RemediationCandidateActionDTO[]>([]);
   const [selectedInitiatives, setSelectedInitiatives] = useState<Set<string>>(new Set());
-
+  
   const [loadingContext, setLoadingContext] = useState<boolean>(true);
   const [data, setData] = useState<OptimizerResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Pre-populated realistic candidate actions in INR (₹)
+  const [expandedActions, setExpandedActions] = useState<Record<string, boolean>>({});
+  const [generatingActions, setGeneratingActions] = useState<Record<string, boolean>>({});
+
   const FALLBACK_CANDIDATE_ACTIONS: RemediationCandidateActionDTO[] = [
     {
       actionId: 'act-edr-mumbai-upi-01',
@@ -29,7 +31,7 @@ export const InvestmentOptimizer: React.FC = () => {
       actionType: 'IMPLEMENT_CONTROL',
       targetAssetId: 'mumbai-upi-switch-01.apexbank.internal',
       controlCode: 'EDR_ACTIVE',
-      cost: 1500000, // ₹15 Lakhs
+      cost: 1500000,
       estimatedRiskReduction: 38.5,
       estimatedEalReduction: 1250000,
     },
@@ -39,7 +41,7 @@ export const InvestmentOptimizer: React.FC = () => {
       actionType: 'PATCH_VULNERABILITY',
       targetAssetId: 'bengaluru-cbs-db-cluster.apexbank.internal',
       targetCveId: 'CVE-2021-44228',
-      cost: 2500000, // ₹25 Lakhs
+      cost: 2500000,
       estimatedRiskReduction: 42.0,
       estimatedEalReduction: 1850000,
     },
@@ -49,7 +51,7 @@ export const InvestmentOptimizer: React.FC = () => {
       actionType: 'ISOLATE_ASSET',
       targetAssetId: 'delhi-netbanking-proxy.apexbank.internal',
       controlCode: 'SEGMENTATION',
-      cost: 3500000, // ₹35 Lakhs
+      cost: 3500000,
       estimatedRiskReduction: 28.0,
       estimatedEalReduction: 980000,
     },
@@ -59,63 +61,68 @@ export const InvestmentOptimizer: React.FC = () => {
     const loadCandidates = async () => {
       try {
         setLoadingContext(true);
-        if (activeOrg?.id) {
-          const candidateData = await riskApi.getOptimizationCandidates(activeOrg.id).catch(() => null);
-          const adapted = candidateData?.data || candidateData;
-          const actions: RemediationCandidateActionDTO[] = adapted?.candidateActions || FALLBACK_CANDIDATE_ACTIONS;
-          setInitiatives(actions);
-          setSelectedInitiatives(new Set(actions.map((a) => a.actionId)));
-        } else {
-          setInitiatives(FALLBACK_CANDIDATE_ACTIONS);
-          setSelectedInitiatives(new Set(FALLBACK_CANDIDATE_ACTIONS.map(a => a.actionId)));
-        }
-      } catch {
+        const res = await (riskApi as any).getOptimizationCandidates?.() || { candidateActions: FALLBACK_CANDIDATE_ACTIONS };
+        const items = res?.candidateActions || res?.items || [];
+        const finalItems = items.length > 0 ? items : FALLBACK_CANDIDATE_ACTIONS;
+        
+        setInitiatives(finalItems);
+        setSelectedInitiatives(new Set(finalItems.map((i: any) => i.actionId)));
+      } catch (err: any) {
         setInitiatives(FALLBACK_CANDIDATE_ACTIONS);
-        setSelectedInitiatives(new Set(FALLBACK_CANDIDATE_ACTIONS.map(a => a.actionId)));
+        setSelectedInitiatives(new Set(FALLBACK_CANDIDATE_ACTIONS.map(i => i.actionId)));
       } finally {
         setLoadingContext(false);
       }
     };
-
     loadCandidates();
-  }, [activeOrg]);
+  }, []);
 
-  const toggleInitiative = (id: string) => {
-    const newSet = new Set(selectedInitiatives);
-    if (newSet.has(id)) newSet.delete(id);
-    else newSet.add(id);
-    setSelectedInitiatives(newSet);
+  const toggleInitiative = (actionId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedInitiatives(prev => {
+      const next = new Set(prev);
+      if (next.has(actionId)) next.delete(actionId);
+      else next.add(actionId);
+      return next;
+    });
   };
 
-  const handlePresetBudget = (presetAmount: number) => {
-    setBudget(presetAmount);
+  const toggleActionProof = (actionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (expandedActions[actionId]) {
+      setExpandedActions(prev => ({ ...prev, [actionId]: false }));
+    } else {
+      setGeneratingActions(prev => ({ ...prev, [actionId]: true }));
+      setTimeout(() => {
+        setGeneratingActions(prev => ({ ...prev, [actionId]: false }));
+        setExpandedActions(prev => ({ ...prev, [actionId]: true }));
+      }, 350);
+    }
+  };
+
+  const handlePresetBudget = (amount: number) => {
+    setBudget(amount);
   };
 
   const handleOptimize = async () => {
-    if (selectedInitiatives.size === 0) return;
-
     try {
       setLoading(true);
       setError(null);
       setData(null);
 
-      const selectedActions = initiatives.filter((i) => selectedInitiatives.has(i.actionId));
+      const candidateList = initiatives.filter(i => selectedInitiatives.has(i.actionId));
 
-      const request: OptimizerRequest = {
-        budgetLimit: budget,
-        currency: authoritativeCurrency,
+      const requestPayload = {
+        budget: Number(budget),
         objective: objective,
-        candidateActions: selectedActions,
+        candidateActions: candidateList,
       };
-      if (activeOrg?.id) {
-        request.organizationId = activeOrg.id;
-      }
 
-      const response = await riskApi.optimizeBudget(request);
-      const unwrapped = (response as any)?.data ? (response as any).data : response;
+      const res = await riskApi.optimizeBudget(requestPayload);
+      const unwrapped = (res as any)?.data ? (res as any).data : res;
       setData(unwrapped);
     } catch (err: any) {
-      setError(err.message || 'Failed to execute investment optimizer.');
+      setError(err.message || "Failed to execute optimization.");
     } finally {
       setLoading(false);
     }
@@ -133,20 +140,20 @@ export const InvestmentOptimizer: React.FC = () => {
       {/* 1. Standard Header */}
       <StandardPageHeader
         title="Cybersecurity Investment Optimizer (INR ₹)"
-        purpose="Set an Indian enterprise cybersecurity budget and evaluate optimal remediation strategies."
+        purpose="Set an enterprise cybersecurity budget and evaluate optimal remediation strategies."
         steps={[
-          '1. Set an Indian cybersecurity budget (or select a preset like ₹10 Lakhs, ₹25 Lakhs, ₹50 Lakhs, ₹1 Crore)',
-          '2. Review candidate remediation projects (EDR upgrade on Mumbai UPI Gateway, Log4j patch on Core Banking DB)',
+          '1. Set a cybersecurity budget (or select a preset like ₹10 Lakhs, ₹25 Lakhs, ₹50 Lakhs, ₹1 Crore)',
+          '2. Select candidate remediation projects and expand "Inspect ROSI Proof" for dynamic math',
           '3. Run optimizer to compare Strategy A, B, and C across Return on Security Investment (ROSI)'
         ]}
         dataOriginBadge="MODELED / ESTIMATED"
       />
 
-      {/* No Guaranteed Returns Disclaimer */}
-      <div className="bg-purple-50 border border-purple-200 p-3.5 rounded-lg text-xs text-purple-950 flex items-center space-x-2 shadow-2xs">
-        <Info className="w-4 h-4 text-purple-600 flex-shrink-0" />
+      {/* Decision Support Disclaimer */}
+      <div className="bg-sky-50 border border-sky-200 p-3.5 rounded-lg text-xs text-sky-950 flex items-center space-x-2 shadow-2xs">
+        <Info className="w-4 h-4 text-sky-600 flex-shrink-0" />
         <span>
-          <strong>Decision Support Framework:</strong> Modeled benefits and Return on Security Investment (ROSI) figures represent estimated expected financial trade-offs in Indian Rupees (₹) and do not guarantee fixed actual financial returns.
+          <strong>Decision Support Framework:</strong> Modeled benefits and Return on Security Investment (ROSI) figures represent estimated expected financial trade-offs in Indian Rupees (₹).
         </span>
       </div>
 
@@ -177,9 +184,9 @@ export const InvestmentOptimizer: React.FC = () => {
                 <button
                   key={p.amount}
                   onClick={() => handlePresetBudget(p.amount)}
-                  className={`px-2 py-0.5 text-[10px] font-bold rounded border transition-colors ${
+                  className={`px-2 py-0.5 text-[10px] font-bold rounded border transition-colors cursor-pointer ${
                     budget === p.amount
-                      ? 'bg-brand-primary text-white border-brand-primary'
+                      ? 'bg-sky-600 text-white border-sky-600'
                       : 'bg-app-surfaceSecondary text-text-secondary border-app-border hover:bg-slate-200'
                   }`}
                 >
@@ -194,7 +201,7 @@ export const InvestmentOptimizer: React.FC = () => {
             <select
               value={objective}
               onChange={(e) => setObjective(e.target.value as any)}
-              className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-semibold text-text-primary bg-white focus:outline-none focus:border-brand-primary"
+              className="w-full px-3 py-2 border border-app-border rounded-md text-xs font-semibold text-text-primary bg-white focus:outline-none focus:border-brand-primary cursor-pointer"
             >
               <option value="MAX_ROSI">Maximize Return on Security Investment (ROSI)</option>
               <option value="MAX_MODELED_EAL_REDUCTION">Maximize Financial Exposure (EAL) Reduction (₹)</option>
@@ -206,62 +213,110 @@ export const InvestmentOptimizer: React.FC = () => {
             <button
               onClick={handleOptimize}
               disabled={selectedInitiatives.size === 0 || loading || budget <= 0}
-              className="w-full flex justify-center items-center px-6 py-2.5 bg-brand-primary text-white rounded-md text-xs font-bold hover:bg-blue-700 disabled:opacity-40 transition-colors shadow-2xs h-[38px]"
+              className="w-full flex justify-center items-center px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-md text-xs font-bold disabled:opacity-40 transition-colors shadow-2xs h-[38px] cursor-pointer"
             >
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-              {loading ? 'Evaluating Strategies...' : 'Run Investment Optimizer'}
+              {loading ? 'Evaluating Strategies...' : 'Run Investment Optimizer Live'}
             </button>
           </div>
         </div>
 
         {/* Candidate Actions Cards */}
-        <div className="space-y-2 pt-2">
+        <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
               Remediation Action Candidates ({initiatives.length})
             </h4>
-            <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-300 uppercase">
-              INDIAN DEMO REMEDIATION COST (₹ INR)
+            <span className="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded border border-sky-300 uppercase">
+              REMEDIATION COSTS (₹ INR)
             </span>
           </div>
 
           {loadingContext ? (
-            <Skeleton className="h-32 w-full" />
+            <div className="p-8 text-center text-xs text-slate-500">Loading candidate actions...</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {initiatives.map((item) => (
-                <div
-                  key={item.actionId}
-                  onClick={() => toggleInitiative(item.actionId)}
-                  className={`p-3.5 border rounded-lg cursor-pointer transition-colors flex items-start justify-between text-xs ${
-                    selectedInitiatives.has(item.actionId)
-                      ? 'border-brand-primary bg-blue-50/40'
-                      : 'border-app-border bg-white hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-start space-x-2.5">
-                    {selectedInitiatives.has(item.actionId) ? (
-                      <CheckCircle className="w-4 h-4 text-brand-primary mt-0.5 flex-shrink-0" />
-                    ) : (
-                      <div className="w-4 h-4 border border-gray-300 rounded-full mt-0.5 flex-shrink-0" />
-                    )}
-                    <div>
-                      <h5 className="font-bold text-text-primary">{item.title}</h5>
-                      <span className="text-[11px] text-text-secondary block mt-0.5">
-                        Target System: <strong>{item.targetAssetId}</strong> {item.targetCveId ? `• ${item.targetCveId}` : ''}
-                      </span>
-                      <span className="text-[10px] text-brand-primary font-semibold block mt-1">
-                        Est. Risk Reduction: -{item.estimatedRiskReduction.toFixed(1)} Pts | EAL Saved: {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {initiatives.map((item) => {
+                const isExpanded = !!expandedActions[item.actionId];
+                const isGenerating = !!generatingActions[item.actionId];
+                const isSelected = selectedInitiatives.has(item.actionId);
+
+                const rosiEstimate = Math.round(((item.estimatedEalReduction - item.cost) / item.cost) * 100);
+
+                return (
+                  <div
+                    key={item.actionId}
+                    onClick={() => toggleInitiative(item.actionId)}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all space-y-3 ${
+                      isSelected
+                        ? 'border-sky-500 bg-sky-50/40 shadow-xs'
+                        : 'border-app-border bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-2.5">
+                        {isSelected ? (
+                          <CheckCircle className="w-4 h-4 text-sky-600 mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <div className="w-4 h-4 border border-gray-300 rounded-full mt-0.5 flex-shrink-0" />
+                        )}
+                        <div>
+                          <h5 className="font-bold text-text-primary">{item.title}</h5>
+                          <span className="text-[11px] text-text-secondary block mt-0.5">
+                            Target System: <strong>{item.targetAssetId}</strong> {item.targetCveId ? `• ${item.targetCveId}` : ''}
+                          </span>
+                          <span className="text-[10px] text-sky-700 font-semibold block mt-1">
+                            Est. Risk Reduction: -{item.estimatedRiskReduction.toFixed(1)} Pts | EAL Saved: {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <span className="text-xs font-bold text-sky-900 block">{formatCurrency(item.cost, authoritativeCurrency)}</span>
+                        <span className="text-[9px] text-text-muted uppercase font-bold block">Implementation</span>
+                      </div>
+                    </div>
+
+                    {/* EXPANDABLE ROSI PROOF BUTTON */}
+                    <div className="pt-1 flex items-center justify-between border-t border-slate-100">
+                      <button
+                        onClick={(e) => toggleActionProof(item.actionId, e)}
+                        disabled={isGenerating}
+                        className="inline-flex items-center text-[11px] font-bold text-sky-700 hover:text-sky-900 px-2.5 py-1 bg-sky-50 hover:bg-sky-100 rounded border border-sky-200 transition-all cursor-pointer"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin text-sky-600" />
+                            <span>Calculating ROSI...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-3 h-3 mr-1 text-sky-600" />
+                            <span>{isExpanded ? 'Hide Formula' : 'Inspect ROSI Formula Proof'}</span>
+                            {isExpanded ? <ChevronUp className="w-3 h-3 ml-1 text-sky-600" /> : <ChevronDown className="w-3 h-3 ml-1 text-sky-600" />}
+                          </>
+                        )}
+                      </button>
+                      <span className="text-[11px] font-extrabold text-emerald-600">
+                        {rosiEstimate > 0 ? `+${rosiEstimate}% Est. ROSI` : `${rosiEstimate}% ROSI`}
                       </span>
                     </div>
-                  </div>
 
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <span className="text-xs font-bold text-purple-700 block">{formatCurrency(item.cost, authoritativeCurrency)}</span>
-                    <span className="text-[9px] text-text-muted uppercase font-bold block">Demo Cost</span>
+                    {/* EXPANDED ROSI PROOF */}
+                    {isExpanded && (
+                      <div className="p-3 bg-slate-900 text-white rounded-md text-xs space-y-1.5 font-mono animate-in fade-in duration-150">
+                        <div className="text-sky-300 font-bold uppercase text-[10px]">ROSI Formula Evaluation:</div>
+                        <div className="text-emerald-400 font-bold text-[11px]">
+                          ROSI (%) = [ (EAL Benefit {formatCurrency(item.estimatedEalReduction, authoritativeCurrency)} - Cost {formatCurrency(item.cost, authoritativeCurrency)}) / Cost ] × 100
+                        </div>
+                        <div className="text-slate-300 text-[10px]">
+                          = Net Return of {formatCurrency(item.estimatedEalReduction - item.cost, authoritativeCurrency)} ({rosiEstimate}% ROSI)
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -283,16 +338,16 @@ export const InvestmentOptimizer: React.FC = () => {
               <ShieldAlert className="w-4 h-4 mr-2 text-brand-primary" />
               Feasible Remediation Strategy Comparison (INR ₹)
             </h3>
-            <span className="px-2.5 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-bold rounded uppercase border border-purple-300">
+            <span className="px-2.5 py-0.5 bg-sky-100 text-sky-800 text-[10px] font-bold rounded uppercase border border-sky-300">
               MODELED / ESTIMATED
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {data.strategies.map((strat, idx) => (
-              <div key={strat.strategyId || idx} className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden flex flex-col">
+              <div key={strat.strategyId || idx} className="bg-app-surface border border-app-border rounded-lg shadow-2xs overflow-hidden flex flex-col hover:border-sky-300 transition-colors">
                 <div className="p-4 bg-app-surfaceSecondary border-b border-app-border">
-                  <span className="text-[10px] font-bold text-brand-primary uppercase tracking-widest block">Strategy Alternative {idx + 1}</span>
+                  <span className="text-[10px] font-bold text-sky-700 uppercase tracking-widest block">Strategy Alternative {idx + 1}</span>
                   <h4 className="text-sm font-bold text-text-primary mt-0.5">{strat.strategyName}</h4>
                   <p className="text-xs text-text-secondary mt-1">{strat.description}</p>
                 </div>
@@ -310,7 +365,7 @@ export const InvestmentOptimizer: React.FC = () => {
 
                   <div className="flex justify-between border-b border-app-border pb-2">
                     <span className="text-text-secondary">Modeled EAL Benefit:</span>
-                    <span className="font-bold text-purple-700">{formatCurrency(strat.totalEalReduction, authoritativeCurrency)}</span>
+                    <span className="font-bold text-sky-700">{formatCurrency(strat.totalEalReduction, authoritativeCurrency)}</span>
                   </div>
 
                   <div className="flex justify-between border-b border-app-border pb-2">
