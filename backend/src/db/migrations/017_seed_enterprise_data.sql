@@ -1,7 +1,7 @@
 -- =============================================================================
--- Migration 017: Seed Enterprise Topology, Assets & Control Posture Data
--- Purpose: Populates authentic Indian Enterprise assets, network dependencies, and
---          security control postures for Bharat Digital Financial Services (Demo)
+-- Migration 017: Seed Enterprise Topology, Assets, Controls & Risk Results Data
+-- Purpose: Populates authentic Indian Enterprise assets, network dependencies,
+--          security control postures, and evaluated risk scores for Bharat Digital Financial Services (Demo)
 -- =============================================================================
 
 -- 1. Ensure default Organizations exist
@@ -110,3 +110,15 @@ SELECT
 FROM assets a
 CROSS JOIN security_controls sc
 ON CONFLICT (asset_id, control_id) DO NOTHING;
+
+-- 7. Seed Risk Results Evaluations
+INSERT INTO risk_results (
+    id, organization_id, asset_id, cve_id, score, level, base_cvss, model_version, input_provenance_hash, data_completeness, factors, missing_data_warnings, risk_flags, evaluated_at
+) VALUES
+('r1111111-1111-1111-1111-111111111111', 'demo-bharat-digital-01', 'a5555555-5555-5555-5555-555555555555', 'CVE-2021-44228', 96.5, 'CRITICAL', 10.0, '1.0.0', 'hash-log4j-pay-switch', 0.95, '[{"factor": "Technical Severity", "value": "10.0"}, {"factor": "Business Criticality", "value": "Level 5 (Crown Jewel)"}, {"factor": "CISA KEV Exploitation", "value": "Known Active Threat Actor Targeting"}]', '[]', '["CISA_KEV_EXPLOITED", "HIGH_CRITICALITY_TARGET"]', NOW()),
+('r2222222-2222-2222-2222-222222222222', 'demo-bharat-digital-01', 'a6666666-6666-6666-6666-666666666666', 'CVE-2023-34362', 94.2, 'CRITICAL', 9.8, '1.0.0', 'hash-moveit-cust-db', 0.90, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Business Criticality", "value": "Level 5 (Customer DB)"}]', '[]', '["DATA_EXFILTRATION_RISK"]', NOW()),
+('r3333333-3333-3333-3333-333333333333', 'demo-bharat-digital-01', 'a4444444-4444-4444-4444-444444444444', 'CVE-2023-22515', 91.8, 'CRITICAL', 9.8, '1.0.0', 'hash-swift-auth-bypass', 0.90, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Structural Choke Point", "value": "SWIFT Integration Gateway"}]', '[]', '["CHOKE_POINT_INTERCEPT"]', NOW()),
+('r4444444-4444-4444-4444-444444444444', 'demo-bharat-digital-01', 'a2222222-2222-2222-2222-222222222222', 'CVE-2023-4966', 88.5, 'HIGH', 9.4, '1.0.0', 'hash-citrix-delhi-portal', 0.85, '[{"factor": "Technical Severity", "value": "9.4"}, {"factor": "Internet Exposure", "value": "Public Edge Banking Portal"}]', '[]', '["PERIMETER_EXPOSED"]', NOW()),
+('r5555555-5555-5555-5555-555555555555', 'demo-bharat-digital-01', 'a1111111-1111-1111-1111-111111111111', 'CVE-2023-23397', 82.4, 'HIGH', 9.8, '1.0.0', 'hash-outlook-mumbai-gw', 0.80, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Internet Exposure", "value": "Mumbai API Gateway"}]', '[]', '["PERIMETER_EXPOSED"]', NOW()),
+('r6666666-6666-6666-6666-666666666666', 'demo-bharat-digital-01', 'a3333333-3333-3333-3333-333333333333', 'CVE-2023-38606', 68.0, 'MEDIUM', 7.8, '1.0.0', 'hash-kernel-bengaluru-auth', 0.85, '[{"factor": "Technical Severity", "value": "7.8"}, {"factor": "Internal Scope", "value": "Bengaluru Auth Microservice"}]', '[]', '[]', NOW())
+ON CONFLICT (id) DO NOTHING;
