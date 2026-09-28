@@ -114,6 +114,7 @@ export const InvestmentOptimizer: React.FC = () => {
       const candidateList = initiatives.filter(i => selectedInitiatives.has(i.actionId));
 
       const requestPayload = {
+        budgetLimit: Number(budget),
         budget: Number(budget),
         objective: objective,
         candidateActions: candidateList,

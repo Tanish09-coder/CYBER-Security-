@@ -44,6 +44,7 @@ export class OptimizationService {
    */
   async solve(request: OptimizationRequestDTO): Promise<OptimizationResultDTO> {
     const candidateActions = request.candidateActions;
+    const resolvedBudgetLimit = request.budgetLimit ?? (request as any).budget ?? 2500000;
 
     // Strict contract: optimizer must operate on explicit candidate actions containing authoritative
     // actionId, implementationCost, feasibility, dependencies, mutual exclusions, and modeled benefit.
@@ -57,14 +58,14 @@ export class OptimizationService {
     }
 
     logger.info('Executing Investment Optimization via Python Optimizer', {
-      budgetLimit: request.budgetLimit,
+      budgetLimit: resolvedBudgetLimit,
       candidatesCount: candidateActions.length,
       objective: request.objective || 'ALL_STRATEGIES',
     });
 
     const payload: OptimizationRequestDTO = {
-      budgetLimit: request.budgetLimit,
-      currency: request.currency ?? null, // null if not provided — org resolution below may supply it
+      budgetLimit: resolvedBudgetLimit,
+      currency: request.currency ?? 'INR',
       objective: request.objective,
       candidateActions,
       baselinePortfolioRisk: request.baselinePortfolioRisk,
