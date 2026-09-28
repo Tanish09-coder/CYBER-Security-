@@ -12,6 +12,7 @@ export function createControlsRouter(controller?: ControlsController): Router {
 
   // Catalog & Coverage Endpoints
   router.get('/', ctrl.listControls);
+  router.get('/summary', ctrl.getSummary);
   router.get('/:code', ctrl.getControl);
 
   return router;

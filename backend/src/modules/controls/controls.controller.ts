@@ -28,6 +28,17 @@ export class ControlsController {
   // Catalog Endpoints
   // ---------------------------------------------------------------------------
 
+  getSummary = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const organizationId = req.query.organizationId as string | undefined;
+      const summary = await this.service.getCoverageSummary(organizationId);
+      res.status(200).json(summary);
+    } catch (err: any) {
+      logger.error('Failed to get security controls summary', { error: err.message });
+      res.status(500).json({ error: 'QueryError', message: err.message });
+    }
+  };
+
   listControls = async (req: Request, res: Response): Promise<void> => {
     try {
       const summaryParam = req.query.summary === 'true';

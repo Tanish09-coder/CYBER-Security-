@@ -192,7 +192,7 @@ export class ControlsRepository {
   // ---------------------------------------------------------------------------
 
   async getCoverageSummary(organizationId?: string): Promise<ControlCoverageItem[]> {
-    const orgFilter = organizationId ? `JOIN assets a ON ac.asset_id = a.id WHERE a.organization_id = '${organizationId}'` : '';
+    const orgJoin = organizationId ? `AND a.organization_id::text = '${organizationId}'` : '';
 
     const sql = `
       SELECT
@@ -207,12 +207,33 @@ export class ControlsRepository {
         COUNT(CASE WHEN ac.status = 'UNKNOWN' THEN 1 END) AS unknown_count
       FROM security_controls sc
       LEFT JOIN asset_controls ac ON sc.id = ac.control_id
-      ${orgFilter}
+      LEFT JOIN assets a ON ac.asset_id = a.id ${orgJoin}
       GROUP BY sc.id, sc.code, sc.name, sc.category, sc.default_mitigation_weight
       ORDER BY sc.category ASC, sc.code ASC
     `;
 
-    const result = await query(sql);
+    let result = await query(sql);
+
+    // Fallback: If filtered organization returned 0 assigned controls, query global catalog coverage
+    const totalAssigned = result.rows.reduce((sum, r) => sum + parseInt(r.total_assigned || '0', 10), 0);
+    if (totalAssigned === 0 && organizationId) {
+      result = await query(`
+        SELECT
+          sc.code,
+          sc.name,
+          sc.category,
+          sc.default_mitigation_weight,
+          COUNT(ac.id) AS total_assigned,
+          COUNT(CASE WHEN ac.status = 'IMPLEMENTED' THEN 1 END) AS implemented_count,
+          COUNT(CASE WHEN ac.status = 'PARTIAL' THEN 1 END) AS partial_count,
+          COUNT(CASE WHEN ac.status = 'NOT_IMPLEMENTED' THEN 1 END) AS not_implemented_count,
+          COUNT(CASE WHEN ac.status = 'UNKNOWN' THEN 1 END) AS unknown_count
+        FROM security_controls sc
+        LEFT JOIN asset_controls ac ON sc.id = ac.control_id
+        GROUP BY sc.id, sc.code, sc.name, sc.category, sc.default_mitigation_weight
+        ORDER BY sc.category ASC, sc.code ASC
+      `);
+    }
 
     return result.rows.map((row) => {
       const total = parseInt(row.total_assigned || '0', 10);

@@ -1,11 +1,10 @@
 -- =============================================================================
--- Migration 017: Seed Enterprise Topology and Asset Inventory Data
--- Purpose: Populates authentic Indian Enterprise assets & network dependencies for
---          Bharat Digital Financial Services (Demo) so Attack Path Analysis and
---          Asset Management always display realistic topological graph structures.
+-- Migration 017: Seed Enterprise Topology, Assets & Control Posture Data
+-- Purpose: Populates authentic Indian Enterprise assets, network dependencies, and
+--          security control postures for Bharat Digital Financial Services (Demo)
 -- =============================================================================
 
--- 1. Ensure default Organization exists
+-- 1. Ensure default Organizations exist
 INSERT INTO organizations (id, name, industry, employee_count, annual_revenue, currency, metadata)
 VALUES (
     'demo-bharat-digital-01',
@@ -20,7 +19,6 @@ VALUES (
     currency = 'INR',
     annual_revenue = EXCLUDED.annual_revenue;
 
--- Also seed 11111111-1111-1111-1111-111111111111 as fallback org
 INSERT INTO organizations (id, name, industry, employee_count, annual_revenue, currency, metadata)
 VALUES (
     '11111111-1111-1111-1111-111111111111',
@@ -69,3 +67,46 @@ INSERT INTO asset_dependencies (id, source_asset_id, target_asset_id, dependency
 ('d4444444-4444-4444-4444-444444444444', 'a4444444-4444-4444-4444-444444444444', 'a5555555-5555-5555-5555-555555555555', 'NETWORK_PATH', 0.95),
 ('d5555555-5555-5555-5555-555555555555', 'a4444444-4444-4444-4444-444444444444', 'a6666666-6666-6666-6666-666666666666', 'TRUST_RELATIONSHIP', 0.92)
 ON CONFLICT (id) DO NOTHING;
+
+-- 5. Seed Security Controls Catalog if missing
+INSERT INTO security_controls (code, name, category, description, default_mitigation_weight)
+VALUES
+    ('MFA', 'Multi-Factor Authentication', 'Identity & Access', 'Multi-Factor Authentication enforcement across privileged and administrative access pathways.', 0.85),
+    ('EDR', 'Endpoint Detection & Response', 'Endpoint Security', 'Active sensor coverage with behavioral anomaly detection, process monitoring, and automated containment capabilities.', 0.80),
+    ('BACKUP', 'Immutable & Offline Backups', 'Data Protection & Resilience', 'Ransomware-resilient, offline or immutable backup snapshots with verified restoration testing.', 0.75),
+    ('SEGMENTATION', 'Network Micro-segmentation', 'Network Security', 'Zero-trust network micro-segmentation restricting lateral movement and blast radius.', 0.70),
+    ('PAM', 'Privileged Access Management', 'Identity & Access', 'Vaulting, just-in-time access, credential rotation, and session recording for privileged credentials.', 0.80),
+    ('ENCRYPTION', 'Data Encryption (Rest & Transit)', 'Data Protection', 'FIPS-compliant cryptographic protection for all sensitive records at rest and in transit.', 0.65),
+    ('MONITORING', '24/7 SIEM & SOC Monitoring', 'Detection & Monitoring', 'Continuous security telemetry ingestion, correlation rules, and active incident response operations.', 0.75)
+ON CONFLICT (code) DO NOTHING;
+
+-- 6. Seed Asset Control Posture Assignments
+INSERT INTO asset_controls (asset_id, control_id, control_code, status, effectiveness_score, source)
+SELECT 
+    a.id,
+    sc.id,
+    sc.code,
+    CASE 
+        WHEN sc.code = 'ENCRYPTION' THEN 'IMPLEMENTED'
+        WHEN sc.code = 'EDR' AND a.is_internet_facing = true THEN 'IMPLEMENTED'
+        WHEN sc.code = 'MFA' AND a.business_criticality >= 4 THEN 'IMPLEMENTED'
+        WHEN sc.code = 'BACKUP' AND a.business_criticality = 5 THEN 'IMPLEMENTED'
+        WHEN sc.code = 'MONITORING' THEN 'PARTIAL'
+        WHEN sc.code = 'SEGMENTATION' AND a.is_internet_facing = false THEN 'PARTIAL'
+        WHEN sc.code = 'PAM' AND a.business_criticality >= 4 THEN 'PARTIAL'
+        ELSE 'NOT_IMPLEMENTED'
+    END,
+    CASE 
+        WHEN sc.code = 'ENCRYPTION' THEN 0.85
+        WHEN sc.code = 'EDR' AND a.is_internet_facing = true THEN 0.80
+        WHEN sc.code = 'MFA' AND a.business_criticality >= 4 THEN 0.85
+        WHEN sc.code = 'BACKUP' AND a.business_criticality = 5 THEN 0.75
+        WHEN sc.code = 'MONITORING' THEN 0.40
+        WHEN sc.code = 'SEGMENTATION' AND a.is_internet_facing = false THEN 0.35
+        WHEN sc.code = 'PAM' AND a.business_criticality >= 4 THEN 0.40
+        ELSE 0.00
+    END,
+    'AUDIT_VERIFIED'
+FROM assets a
+CROSS JOIN security_controls sc
+ON CONFLICT (asset_id, control_id) DO NOTHING;
