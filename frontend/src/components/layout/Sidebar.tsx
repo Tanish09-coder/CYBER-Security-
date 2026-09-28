@@ -119,7 +119,7 @@ export const Sidebar: React.FC = () => {
           <span style={{
             fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
             textTransform: 'uppercase',
-            color: isOnline ? 'rgba(134,239,172,0.9)' : 'rgba(252,165,165,0.9)'
+            color: isOnline ? '#16A34A' : '#DC2626'
           }}>
             {isOnline ? 'Gateway Online' : 'Gateway Offline'}
           </span>
@@ -128,16 +128,16 @@ export const Sidebar: React.FC = () => {
         {/* Org */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{
-            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+            background: '#F1F5F9', border: '1px solid #E2E8F0',
             borderRadius: 6, padding: 6, lineHeight: 0
           }}>
-            <Building2 size={14} color="#38BDF8" />
+            <Building2 size={14} color="#0284C7" />
           </div>
           <div style={{ overflow: 'hidden' }}>
-            <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {activeOrg.name}
             </div>
-            <div style={{ fontSize: 9.5, color: 'rgba(147,197,253,0.7)', marginTop: 1 }}>
+            <div style={{ fontSize: 9.5, color: '#64748B', marginTop: 1 }}>
               Enterprise Operations
             </div>
           </div>
