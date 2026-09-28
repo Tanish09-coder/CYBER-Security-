@@ -5,7 +5,6 @@ import { Header } from './components/layout/Header';
 import { PageContainer } from './components/layout/PageContainer';
 import { WorkspaceProvider } from './context/WorkspaceContext';
 import { DemoIndicator } from './components/common/DemoIndicator';
-import { FirstTimeTourModal } from './components/common/FirstTimeTourModal';
 
 
 import { Integrations } from './pages/Integrations';
@@ -63,8 +62,6 @@ export const App: React.FC = () => {
         </div>
 
 
-        {/* Onboarding First-Time Tour Modal */}
-        <FirstTimeTourModal />
       </div>
     </WorkspaceProvider>
   );
