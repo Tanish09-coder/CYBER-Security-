@@ -195,7 +195,7 @@ export class OptimizationService {
       candidateActions.push({
         actionId: row.id,
         actionType,
-        targetAssetId,
+        targetAssetId: targetAssetId || row.target_asset_id || '',
         targetCveId,
         controlCode,
         cost: parseFloat(row.remediation_cost || '0.0'),

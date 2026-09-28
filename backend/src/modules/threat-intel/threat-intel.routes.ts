@@ -9,6 +9,7 @@ export function createThreatIntelRouter(controller?: ThreatIntelController): Rou
   // Create an instance of MitreAttackController to reuse its methods for aliases
   const mitreCtrl = new MitreAttackController();
 
+  router.get('/', (req, res) => ctrl.getSummary(req, res));
   router.get('/summary', (req, res) => ctrl.getSummary(req, res));
   router.get('/kev', (req, res) => ctrl.getKevCatalog(req, res));
   

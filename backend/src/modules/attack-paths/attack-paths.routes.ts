@@ -14,6 +14,7 @@ export function createAttackPathsRouter(
   const router = Router();
 
   router.get('/', controller.getAttackGraph);
+  router.get('/graph', controller.getAttackGraph);
   router.post('/analyze', controller.analyzeCustomGraph);
   router.get('/choke-points', controller.getChokePoints);
   router.get('/asset/:id', controller.getAssetBlastRadius);

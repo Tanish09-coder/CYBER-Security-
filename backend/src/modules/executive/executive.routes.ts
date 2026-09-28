@@ -13,6 +13,8 @@ export function createExecutiveRouter(
 ): Router {
   const router = Router();
 
+  router.get('/', controller.getPosture);
+  router.get('/summary', controller.getPosture);
   router.get('/posture', controller.getPosture);
   router.get('/top-risks', controller.getTopRisks);
   router.get('/financial-summary', controller.getFinancialSummary);

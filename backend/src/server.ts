@@ -159,6 +159,18 @@ const vcdbRouter = createVcdbRouter();
 app.use('/api/integrations/vcdb', vcdbRouter);
 app.use('/api/v1/incidents', vcdbRouter);
 
+app.get('/api/integrations', (req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    integrations: [
+      { name: 'NVD', path: '/api/integrations/nvd', status: 'connected' },
+      { name: 'CISA KEV', path: '/api/integrations/cisa-kev', status: 'connected' },
+      { name: 'MITRE ATT&CK', path: '/api/integrations/mitre-attack', status: 'connected' },
+      { name: 'VCDB', path: '/api/integrations/vcdb', status: 'connected' },
+    ]
+  });
+});
+
 app.use('/api/threat-intel', createThreatIntelRouter());
 
 // Enterprise Context APIs (Owner: HARSH)

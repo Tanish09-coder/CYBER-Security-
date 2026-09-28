@@ -7,6 +7,7 @@
 
 import { Router } from 'express';
 import { riskController, RiskController } from './risk.controller';
+import { financialController } from '../financial/financial.controller';
 
 export function createRiskRouter(controller: RiskController = riskController): Router {
   const router = Router();
@@ -17,6 +18,7 @@ export function createRiskRouter(controller: RiskController = riskController): R
 
   // Query & Explorer endpoints for Screen N8
   router.get('/scores', controller.getRiskScores);
+  router.get('/financial-exposure', (req, res) => financialController.getFinancialExposures(req, res));
   router.get('/assets/:assetId', controller.getAssetRisk);
   router.post('/assets/:assetId/evaluate', controller.evaluateAssetVulnerabilities);
   router.get('/vulnerabilities/:cveId', controller.getVulnerabilityRisk);
