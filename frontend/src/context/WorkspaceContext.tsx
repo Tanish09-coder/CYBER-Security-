@@ -17,7 +17,7 @@ export interface WorkspaceContextType {
 
 // Fallback Indian Enterprise demo organization
 const DEFAULT_DEMO_ORG: OrganizationResponse = {
-  id: 'demo-bharat-digital-01',
+  id: '11111111-1111-1111-1111-111111111111',
   name: 'Bharat Digital Financial Services (Demo)',
   industry: 'Banking & Financial Services',
   employeeCount: 24500,

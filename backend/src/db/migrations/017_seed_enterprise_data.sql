@@ -7,7 +7,7 @@
 -- 1. Ensure default Organizations exist
 INSERT INTO organizations (id, name, industry, employee_count, annual_revenue, currency, metadata)
 VALUES (
-    'demo-bharat-digital-01',
+    '11111111-1111-1111-1111-111111111111',
     'Bharat Digital Financial Services (Demo)',
     'Banking & Financial Services',
     24500,
@@ -17,18 +17,8 @@ VALUES (
 ) ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     currency = 'INR',
-    annual_revenue = EXCLUDED.annual_revenue;
-
-INSERT INTO organizations (id, name, industry, employee_count, annual_revenue, currency, metadata)
-VALUES (
-    '11111111-1111-1111-1111-111111111111',
-    'Bharat Digital Financial Services',
-    'Banking & Financial Services',
-    24500,
-    185000000000.00,
-    'INR',
-    '{"is_demo": true}'
-) ON CONFLICT (id) DO NOTHING;
+    annual_revenue = EXCLUDED.annual_revenue,
+    metadata = EXCLUDED.metadata;
 
 -- 2. Ensure Asset Dependencies table exists
 CREATE TABLE IF NOT EXISTS asset_dependencies (
@@ -47,12 +37,12 @@ CREATE INDEX IF NOT EXISTS idx_asset_dep_target ON asset_dependencies (target_as
 INSERT INTO assets (
     id, organization_id, name, hostname, ip_address, asset_type, operating_system, environment, owner, is_internet_facing, business_criticality, data_classification, revenue_dependency_pct, operational_importance
 ) VALUES
-('a1111111-1111-1111-1111-111111111111', 'demo-bharat-digital-01', 'mumbai-edge-api-gateway', 'gw-mumbai.bharatfin.in', '103.21.244.10', 'gateway', 'Linux RHEL 9.2', 'Production', 'InfraSec Ops', true, 3, 'Public', 45.00, 80.00),
-('a2222222-2222-2222-2222-222222222222', 'demo-bharat-digital-01', 'delhi-public-banking-portal', 'netbanking.bharatfin.in', '103.21.244.15', 'web_server', 'Ubuntu 22.04 LTS', 'Production', 'Retail Banking Team', true, 4, 'Confidential', 65.00, 85.00),
-('a3333333-3333-3333-3333-333333333333', 'demo-bharat-digital-01', 'bengaluru-auth-microservice', 'auth-app.internal.bharatfin.in', '10.0.1.50', 'application_server', 'Linux K8s Cluster', 'Production', 'IAM Engineering', false, 4, 'Restricted', 75.00, 90.00),
-('a4444444-4444-4444-4444-444444444444', 'demo-bharat-digital-01', 'pune-swift-integration-gateway', 'swift-choke.internal.bharatfin.in', '10.0.4.12', 'middleware', 'Windows Server 2022', 'Production', 'Treasury & SWIFT Ops', false, 5, 'Highly Confidential', 88.00, 95.00),
-('a5555555-5555-5555-5555-555555555555', 'demo-bharat-digital-01', 'chennai-core-payment-switch', 'pay-switch.internal.bharatfin.in', '10.0.2.100', 'payment_gateway', 'Solaris 11 Enterprise', 'Production', 'Core Banking Ops', false, 5, 'Crown Jewels', 95.00, 99.00),
-('a6666666-6666-6666-6666-666666666666', 'demo-bharat-digital-01', 'hyderabad-customer-db-cluster', 'cust-db-01.internal.bharatfin.in', '10.0.3.200', 'database', 'Oracle Enterprise Linux', 'Production', 'Database Platform Team', false, 5, 'Crown Jewels', 98.00, 99.00)
+('a1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'mumbai-edge-api-gateway', 'gw-mumbai.bharatfin.in', '103.21.244.10', 'gateway', 'Linux RHEL 9.2', 'Production', 'InfraSec Ops', true, 3, 'Public', 45.00, 80.00),
+('a2222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'delhi-public-banking-portal', 'netbanking.bharatfin.in', '103.21.244.15', 'web_server', 'Ubuntu 22.04 LTS', 'Production', 'Retail Banking Team', true, 4, 'Confidential', 65.00, 85.00),
+('a3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', 'bengaluru-auth-microservice', 'auth-app.internal.bharatfin.in', '10.0.1.50', 'application_server', 'Linux K8s Cluster', 'Production', 'IAM Engineering', false, 4, 'Restricted', 75.00, 90.00),
+('a4444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111', 'pune-swift-integration-gateway', 'swift-choke.internal.bharatfin.in', '10.0.4.12', 'middleware', 'Windows Server 2022', 'Production', 'Treasury & SWIFT Ops', false, 5, 'Highly Confidential', 88.00, 95.00),
+('a5555555-5555-5555-5555-555555555555', '11111111-1111-1111-1111-111111111111', 'chennai-core-payment-switch', 'pay-switch.internal.bharatfin.in', '10.0.2.100', 'payment_gateway', 'Solaris 11 Enterprise', 'Production', 'Core Banking Ops', false, 5, 'Crown Jewels', 95.00, 99.00),
+('a6666666-6666-6666-6666-666666666666', '11111111-1111-1111-1111-111111111111', 'hyderabad-customer-db-cluster', 'cust-db-01.internal.bharatfin.in', '10.0.3.200', 'database', 'Oracle Enterprise Linux', 'Production', 'Database Platform Team', false, 5, 'Crown Jewels', 98.00, 99.00)
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     ip_address = EXCLUDED.ip_address,
@@ -115,10 +105,10 @@ ON CONFLICT (asset_id, control_id) DO NOTHING;
 INSERT INTO risk_results (
     id, organization_id, asset_id, cve_id, score, level, base_cvss, model_version, input_provenance_hash, data_completeness, factors, missing_data_warnings, risk_flags, evaluated_at
 ) VALUES
-('r1111111-1111-1111-1111-111111111111', 'demo-bharat-digital-01', 'a5555555-5555-5555-5555-555555555555', 'CVE-2021-44228', 96.5, 'CRITICAL', 10.0, '1.0.0', 'hash-log4j-pay-switch', 0.95, '[{"factor": "Technical Severity", "value": "10.0"}, {"factor": "Business Criticality", "value": "Level 5 (Crown Jewel)"}, {"factor": "CISA KEV Exploitation", "value": "Known Active Threat Actor Targeting"}]', '[]', '["CISA_KEV_EXPLOITED", "HIGH_CRITICALITY_TARGET"]', NOW()),
-('r2222222-2222-2222-2222-222222222222', 'demo-bharat-digital-01', 'a6666666-6666-6666-6666-666666666666', 'CVE-2023-34362', 94.2, 'CRITICAL', 9.8, '1.0.0', 'hash-moveit-cust-db', 0.90, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Business Criticality", "value": "Level 5 (Customer DB)"}]', '[]', '["DATA_EXFILTRATION_RISK"]', NOW()),
-('r3333333-3333-3333-3333-333333333333', 'demo-bharat-digital-01', 'a4444444-4444-4444-4444-444444444444', 'CVE-2023-22515', 91.8, 'CRITICAL', 9.8, '1.0.0', 'hash-swift-auth-bypass', 0.90, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Structural Choke Point", "value": "SWIFT Integration Gateway"}]', '[]', '["CHOKE_POINT_INTERCEPT"]', NOW()),
-('r4444444-4444-4444-4444-444444444444', 'demo-bharat-digital-01', 'a2222222-2222-2222-2222-222222222222', 'CVE-2023-4966', 88.5, 'HIGH', 9.4, '1.0.0', 'hash-citrix-delhi-portal', 0.85, '[{"factor": "Technical Severity", "value": "9.4"}, {"factor": "Internet Exposure", "value": "Public Edge Banking Portal"}]', '[]', '["PERIMETER_EXPOSED"]', NOW()),
-('r5555555-5555-5555-5555-555555555555', 'demo-bharat-digital-01', 'a1111111-1111-1111-1111-111111111111', 'CVE-2023-23397', 82.4, 'HIGH', 9.8, '1.0.0', 'hash-outlook-mumbai-gw', 0.80, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Internet Exposure", "value": "Mumbai API Gateway"}]', '[]', '["PERIMETER_EXPOSED"]', NOW()),
-('r6666666-6666-6666-6666-666666666666', 'demo-bharat-digital-01', 'a3333333-3333-3333-3333-333333333333', 'CVE-2023-38606', 68.0, 'MEDIUM', 7.8, '1.0.0', 'hash-kernel-bengaluru-auth', 0.85, '[{"factor": "Technical Severity", "value": "7.8"}, {"factor": "Internal Scope", "value": "Bengaluru Auth Microservice"}]', '[]', '[]', NOW())
+('b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'a5555555-5555-5555-5555-555555555555', 'CVE-2021-44228', 96.5, 'CRITICAL', 10.0, '1.0.0', 'hash-log4j-pay-switch', 0.95, '[{"factor": "Technical Severity", "value": "10.0"}, {"factor": "Business Criticality", "value": "Level 5 (Crown Jewel)"}, {"factor": "CISA KEV Exploitation", "value": "Known Active Threat Actor Targeting"}]', '[]', '["CISA_KEV_EXPLOITED", "HIGH_CRITICALITY_TARGET"]', NOW()),
+('b2222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'a6666666-6666-6666-6666-666666666666', 'CVE-2023-34362', 94.2, 'CRITICAL', 9.8, '1.0.0', 'hash-moveit-cust-db', 0.90, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Business Criticality", "value": "Level 5 (Customer DB)"}]', '[]', '["DATA_EXFILTRATION_RISK"]', NOW()),
+('b3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', 'a4444444-4444-4444-4444-444444444444', 'CVE-2023-22515', 91.8, 'CRITICAL', 9.8, '1.0.0', 'hash-swift-auth-bypass', 0.90, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Structural Choke Point", "value": "SWIFT Integration Gateway"}]', '[]', '["CHOKE_POINT_INTERCEPT"]', NOW()),
+('b4444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111', 'a2222222-2222-2222-2222-222222222222', 'CVE-2023-4966', 88.5, 'HIGH', 9.4, '1.0.0', 'hash-citrix-delhi-portal', 0.85, '[{"factor": "Technical Severity", "value": "9.4"}, {"factor": "Internet Exposure", "value": "Public Edge Banking Portal"}]', '[]', '["PERIMETER_EXPOSED"]', NOW()),
+('b5555555-5555-5555-5555-555555555555', '11111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'CVE-2023-23397', 82.4, 'HIGH', 9.8, '1.0.0', 'hash-outlook-mumbai-gw', 0.80, '[{"factor": "Technical Severity", "value": "9.8"}, {"factor": "Internet Exposure", "value": "Mumbai API Gateway"}]', '[]', '["PERIMETER_EXPOSED"]', NOW()),
+('b6666666-6666-6666-6666-666666666666', '11111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', 'CVE-2023-38606', 68.0, 'MEDIUM', 7.8, '1.0.0', 'hash-kernel-bengaluru-auth', 0.85, '[{"factor": "Technical Severity", "value": "7.8"}, {"factor": "Internal Scope", "value": "Bengaluru Auth Microservice"}]', '[]', '[]', NOW())
 ON CONFLICT (id) DO NOTHING;
