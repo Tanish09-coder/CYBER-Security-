@@ -285,8 +285,22 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 export async function startServer(port: number | string = PORT) {
   try {
     logger.info('[Bootstrap] Validating configuration and running database migrations...');
-    await runMigrations();
-    logger.info('[Bootstrap] Database migrations applied successfully.');
+    
+    const maxRetries = 12;
+    const retryDelayMs = 4000;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await runMigrations();
+        logger.info('[Bootstrap] Database migrations applied successfully.');
+        break;
+      } catch (err: any) {
+        if (attempt === maxRetries) {
+          throw err;
+        }
+        logger.warn(`[Bootstrap] Database not ready yet (attempt ${attempt}/${maxRetries}): ${err.message}. Retrying in 4s...`);
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      }
+    }
 
     return new Promise((resolve) => {
       const server = app.listen(port, () => {
