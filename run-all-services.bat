@@ -5,7 +5,7 @@ echo   CyberRiskOS Full Stack Launcher
 echo ===================================================
 echo.
 echo [1/3] Starting Python Risk Engine (Port 8000)...
-start "Python Risk Engine (Port 8000)" cmd /k "cd /d %~dp0risk-engine && .venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
+start "Python Risk Engine (Port 8000)" cmd /k "cd /d %~dp0risk-engine && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
 
 timeout /t 3 /nobreak >nul
 

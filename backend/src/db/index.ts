@@ -339,8 +339,18 @@ export async function withTransaction<T>(
 }
 
 export async function runMigrations(): Promise<void> {
-  const migrationsDir = path.join(__dirname, 'migrations');
-  if (!fs.existsSync(migrationsDir)) return;
+  const possibleMigrationDirs = [
+    path.join(__dirname, 'migrations'),
+    path.join(__dirname, '../../src/db/migrations'),
+    path.join(__dirname, '../src/db/migrations'),
+    path.join(process.cwd(), 'src/db/migrations'),
+    path.join(process.cwd(), 'backend/src/db/migrations'),
+  ];
+  const migrationsDir = possibleMigrationDirs.find((dir) => fs.existsSync(dir));
+  if (!migrationsDir) {
+    logger.warn('No migrations directory found in any standard path.');
+    return;
+  }
 
   const activePool = await getDbPool();
   if (activePool.isMemory || memoryAdapter) {

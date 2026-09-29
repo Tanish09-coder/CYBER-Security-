@@ -3,7 +3,10 @@
  * The Vite proxy handles routing `/api/*` to the correct backend port (5000).
  */
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+  let base = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '');
+  if (base && !base.startsWith('http://') && !base.startsWith('https://')) {
+    base = `https://${base}`;
+  }
   const path = endpoint.startsWith('/api') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   const url = base ? `${base}${path}` : path;
   

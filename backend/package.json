@@ -4,7 +4,7 @@
   "description": "CyberRiskOS Node.js API Gateway & Orchestrator",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"fs.cpSync('src/db/migrations', 'dist/db/migrations', {recursive: true})\"",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "test": "jest --runInBand",
